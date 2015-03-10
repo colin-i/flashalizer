@@ -1,0 +1,3 @@
+-if starting with an argument, the argument will be the project folder, same as File > Open
+-ActionSWF is at http://oa.netau.net/programs/download/actionswf.zip
+-when working with functions, if "action"/"action_sprite" is called, the write function for them will be at "swf_showframe"/"swf_sprite_showframe"
