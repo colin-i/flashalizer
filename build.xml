@@ -10,7 +10,7 @@
     </target>
 
     <target name="run">
-        <java jar="flashalizer.jar" fork="true"/>
+        <java classpath="bin" classname="flashalizer" fork="true"/>
     </target>
 
 </project>
