@@ -1,0 +1,16 @@
+<project>
+
+    <target name="clean">
+        <delete dir="bin"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="bin"/>
+        <javac srcdir="src" destdir="bin" includeantruntime="false"/>
+    </target>
+
+    <target name="run">
+        <java jar="flashalizer.jar" fork="true"/>
+    </target>
+
+</project>
