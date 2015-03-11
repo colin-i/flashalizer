@@ -1,4 +1,4 @@
 # Ignore everything in this directory
 *
-# Except this file
+# Excluding a file, git isn't working with empty dirs
 !.gitignore

@@ -2,7 +2,7 @@
 -clone the project with: git clone https://github.com/colin-i/flashalizer.git
 -download Java Native Access jar file at https://github.com/twall/jna and uncompress the archive into "bin"
 -download Javassist jar file at https://github.com/jboss-javassist/javassist/releases and uncompress the archive into "bin"
--run: ant compile run
+-run: ant compile run ; clean with: ant clean
 
 
 -if starting with an argument, the argument will be the project folder, same as File > Open

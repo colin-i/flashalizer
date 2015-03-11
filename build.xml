@@ -1,11 +1,14 @@
 <project>
 
     <target name="clean">
-        <delete dir="bin"/>
+	<delete includeemptydirs="true">
+		<fileset dir="bin">
+			<exclude name=".gitignore"/>
+		</fileset>
+	</delete>
     </target>
 
     <target name="compile">
-        <mkdir dir="bin"/>
         <javac srcdir="src" destdir="bin" includeantruntime="false"/>
     </target>
 
