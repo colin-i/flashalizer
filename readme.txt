@@ -1,4 +1,6 @@
 
+-donate https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=BQL9C44C4ZCGJ
+
 -clone the project with: git clone https://github.com/colin-i/flashalizer.git
 -download Java Native Access jar file at https://github.com/twall/jna and uncompress the archive into "bin"
 -download Javassist jar file at https://github.com/jboss-javassist/javassist/releases and uncompress the archive into "bin"
