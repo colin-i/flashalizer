@@ -2,18 +2,18 @@
 
     <target name="clean">
 	<delete includeemptydirs="true">
-		<fileset dir="bin">
+		<fileset dir="build">
 			<exclude name=".gitignore"/>
 		</fileset>
 	</delete>
     </target>
 
     <target name="compile">
-        <javac srcdir="src" destdir="bin" includeantruntime="false"/>
+        <javac srcdir="src" destdir="build" includeantruntime="false"/>
     </target>
 
     <target name="run">
-        <java classpath="bin" classname="flashalizer" fork="true"/>
+        <java classpath="build" classname="flashalizer" fork="true"/>
     </target>
 
 </project>
