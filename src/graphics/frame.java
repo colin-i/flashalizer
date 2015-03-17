@@ -60,7 +60,7 @@ class frame extends JScrollPane{
 			Object e=els.get(i);
 			if(e.getClass().getSimpleName().equals(showframe)){
 				DefaultMutableTreeNode frame=new DefaultMutableTreeNode("Frame"+top.getChildCount());
-				for(int j=i-1;pos<j;j--){
+				for(int j=pos;j<i;j++){
 					Object el=els.get(j);
 					for(int k=0;k<ControlTags.length;k++){
 						if(el.getClass().getSimpleName().equals(ControlTags[k].name)){

@@ -230,6 +230,7 @@ public class WorkSpace {
 				group.add(rbMenuItem);
 				rbMenuItem.addActionListener(new persp());
 				add(rbMenuItem);
+				//rbMenuItem.setSelected(true);perspective=graphs;
 				
 				menu.add(this);
 			}
