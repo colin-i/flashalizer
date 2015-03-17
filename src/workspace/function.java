@@ -12,7 +12,7 @@ import javassist.NotFoundException;
 public class function{
 	public String name;
 	int number_of_args;
-	List<String> args_types;List<Boolean> args_isNamed;
+	List<String> args_types;public List<Boolean> args_isNamed;
 	String return_type;
 	
 	public function(CtMethod method) throws NotFoundException, ClassNotFoundException{

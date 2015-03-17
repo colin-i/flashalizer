@@ -51,8 +51,8 @@ public class Project{
 		return path.toString()+'/'+path.getFileName().toString()+"."+ext;
 	}
 	int width_default=640;int height_default=480;int backgroundcolor_default=0xffFFff;int fps_default=12;
-	int width;            int height;            int backgroundcolor;                 int fps;
-	List<Object> elements=new ArrayList<Object>();//data,write,read,display,build   ,new project
+	public int width;     public int height;     public int backgroundcolor;          int fps;
+	public List<Object> elements=new ArrayList<Object>();//data,write,read,display,build   ,new project
 	void newproj(int wd,int hg,int bcolor,int fs){
 		width=wd;height=hg;backgroundcolor=bcolor;fps=fs;
 		fresh_proj();
@@ -60,7 +60,10 @@ public class Project{
 	}
 	private void fresh_proj(){
 		elements.clear();
-		workspace.frame.setTitle(path.getFileName().toString()+" - "+"Flashalizer");
+		WorkSpace.frame.setTitle(path.getFileName().toString()+" - "+"Flashalizer");
+	}
+	boolean isShapeBitmap(int type){
+		return (0x40<=type&&type<=0x43);
 	}
 	private class xml{
 		private void write() throws XMLStreamException, IOException, IllegalAccessException{
@@ -139,7 +142,7 @@ public class Project{
 								List<Object>ints=new ArrayList<Object>();String iget;while((iget=rd.data())!=null)ints.add(iget);
 								Object[]dest=new Object[ints.size()];
 								dest[0]=Long.decode((String)ints.get(0)).intValue();int i=1;
-								if(Functions.table.isShapeBitmap((int)dest[0])){i=2;dest[1]=ints.get(1);}
+								if(isShapeBitmap((int)dest[0])){i=2;dest[1]=ints.get(1);}
 								for(;i<dest.length;i++)dest[i]=Long.decode((String)ints.get(i)).intValue();
 								values.add(dest);
 							}
@@ -227,8 +230,8 @@ public class Project{
 												}
 												val=newobj;
 											}else if(tp.equals("Object[]")){
-												Object[]src=(Object[])val;
-												if(Functions.table.isShapeBitmap((int)src[0]))src[1]=ids_get((String)src[1]);
+												Object[]src=((Object[])val).clone();
+												if(isShapeBitmap((int)src[0]))src[1]=ids_get((String)src[1]);
 												int[]dest=new int[src.length];
 												for(int i=0;i<src.length;i++)dest[i]=(int)src[i];
 												val=dest;
@@ -276,13 +279,26 @@ public class Project{
 			return new Object[]{folder_file("swf"),width,height,backgroundcolor,fps};
 		}
 	}
+	public static final String button="Button";
+	public static final String font="Font";
+	public static final String text="Text";
+	public static final String shape="Shape";
+	public static final String image="Image";
+	public static final String dbl="DBL";
+	public static final String placement="Placement";
+	public static final String placementcoords="PlacementCoords";
+	public static final String remove="Remove";
+	public static final String showframe="ShowFrame";
+	public static final String spritedone="SpriteDone";
+	public static final String exportsadd="ExportsAdd";
+	public static final String action="Action";
 	public static String elements_names_convertor(String cName,String fName){
 		String[][]values={
-			{"Button","swf_button"},{"Font","swf_font"},{"Text","swf_text"},{"Shape","swf_shape"},{"Image","swf_image"},{"DBL","swf_dbl"}
-			,{"Placement","swf_placeobject"},{"PlacementCoords","swf_placeobject_coords"},{"Remove","swf_removeobject"},{"ShowFrame","swf_showframe"}
-			,{"SpriteDone","swf_sprite_done"},{"SpriteNew","swf_sprite_new"},{"SpritePlacement","swf_sprite_placeobject"},{"SpritePlacementCoords","swf_sprite_placeobject_coords"},{"SpriteRemove","swf_sprite_removeobject"},{"SpriteShowFrame","swf_sprite_showframe"}
-			,{"ExportsAdd","swf_exports_add"},{"ExportsDone","swf_exports_done"}
-			,{"Action","action"},{"ActionSprite","action_sprite"}
+			{button,"swf_button"},{font,"swf_font"},{text,"swf_text"},{shape,"swf_shape"},{image,"swf_image"},{dbl,"swf_dbl"}
+			,{placement,"swf_placeobject"},{placementcoords,"swf_placeobject_coords"},{remove,"swf_removeobject"},{showframe,"swf_showframe"}
+			,{spritedone,"swf_sprite_done"},{"SpriteNew","swf_sprite_new"},{"SpritePlacement","swf_sprite_placeobject"},{"SpritePlacementCoords","swf_sprite_placeobject_coords"},{"SpriteRemove","swf_sprite_removeobject"},{"SpriteShowFrame","swf_sprite_showframe"}
+			,{exportsadd,"swf_exports_add"},{"ExportsDone","swf_exports_done"}
+			,{action,"action"},{"ActionSprite","action_sprite"}
 		};
 		int i=0;
 		if(cName != null){

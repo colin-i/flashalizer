@@ -1,30 +1,36 @@
 package workspace;
 
+import graphics.Graphics;
+
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JColorChooser;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JRadioButtonMenuItem;
 
 import java.awt.Button;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Label;
-import java.awt.Menu;
-import java.awt.MenuBar;
-import java.awt.MenuItem;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.prefs.Preferences;
 
 
-public class workspace {
+public class WorkSpace {
 	private Preferences prefs=Preferences.userRoot().node(this.getClass().getName());
 	private class prop{
 		private Label label;
@@ -47,7 +53,7 @@ public class workspace {
 	private interface JFileChooser_run{
 		void Run(JFileChooser c);
 	}
-	private class menu extends MenuBar{
+	private class menu extends JMenuBar{
 		private static final long serialVersionUID = 1L;
 		private void choose(String title,JFileChooser_run r){
 			JFileChooser chooser=new JFileChooser();
@@ -56,16 +62,16 @@ public class workspace {
 			chooser.setCurrentDirectory(new File(workpath.get()));
 			if(chooser.showOpenDialog(frame)==JFileChooser.APPROVE_OPTION)r.Run(chooser);
 		}
-		private class file extends Menu{
+		private class file extends JMenu{
 			private static final long serialVersionUID = 1L;
-			private file(MenuBar menu){
+			private file(JMenuBar menu){
 				super("File");
 				newp();open();save();properties();exit();
 				menu.add(this);
 			}
 			private void newp(){
 				String new_f="New";
-				MenuItem newp=new MenuItem(new_f);
+				JMenuItem newp=new JMenuItem(new_f);
 				//new dialog
 				JDialog dg=new JDialog(frame,new_f,Dialog.ModalityType.DOCUMENT_MODAL);
 				Container ctnr=dg.getContentPane();
@@ -118,7 +124,7 @@ public class workspace {
 						if(project.folder_set(workpath.get()+"/"+new_name.getText(),false)){
 							project.newproj(Long.decode(new_width.getText()).intValue(),Long.decode(new_height.getText()).intValue(),colorChooser.getColor().getRGB()&0xffFFff,Long.decode(new_fps.getText()).intValue());
 							dg.setVisible(false);
-							redrawFuncPane();
+							resetPerspective();
 						}
 					}
 				});
@@ -134,19 +140,19 @@ public class workspace {
 				add(newp);
 			}
 			private void open(){
-				MenuItem open=new MenuItem("Open");
+				JMenuItem open=new JMenuItem("Open");
 				open.addActionListener(new ActionListener(){
 					public void actionPerformed(ActionEvent e) {
 						choose("Open Project",new JFileChooser_run(){public void Run(JFileChooser c){
 							project.folder_set(c.getSelectedFile().toString(),true);
-							redrawFuncPane();
+							resetPerspective();
 						}});
 					}
 				});
 				add(open);
 			}
 			private void save(){
-				MenuItem save=new MenuItem("Save");
+				JMenuItem save=new JMenuItem("Save");
 				save.addActionListener(new ActionListener(){
 					public void actionPerformed(ActionEvent e) {
 						project.save();
@@ -157,7 +163,7 @@ public class workspace {
 			private void properties(){
 				//properties
 				String prop="Properties";
-				MenuItem properties=new MenuItem(prop);
+				JMenuItem properties=new JMenuItem(prop);
 				JDialog dl=new JDialog(frame,prop,Dialog.ModalityType.DOCUMENT_MODAL);
 				Container cnt=dl.getContentPane();
 				cnt.setLayout(new BoxLayout(cnt,BoxLayout.Y_AXIS));
@@ -197,7 +203,7 @@ public class workspace {
 				add(properties);
 			}
 			private void exit(){
-				MenuItem exit=new MenuItem("Exit");
+				JMenuItem exit=new JMenuItem("Exit");
 				exit.addActionListener(new ActionListener(){
 					public void actionPerformed(ActionEvent e) {
 						System.exit(0);
@@ -206,15 +212,39 @@ public class workspace {
 				add(exit);
 			}
 		}
-		private class proj extends Menu{
+		private class proj extends JMenu{
 			private static final long serialVersionUID = 1L;
-			private proj(MenuBar menu){
+			private proj(JMenuBar menu){
 				super("Project");
 				build();
+				
+				JRadioButtonMenuItem rbMenuItem;
+				addSeparator();
+				ButtonGroup group = new ButtonGroup();
+				rbMenuItem = new JRadioButtonMenuItem(funcs);
+				group.add(rbMenuItem);
+				rbMenuItem.addActionListener(new persp());
+				add(rbMenuItem);
+				rbMenuItem.setSelected(true);perspective=funcs;
+				rbMenuItem = new JRadioButtonMenuItem(graphs);
+				group.add(rbMenuItem);
+				rbMenuItem.addActionListener(new persp());
+				add(rbMenuItem);
+				
 				menu.add(this);
 			}
+			private class persp implements ActionListener{
+				@Override
+				public void actionPerformed(ActionEvent arg0){
+					try{
+						perspective=arg0.getActionCommand();
+						if(getPerspective()==Functions.container)Functions.table.update();
+						resetPerspective();
+					}catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {e.printStackTrace();}
+				}
+			}
 			private void build(){
-				MenuItem build=new MenuItem("Build");
+				JMenuItem build=new JMenuItem("Build");
 				build.addActionListener(new ActionListener(){
 					public void actionPerformed(ActionEvent e) {
 						project.build();
@@ -223,16 +253,16 @@ public class workspace {
 				add(build);
 			}
 		}
-		private class help extends Menu{
+		private class help extends JMenu{
 			private static final long serialVersionUID = 1L;
-			private help(MenuBar menu){
+			private help(JMenuBar menu){
 				super("Help");
 				about();
 				menu.add(this);
 			}
 			private void about(){
 				String abt="About";
-				MenuItem about=new MenuItem(abt);
+				JMenuItem about=new JMenuItem(abt);
 				
 				//about dialog
 				JDialog d=new JDialog(frame,abt,Dialog.ModalityType.DOCUMENT_MODAL);
@@ -272,17 +302,26 @@ public class workspace {
 			new help(this);
 		}
 	}
-	private void redrawFuncPane(){
-		Functions.container.getParent().remove(Functions.container);
-		new Functions();
+	public static Container container;
+	private Component getPerspective(){return container.getComponent(0);}
+	private void resetPerspective(){
+		container.remove(getPerspective());
+		addPerspective();
 		//the new table is not visible "in the next second" without re validate
-		Functions.container.getParent().revalidate();
+		container.revalidate();
 	}
 	private prop workpath;
 	static PopUp textPopup=new PopUp();
-	static Project project=new Project();
+	public static Project project=new Project();
 	static JFrame frame;
 	private ImageIcon img;
+	private static final String funcs="Functions view";
+	private static final String graphs="Graphics view";
+	private String perspective;
+	private void addPerspective(){
+		if(perspective.equals(graphs))new Graphics();
+		else new Functions();
+	}
 	public void main(String[] args) {
 		//keep this order of declarations
 		img = new ImageIcon(System.getProperty("user.dir")+"img/icon.jpg");
@@ -294,7 +333,8 @@ public class workspace {
 			project.folder_set_base(workpath.get(),true,true);//work path sets path
 			project.newproj(project.width_default,project.height_default,project.backgroundcolor_default,project.fps_default);//frame,use path
 		}
-		new Functions();//frame,use path
+		container=frame.getContentPane();
+		addPerspective();//frame,use path,container
 		
 		//Set up the exit.
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -303,7 +343,7 @@ public class workspace {
 		frame.setIconImage(img.getImage());
 		
 		//MenuBar to frame
-		frame.setMenuBar(menuBar);
+		frame.setJMenuBar(menuBar);
 		
 		//Display the window.
 		frame.pack();

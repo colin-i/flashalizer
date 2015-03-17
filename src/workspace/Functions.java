@@ -53,7 +53,7 @@ import static actionswf.ActionSwf.FillStyleType_none;
 
 public class Functions extends JTable{
 	private static final long serialVersionUID = 1L;
-	static JScrollPane container;static Functions table;
+	static Functions table;static Component container;
 	private JButton ButtonData_button=new JButton(ButtonData);
 	{
 		ButtonData_button.addActionListener(new ActionListener(){
@@ -94,7 +94,7 @@ public class Functions extends JTable{
 		void Run(Field f,InputText txt);
 	}
 	private void structure_dialog(String title,structure_dialog_run run){
-		JDialog dg=new JDialog(SwingUtilities.getWindowAncestor(table),title,Dialog.ModalityType.DOCUMENT_MODAL);
+		JDialog dg=new JDialog(SwingUtilities.getWindowAncestor(this),title,Dialog.ModalityType.DOCUMENT_MODAL);
 		Container ct=dg.getContentPane();
 		ct.setLayout(new BoxLayout(ct,BoxLayout.Y_AXIS));
 		Container c=new Container();c.setLayout(new GridLayout(0,2));
@@ -151,9 +151,6 @@ public class Functions extends JTable{
 			else/* if(x==5)*/it.setToolTipText("If Edge, If Curved, AnchorDeltaY");
 		}
 	}
-	boolean isShapeBitmap(int type){
-		return (0x40<=type&&type<=0x43);
-	}
 	{
 		Shape_button.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
@@ -190,7 +187,7 @@ public class Functions extends JTable{
 							type=Long.decode(text).intValue();
 						}
 						catch(NumberFormatException x){/*text.length==0 or 0x */}
-						if(isShapeBitmap(type))fill_arg.setBackground(NamedId_color);
+						if(WorkSpace.project.isShapeBitmap(type))fill_arg.setBackground(NamedId_color);
 						else fill_arg.setBackground(Color.WHITE);
 					}
 				});
@@ -243,7 +240,7 @@ public class Functions extends JTable{
 						Object ft_arg = 0;
 						if(ft!=FillStyleType_none){
 							ft_arg=((InputText)c.getComponent(3)).getText();
-							if(isShapeBitmap(ft)==false){
+							if(WorkSpace.project.isShapeBitmap(ft)==false){
 								try{
 									ft_arg=Long.decode((String)ft_arg).intValue();
 								}catch(NumberFormatException er){
@@ -329,16 +326,16 @@ public class Functions extends JTable{
 		//set rows and columns
 		for(int i=0;i<(1+total_args+1);i++)model.addColumn(null);
 		//minimum model
-		Object[] n=workspace.project.builder.swf_new__arguments();
+		Object[] n=WorkSpace.project.builder.swf_new__arguments();
 		ArrayList<Object> temp=new ArrayList<Object>(Arrays.asList(n));
 		temp.add(0,new ToolTipWrapper("swf_new","swf_new"));
 		n=temp.toArray();
 		model.addRow(n);
 		//last show frame is wrote later
-		int max_size=workspace.project.elements.size()-1;
+		int max_size=WorkSpace.project.elements.size()-1;
 		for(int a=0;a<max_size;a++){
 			Object[]obj=new Object[getColumnCount()];
-			Object element=workspace.project.elements.get(a);
+			Object element=WorkSpace.project.elements.get(a);
 			String el_type=element.getClass().getSimpleName();
 			Class<?>[]el_types=Elements.class.getDeclaredClasses();
 			for(int x=0;x<el_types.length;x++){
@@ -430,9 +427,9 @@ public class Functions extends JTable{
 		//set renderer for marking non-used cells(reminder: can subclass some code to set for individual cells)
 		setDefaultRenderer(getColumnClass(0),new TableRenderer());
 	
-		//to a scroll panel and to parent container
+		//to frame container
 		container=new JScrollPane(this);
-		workspace.frame.setContentPane(container);
+		WorkSpace.container.add(container);
 	}
 	// Determine editor to be used by row
 	@Override
@@ -483,7 +480,7 @@ public class Functions extends JTable{
 				else if(f.equals("swf_dbl"))tips=new String[]{"DefineBitsLossless 1 or 2 image path"};
 				
 				//else if(f.equals("swf_done"))
-				else if(f.equals("swf_new"))tips=new String[]{"SWF file name","Width in pixels","Height in pixels","Background rgb color","Frames per second"};
+				else if(f.equals("swf_new"))tips=new String[]{"SWF file name: "+getValueAt(row,1),"Width in pixels","Height in pixels","Background rgb color","Frames per second"};
 				else if(f.equals("swf_placeobject"))tips=new String[]{"CharacterId field","Depth of character"};
 				else if(f.equals("swf_placeobject_coords"))tips=new String[]{"CharacterId field","Depth of character","X position in pixels","Y position in pixels"};
 				else if(f.equals("swf_removeobject"))tips=new String[]{"Depth of character"};
@@ -550,7 +547,7 @@ public class Functions extends JTable{
 							//
 							if(s.equals("swf_done"))break;
 							if(s.equals("swf_new")){
-								workspace.project.width=Long.decode(x.get(1).toString()).intValue();workspace.project.height=Long.decode(x.get(2).toString()).intValue();workspace.project.backgroundcolor=Long.decode(x.get(3).toString()).intValue();workspace.project.fps=Long.decode(x.get(4).toString()).intValue();
+								WorkSpace.project.width=Long.decode(x.get(1).toString()).intValue();WorkSpace.project.height=Long.decode(x.get(2).toString()).intValue();WorkSpace.project.backgroundcolor=Long.decode(x.get(3).toString()).intValue();WorkSpace.project.fps=Long.decode(x.get(4).toString()).intValue();
 							}
 							else{
 								String element=Project.elements_names_convertor(null,s);
@@ -586,7 +583,7 @@ public class Functions extends JTable{
 					}
 				}
 			}
-			workspace.project.elements=elems;
+			WorkSpace.project.elements=elems;
 		}
 		catch(NumberFormatException e){
 			JOptionPane.showMessageDialog(null,"User number input error in table");
@@ -649,8 +646,6 @@ public class Functions extends JTable{
 	}
 	static final String ButtonData="ButtonData";
 	static final String EditText="EditText";
-	//private class TableEditor extends AbstractCellEditor implements TableCellEditor{
-	//hard coding at public Object getCellEditorValue(){}
 	private class TableEditor extends DefaultCellEditor{
 		private static final long serialVersionUID = 1L;
 		private TableEditor(JTextField textField){

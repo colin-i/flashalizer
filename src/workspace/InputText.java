@@ -9,7 +9,7 @@ class InputText extends JTextField{
 	InputText(String string) {
 		super(string);
 		//this.setText(default_text);
-		workspace.textPopup.add(this);
+		WorkSpace.textPopup.add(this);
 	}
-	InputText(){workspace.textPopup.add(this);}
+	InputText(){WorkSpace.textPopup.add(this);}
 }

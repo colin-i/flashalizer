@@ -3,10 +3,12 @@ package workspace;
 import java.util.ArrayList;
 import java.util.List;
 
+import graphics.display.RefId;
+
 import static actionswf.ActionSwf.FillStyleType_none;
 
 public class Elements {
-	static class Button extends element{
+	public static class Button extends element{
 		ButtonData structure;
 		Button(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 		static class ButtonData{
@@ -34,11 +36,11 @@ public class Elements {
 		}
 	}
 	//if not static then Field[] from getDeclaredFields on previous static will have 3 fields: font.. font_flags and "this"
-	static class Font extends element{
+	public static class Font extends element{
 		String fontname;int font_flags;
 		Font(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
-	static class Text extends element{
+	public static class Text extends element{
 		int bound_width;
 		int bound_height;
 		String variablename;
@@ -64,7 +66,7 @@ public class Elements {
 			}
 		}
 	}
-	static class Shape extends element{
+	public static class Shape extends element{
 		int width;
 		int height;
 		Object[]args;
@@ -129,21 +131,21 @@ public class Elements {
 			}
 		}
 	}
-	static class Image extends element{
+	public static class Image extends element{
 		String imagepath;
 		Image(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
-	static class DBL extends element{
+	public static class DBL extends element{
 		String imagepath;
 		DBL(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
 	
-	static class Placement extends element{
-		String refid;int depth;
+	public static class Placement extends element{
+		public @RefId String refid;int depth;
 		Placement(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
-	static class PlacementCoords extends element{
-		String refid;int depth;int x;int y;
+	public static class PlacementCoords extends element{
+		public @RefId String refid;int depth;int x;int y;
 		PlacementCoords(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
 	static class Remove extends element{
@@ -152,7 +154,7 @@ public class Elements {
 	}
 	static class ShowFrame{ShowFrame(Object[]x){};ShowFrame(){};}
 	
-	static class SpriteDone extends element{
+	public static class SpriteDone extends element{
 		String spriteid;
 		SpriteDone(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
@@ -174,7 +176,7 @@ public class Elements {
 		SpriteShowFrame(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
 	
-	static class ExportsAdd extends element{String refid;String name;ExportsAdd(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}}
+	public static class ExportsAdd extends element{public @RefId String refid;String name;ExportsAdd(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}}
 	static class ExportsDone{ExportsDone(Object[]v){}}
 	
 	static class Action extends element{

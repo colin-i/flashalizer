@@ -10,9 +10,11 @@ import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtField;
 import javassist.CtMethod;
+import javassist.Modifier;
 import javassist.NotFoundException;
 import workspace.Functions;
 import workspace.Project;
+import workspace.WorkSpace;
 import workspace.function;
 import static workspace.element.NamedId;
 
@@ -34,7 +36,9 @@ public class flashalizer {
 				function f=new function(method);
 				Functions.f_list.add(f);
 				if(Functions.hasReturn(f)){
-					c.addField(new CtField(cp.get("java.lang.String"),NamedId,c));
+					CtField fld=new CtField(cp.get("java.lang.String"),NamedId,c);
+					fld.setModifiers(Modifier.PUBLIC);
+					c.addField(fld);
 					c.toClass();
 				}
 			}
@@ -57,6 +61,6 @@ public class flashalizer {
 			e1.printStackTrace();
 		}
 		//to avoid static on many declarations, use this
-		workspace.workspace wspace=new workspace.workspace();wspace.main(args);
+		WorkSpace wspace=new WorkSpace();wspace.main(args);
 	}
 }
