@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import graphics.display.RefId;
+import graphics.display.SpriteId;
 
 import static actionswf.ActionSwf.FillStyleType_none;
 
@@ -155,24 +156,24 @@ public class Elements {
 	static class ShowFrame{ShowFrame(Object[]x){};ShowFrame(){};}
 	
 	public static class SpriteDone extends element{
-		String spriteid;
+		public @SpriteId String spriteid;
 		SpriteDone(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
 	static class SpriteNew extends element{SpriteNew(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}}
-	static class SpritePlacement extends element{
-		String spriteid;String refid;int depth;
+	public static class SpritePlacement extends element{
+		public @SpriteId String spriteid;public @RefId String refid;int depth;
 		SpritePlacement(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
-	static class SpritePlacementCoords extends element{
-		String spriteid;String refid;int depth;int x;int y;
+	public static class SpritePlacementCoords extends element{
+		public @SpriteId String spriteid;public @RefId String refid;int depth;int x;int y;
 		SpritePlacementCoords(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
-	static class SpriteRemove extends element{
-		String spriteid;int depth;
+	public static class SpriteRemove extends element{
+		public @SpriteId String spriteid;int depth;
 		SpriteRemove(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
-	static class SpriteShowFrame extends element{
-		String spriteid;
+	public static class SpriteShowFrame extends element{
+		public @SpriteId String spriteid;
 		SpriteShowFrame(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
 	
@@ -183,8 +184,8 @@ public class Elements {
 		String ac;
 		Action(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
-	static class ActionSprite extends element{
-		String spriteid;String ac;
+	public static class ActionSprite extends element{
+		public @SpriteId String spriteid;String ac;
 		ActionSprite(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
 }

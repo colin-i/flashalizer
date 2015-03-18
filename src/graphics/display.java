@@ -46,4 +46,20 @@ public class display extends JScrollPane{
 		}
 		return null;
 	}
+	@Target(ElementType.FIELD)
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface SpriteId{}
+	static Field getSpriteField(String elem){
+		Class<?>[]cls=Elements.class.getDeclaredClasses();
+		for(Class<?>c:cls){
+			if(c.getSimpleName().equals(elem)){
+				Field[]flds=c.getDeclaredFields();
+				for(Field fd:flds){
+					if(fd.isAnnotationPresent(SpriteId.class))return fd;
+				}
+				return null;
+			}
+		}
+		return null;
+	}
 }

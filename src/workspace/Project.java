@@ -290,15 +290,20 @@ public class Project{
 	public static final String remove="Remove";
 	public static final String showframe="ShowFrame";
 	public static final String spritedone="SpriteDone";
+	public static final String spriteplacement="SpritePlacement";
+	public static final String spriteplacementcoords="SpritePlacementCoords";
+	public static final String spriteremove="SpriteRemove";
+	public static final String spriteshowframe="SpriteShowFrame";
 	public static final String exportsadd="ExportsAdd";
 	public static final String action="Action";
+	public static final String actionsprite="ActionSprite";
 	public static String elements_names_convertor(String cName,String fName){
 		String[][]values={
 			{button,"swf_button"},{font,"swf_font"},{text,"swf_text"},{shape,"swf_shape"},{image,"swf_image"},{dbl,"swf_dbl"}
 			,{placement,"swf_placeobject"},{placementcoords,"swf_placeobject_coords"},{remove,"swf_removeobject"},{showframe,"swf_showframe"}
-			,{spritedone,"swf_sprite_done"},{"SpriteNew","swf_sprite_new"},{"SpritePlacement","swf_sprite_placeobject"},{"SpritePlacementCoords","swf_sprite_placeobject_coords"},{"SpriteRemove","swf_sprite_removeobject"},{"SpriteShowFrame","swf_sprite_showframe"}
+			,{spritedone,"swf_sprite_done"},{"SpriteNew","swf_sprite_new"},{spriteplacement,"swf_sprite_placeobject"},{spriteplacementcoords,"swf_sprite_placeobject_coords"},{spriteremove,"swf_sprite_removeobject"},{spriteshowframe,"swf_sprite_showframe"}
 			,{exportsadd,"swf_exports_add"},{"ExportsDone","swf_exports_done"}
-			,{action,"action"},{"ActionSprite","action_sprite"}
+			,{action,"action"},{actionsprite,"action_sprite"}
 		};
 		int i=0;
 		if(cName != null){

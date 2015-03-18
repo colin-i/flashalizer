@@ -98,6 +98,10 @@ class character extends JScrollPane{
 							if(n.equals(name)){exported=true;break;}
 						}
 						top.add(new DefaultMutableTreeNode(new item(name,Types[j].letter,exported)));
+						if(Types[j].name.equals(spritedone)){
+							Field a=display.getSpriteField(spritedone);
+							Graphics.frame.add_sprite(name,(String)a.get(e));
+						}
 						break;
 					}
 				}

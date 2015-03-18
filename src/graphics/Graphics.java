@@ -7,11 +7,14 @@ import workspace.WorkSpace;
 
 public class Graphics extends JComponent{
 	private static final long serialVersionUID = 1L;
+	static frame frame;
 	public Graphics(){
 		setLayout(new BoxLayout(this,BoxLayout.X_AXIS));
-		add(new frame());
+		frame=new frame();
+		add(frame);
 		add(new display());
-		add(new character());
+		add(new character());//using frame.add_sprite(x)
+		frame.init();
 		WorkSpace.container.add(this);
 	}
 }

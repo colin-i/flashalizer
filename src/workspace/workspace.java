@@ -218,19 +218,21 @@ public class WorkSpace {
 				super("Project");
 				build();
 				
-				JRadioButtonMenuItem rbMenuItem;
+				/*JRadioButtonMenuItem rbMenuItem;
 				addSeparator();
 				ButtonGroup group = new ButtonGroup();
 				rbMenuItem = new JRadioButtonMenuItem(funcs);
 				group.add(rbMenuItem);
 				rbMenuItem.addActionListener(new persp());
 				add(rbMenuItem);
-				rbMenuItem.setSelected(true);perspective=funcs;
+				//rbMenuItem.setSelected(true);
 				rbMenuItem = new JRadioButtonMenuItem(graphs);
 				group.add(rbMenuItem);
 				rbMenuItem.addActionListener(new persp());
 				add(rbMenuItem);
-				//rbMenuItem.setSelected(true);perspective=graphs;
+				rbMenuItem.setSelected(true);*/
+				perspective=funcs;
+				//perspective=graphs;
 				
 				menu.add(this);
 			}
