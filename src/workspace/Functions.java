@@ -60,9 +60,8 @@ public class Functions extends JTable{
 			public void actionPerformed(ActionEvent e){
 				structure_dialog_run run=new structure_dialog_run(){
 					public void Run(Field f,InputText txt){
-						if(f.getName().equals("width"))txt.setToolTipText("Width in pixels");else if(f.getName().equals("height"))txt.setToolTipText("Height in pixels");
-						else if(f.getName().equals("def_fill"))txt.setToolTipText("Shape fill color");else if(f.getName().equals("def_line_h"))txt.setToolTipText("Shape line height");else if(f.getName().equals("def_line"))txt.setToolTipText("Shape line color");
-						else if(f.getName().equals("ov_fill"))txt.setToolTipText("Shape mouse over fill color");else if(f.getName().equals("ov_line_h"))txt.setToolTipText("Shape mouse over line height");else if(f.getName().equals("ov_line"))txt.setToolTipText("Shape mouse over line color");
+						if(f.getName().equals("def_fill"))txt.setToolTipText("Shape fill color");else if(f.getName().equals("def_line_sz"))txt.setToolTipText("Shape line size");else if(f.getName().equals("def_line"))txt.setToolTipText("Shape line color");
+						else if(f.getName().equals("ov_fill"))txt.setToolTipText("Shape mouse over fill color");else if(f.getName().equals("ov_line_sz"))txt.setToolTipText("Shape mouse over line size");else if(f.getName().equals("ov_line"))txt.setToolTipText("Shape mouse over line color");
 						else if(f.getName().equals("xcurve"))txt.setToolTipText("Shape curve size on x");else if(f.getName().equals("ycurve"))txt.setToolTipText("Shape curve size on y");
 						else if(f.getName().equals("text"))txt.setToolTipText("Button text");else if(f.getName().equals("font_id"))txt.setToolTipText("Text font id");else if(f.getName().equals("font_height"))txt.setToolTipText("Text font height");else if(f.getName().equals("font_vertical_offset"))txt.setToolTipText("Text font vertical offset");
 						else/*if(f.getName().equals("actions"))*/txt.setToolTipText("ActionScript on press");
@@ -472,7 +471,7 @@ public class Functions extends JTable{
 				
 				Object[]tips=null;
 				
-				if(f.equals("swf_button"))tips=new String[]{"Button data"};
+				if(f.equals("swf_button"))tips=new String[]{"Width in pixels","Height in pixels","Button data"};
 				else if(f.equals("swf_font"))tips=new Object[]{"FontName field",new String[]{"FontFlagsBold=1|FontFlagsItalic=2|FontFlagsWideCodes=4|FontFlagsWideOffsets=8","FontFlagsANSI=0x10|FontFlagsSmallText=0x20|FontFlagsShiftJIS=0x40|FontFlagsHasLayout=0x80"}};
 				else if(f.equals("swf_text"))tips=new Object[]{"Width in pixels","Height in pixels","VariableName field",new String[]{"HasFont=0x1|HasMaxLength=0x2|HasTextColor=0x4|ReadOnly=0x8","Password=0x10|Multiline=0x20|WordWrap=0x40|HasText=0x80","UseOutlines=0x100|HTML=0x200|WasStatic=0x400|Border=0x800","NoSelect=0x1000|HasLayout=0x2000|AutoSize=0x4000|HasFontClass=0x8000"},"EditText structure"};
 				else if(f.equals("swf_shape"))tips=new String[]{"Width in pixels","Height in pixels","SHAPEWITHSTYLE field"};

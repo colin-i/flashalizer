@@ -10,9 +10,9 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 	static final String lib_name="actionswf";
 	ActionSwf INSTANCE = (ActionSwf)Native.loadLibrary(lib_name,ActionSwf.class);
 	
-	int swf_button(ButtonData structure);
+	int swf_button(int width,int height,ButtonData structure);
 	int swf_font(String fontname,int font_flags);
-	int swf_text(int bound_width,int bound_height,String variablename,int flags,EditText structure);
+	int swf_text(int width,int height,String variablename,int flags,EditText structure);
 	int swf_shape(int width,int height,int[] args);
 	int swf_image(String imagepath);
 	int swf_dbl(String imagepath);
@@ -42,6 +42,8 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 		Byte erbool_get();
 		void erbool_reset();
 		void abort();
+		int swf_dbl_width(String imagepath);
+		int swf_dbl_height(String imagepath);
 	}
 	
 	public static final int FillStyleType_none=-1;
@@ -59,14 +61,12 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 		public int layout_indent;
 		public int layout_leading;
 	}
-	class ButtonData extends Structure{//the object is passed through com.sun.jna.Library, Structure is required
-		public int width;
-		public int height;
+	class ButtonData extends Structure{//the object is passed through com.sun.jna.Library, Structure is required,+public(throwing error otherwise)
 		public int def_fill;
-		public int def_line_h;
+		public int def_line_sz;
 		public int def_line;
 		public int ov_fill;
-		public int ov_line_h;
+		public int ov_line_sz;
 		public int ov_line;
 		public int xcurve;
 		public int ycurve;

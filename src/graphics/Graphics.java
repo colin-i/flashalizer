@@ -14,7 +14,7 @@ public class Graphics extends JComponent{
 		add(frame);
 		add(new display());
 		add(new character());//using frame.add_sprite(x)
-		frame.init();
+		frame.init();//using character.characters
 		WorkSpace.container.add(this);
 	}
 }

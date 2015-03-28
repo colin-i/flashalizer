@@ -25,6 +25,8 @@ import java.awt.GridLayout;
 import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.prefs.Preferences;
@@ -218,32 +220,47 @@ public class WorkSpace {
 				super("Project");
 				build();
 				
-				/*JRadioButtonMenuItem rbMenuItem;
 				addSeparator();
 				ButtonGroup group = new ButtonGroup();
-				rbMenuItem = new JRadioButtonMenuItem(funcs);
-				group.add(rbMenuItem);
-				rbMenuItem.addActionListener(new persp());
-				add(rbMenuItem);
-				//rbMenuItem.setSelected(true);
-				rbMenuItem = new JRadioButtonMenuItem(graphs);
-				group.add(rbMenuItem);
-				rbMenuItem.addActionListener(new persp());
-				add(rbMenuItem);
-				rbMenuItem.setSelected(true);*/
+				((JRadioButtonMenuItem)
+						add_radio(group,funcs)
+				).setSelected(true)
+				;
+				//((JRadioButtonMenuItem)
+						add_radio(group,graphs)
+				//).setSelected(true)
+				;
 				perspective=funcs;
 				//perspective=graphs;
 				
 				menu.add(this);
 			}
+			private JRadioButtonMenuItem last_radio;
+			private JRadioButtonMenuItem add_radio(ButtonGroup group,String name){
+				JRadioButtonMenuItem rbMenuItem = new JRadioButtonMenuItem(name);
+				group.add(rbMenuItem);
+				rbMenuItem.addActionListener(new persp());
+				rbMenuItem.addItemListener(new persp_item());
+				add(rbMenuItem);
+				return rbMenuItem;
+			}
 			private class persp implements ActionListener{
 				@Override
 				public void actionPerformed(ActionEvent arg0){
 					try{
-						perspective=arg0.getActionCommand();
 						if(getPerspective()==Functions.container)Functions.table.update();
+						perspective=arg0.getActionCommand();
 						resetPerspective();
-					}catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {e.printStackTrace();}
+					}catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e){
+						last_radio.setSelected(true);
+						e.printStackTrace();
+					}
+				}
+			}
+			private class persp_item implements ItemListener{
+				@Override
+				public void itemStateChanged(ItemEvent e) {
+					if(e.getStateChange()==ItemEvent.DESELECTED)last_radio=(JRadioButtonMenuItem) e.getItem();
 				}
 			}
 			private void build(){

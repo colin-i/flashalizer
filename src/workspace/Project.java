@@ -179,8 +179,8 @@ public class Project{
 	void build(){
 		builder.build();
 	}
-	Builder builder=new Builder();
-	class Builder{
+	public Builder builder=new Builder();
+	public class Builder{
 		private ActionSwf as=ActionSwf.INSTANCE;
 		private privat prv=ActionSwf.privat.INST;
 		private Map<String, Integer>ids;
@@ -198,7 +198,7 @@ public class Project{
 				error_msg=null;
 				Functions.table.update();
 				ids=new HashMap<String, Integer>();
-				call("swf_new",swf_new__arguments());
+				caller("swf_new",swf_new__arguments());
 				for(int a=0;a<elements.size();a++){
 					Object element=elements.get(a);
 					String el_type=element.getClass().getSimpleName();
@@ -243,30 +243,32 @@ public class Project{
 								}
 							}
 							Object[]vals=values.toArray();
-							Object result=call(elements_names_convertor(el_type,null),vals);
+							Object result=caller(elements_names_convertor(el_type,null),vals);
 							if(Functions.hasReturn(f))ids.put((String)c.getDeclaredField(NamedId).get(element),(Integer)result);
 							break;
 						}
 					}
 				}
-				call("swf_done",null);
+				caller("swf_done",null);
 			} catch (Throwable e) {
 				e.printStackTrace();
 				if(error_msg == null)error_msg="Error(user input or space)";
 				JOptionPane.showMessageDialog(null,error_msg);
 			}
 		}
-		private Object call(String f,Object[] params) throws Throwable{
-			Class<? extends Object> s=as.getClass();
-			Method[] m=s.getDeclaredMethods();
+		private Object caller(String f,Object[] params) throws Throwable{
+			return call(as,f,params);
+		}
+		public Object call(Object inter,String f,Object[] params) throws Throwable{
+			Method[] m=inter.getClass().getDeclaredMethods();
 			for(int i=0;i<m.length;i++){
 				if(m[i].getName()==f){
-					Object x=m[i].invoke(as,params);
+					Object x=m[i].invoke(inter,params);
 					error();
 					return x;
 				}
 			}
-			return 0;
+			return null;
 		}
 		private void error() throws Throwable{
 			Byte er=prv.erbool_get();
@@ -279,6 +281,7 @@ public class Project{
 			return new Object[]{folder_file("swf"),width,height,backgroundcolor,fps};
 		}
 	}
+	private static final String sprite="Sprite";
 	public static final String button="Button";
 	public static final String font="Font";
 	public static final String text="Text";
@@ -289,14 +292,14 @@ public class Project{
 	public static final String placementcoords="PlacementCoords";
 	public static final String remove="Remove";
 	public static final String showframe="ShowFrame";
-	public static final String spritedone="SpriteDone";
-	public static final String spriteplacement="SpritePlacement";
-	public static final String spriteplacementcoords="SpritePlacementCoords";
-	public static final String spriteremove="SpriteRemove";
-	public static final String spriteshowframe="SpriteShowFrame";
+	public static final String spritedone=sprite+"Done";
+	public static final String spriteplacement=sprite+"Placement";
+	public static final String spriteplacementcoords=sprite+"PlacementCoords";
+	public static final String spriteremove=sprite+"Remove";
+	public static final String spriteshowframe=sprite+"ShowFrame";
 	public static final String exportsadd="ExportsAdd";
 	public static final String action="Action";
-	public static final String actionsprite="ActionSprite";
+	public static final String actionsprite=sprite+"Action";
 	public static String elements_names_convertor(String cName,String fName){
 		String[][]values={
 			{button,"swf_button"},{font,"swf_font"},{text,"swf_text"},{shape,"swf_shape"},{image,"swf_image"},{dbl,"swf_dbl"}

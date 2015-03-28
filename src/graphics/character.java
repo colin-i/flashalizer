@@ -17,9 +17,15 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -28,9 +34,10 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
+import actionswf.ActionSwf;
 import workspace.WorkSpace;
 
-class character extends JScrollPane{
+public class character extends JScrollPane{
 	private static final long serialVersionUID = 1L;
 	character(){
 		setPreferredSize(new Dimension(200,WorkSpace.project.height));
@@ -51,34 +58,63 @@ class character extends JScrollPane{
 		private type(String n,char l){
 			name=n;letter=l;
 			icon=new ImageIcon("img/char/"+letter+".gif");
-			
-			Image image=icon.getImage();
-			BufferedImage bi=new BufferedImage(icon.getIconWidth(),icon.getIconHeight(),BufferedImage.TYPE_INT_RGB);
-			Graphics2D g = bi.createGraphics();
-			g.setColor(Color.BLUE);
-			g.drawImage(image,0,0,null);
-			g.setStroke(new BasicStroke(1));
-			g.drawRect(0,0,bi.getWidth()-1,bi.getHeight()-1);
-			g.dispose();
-			icon_exp=new ImageIcon(bi);
+			icon_exp=image_border(icon);
 		}
 	}
-	private class item{
-		private String value;
+	static ImageIcon image_border(ImageIcon icon){
+		Image image=icon.getImage();
+		BufferedImage bi=new BufferedImage(icon.getIconWidth(),icon.getIconHeight(),BufferedImage.TYPE_INT_RGB);
+		Graphics2D g = bi.createGraphics();
+		g.setColor(Color.BLUE);
+		g.drawImage(image,0,0,null);
+		g.setStroke(new BasicStroke(1));
+		g.drawRect(0,0,bi.getWidth()-1,bi.getHeight()-1);
+		g.dispose();
+		return new ImageIcon(bi);
+	}
+	class Character{
+		String value;
 		private char letter;
 		private boolean exported;
-		private item(String v,char l,boolean e){
+		int width;int height;
+		private Character(String v,char l,boolean e){
 			value=v;letter=l;exported=e;
 		}
 		@Override
 		public String toString(){return value;}
 	}
-	private type Types[]={new type(button,'b'),new type(font,'f'),new type(text,'t'),new type(shape,'s'),new type(image,'i'),new type(dbl,'l'),new type(spritedone,'m')};
+	private type Types[];
+	static Map<String,Character>placeables;
+	private class PlaceableTag{
+		private String name;
+		private Field width;
+		private Field height;
+		private PlaceableTag(String n){
+			name=n;
+			width=frame.getField(n,WidthInt.class);
+			height=frame.getField(n,HeightInt.class);
+		}
+	}
+	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)public @interface WidthInt{}
+	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)public @interface HeightInt{}
+	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)public @interface DBLStr{}
 	private void create_nodes(DefaultMutableTreeNode top){
 		try{
+			placeables=new HashMap<String,Character>();
+			type plc[]={new type(button,'b'),new type(text,'t'),new type(shape,'s'),new type(image,'i'),new type(spritedone,'m')};
 			List<Object>els=WorkSpace.project.elements;
 			
-			Field fd=display.getRefField(exportsadd);
+			List<PlaceableTag>p=new ArrayList<PlaceableTag>();
+			List<type>t=new ArrayList<type>();
+			for(type x:plc){
+				t.add(x);
+				p.add(new PlaceableTag(x.name));
+			}
+			PlaceableTag[]PlaceableTags=p.toArray(new PlaceableTag[p.size()]);
+			t.add(new type(font,'f'));t.add(new type(dbl,'l'));
+			Types=t.toArray(new type[t.size()]);
+			
+			Field fd=frame.getRefField(exportsadd);
 			List<String>exports=new ArrayList<String>();
 			for(int i=0;i<els.size();i++){
 				Object e=els.get(i);
@@ -87,20 +123,40 @@ class character extends JScrollPane{
 				}
 			}
 			
+			Field fd_img=frame.getField(image,DBLStr.class);
 			for(int i=0;i<els.size();i++){
 				Object e=els.get(i);
 				for(int j=0;j<Types.length;j++){
-					if(e.getClass().getSimpleName().equals(Types[j].name)){
+					String type=Types[j].name;
+					if(e.getClass().getSimpleName().equals(type)){
 						Field f=e.getClass().getDeclaredField(NamedId);
 						String name=(String)f.get(e);
 						boolean exported=false;
 						for(String n:exports){
 							if(n.equals(name)){exported=true;break;}
 						}
-						top.add(new DefaultMutableTreeNode(new item(name,Types[j].letter,exported)));
-						if(Types[j].name.equals(spritedone)){
-							Field a=display.getSpriteField(spritedone);
-							Graphics.frame.add_sprite(name,(String)a.get(e));
+						Character c=new Character(name,Types[j].letter,exported);
+						top.add(new DefaultMutableTreeNode(c));
+						for(PlaceableTag a:PlaceableTags){
+							if(a.name.equals(type)){
+								placeables.put(c.value,c);
+								if(Types[j].name.equals(spritedone)){
+									Field b=frame.getSpriteField(spritedone);
+									Graphics.frame.add_sprite(name,(String)b.get(e));
+								}else{
+									int w = 0;int h = 0;
+									if(type.equals(image)){
+										Object inter=ActionSwf.privat.INST;
+										Object[]obj={fd_img.get(e)};
+										try {
+											w=(int) workspace.WorkSpace.project.builder.call(inter,"swf_dbl_width",obj);
+											h=(int) workspace.WorkSpace.project.builder.call(inter,"swf_dbl_height",obj);
+										} catch (Throwable e1) {e1.printStackTrace();}
+									}else{w=(int)a.width.get(e);h=(int)a.height.get(e);}
+									c.width=w;c.height=h;
+								}
+								break;
+							}
 						}
 						break;
 					}
@@ -113,7 +169,7 @@ class character extends JScrollPane{
 		@Override
 		public Component getTreeCellRendererComponent(JTree tree,Object value,boolean sel,boolean expanded,boolean leaf,int row,boolean hasFocus) {
 			super.getTreeCellRendererComponent(tree,value,sel,expanded,leaf,row,hasFocus);
-			item v=(item) ((DefaultMutableTreeNode)value).getUserObject();
+			Character v=(Character)((DefaultMutableTreeNode)value).getUserObject();
 			if(v != null){//getting null for some data
 				for(int i=0;i<Types.length;i++){
 					if(Types[i].letter==v.letter){

@@ -3,23 +3,29 @@ package workspace;
 import java.util.ArrayList;
 import java.util.List;
 
-import graphics.display.RefId;
-import graphics.display.SpriteId;
-
+import graphics.character.DBLStr;
+import graphics.character.HeightInt;
+import graphics.character.WidthInt;
+import graphics.frame.RefId;
+import graphics.frame.SpriteId;
+import graphics.frame.ActionStr;
+import graphics.frame.DepthInt;
+import graphics.frame.XInt;
+import graphics.frame.YInt;
 import static actionswf.ActionSwf.FillStyleType_none;
 
 public class Elements {
 	public static class Button extends element{
+		public @WidthInt int width;
+		public @HeightInt int height;
 		ButtonData structure;
 		Button(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 		static class ButtonData{
-			int width;
-			int height;
 			int def_fill;
-			int def_line_h;
+			int def_line_sz;
 			int def_line;
 			int ov_fill;
-			int ov_line_h;
+			int ov_line_sz;
 			int ov_line;
 			int xcurve;
 			int ycurve;
@@ -30,7 +36,7 @@ public class Elements {
 			String actions;
 			ButtonData(Object[]v) throws IllegalArgumentException, IllegalAccessException{element.Element(v,this);}
 			ButtonData(){
-				width=0;height=0;def_fill=0;def_line_h=0;def_line=0;ov_fill=0;ov_line_h=0;ov_line=0;xcurve=0;ycurve=0;
+				def_fill=0;def_line_sz=0;def_line=0;ov_fill=0;ov_line_sz=0;ov_line=0;xcurve=0;ycurve=0;
 				text="";font_id="";font_height=0;font_vertical_offset=0;
 				actions="";
 			}
@@ -42,8 +48,8 @@ public class Elements {
 		Font(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
 	public static class Text extends element{
-		int bound_width;
-		int bound_height;
+		public @WidthInt int width;
+		public @HeightInt int height;
 		String variablename;
 		int flags;
 		EditText structure;
@@ -68,8 +74,8 @@ public class Elements {
 		}
 	}
 	public static class Shape extends element{
-		int width;
-		int height;
+		public @WidthInt int width;
+		public @HeightInt int height;
 		Object[]args;
 		Shape(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 		static class ShapeWithStyle{
@@ -133,7 +139,7 @@ public class Elements {
 		}
 	}
 	public static class Image extends element{
-		String imagepath;
+		public @DBLStr String imagepath;
 		Image(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
 	public static class DBL extends element{
@@ -142,15 +148,15 @@ public class Elements {
 	}
 	
 	public static class Placement extends element{
-		public @RefId String refid;int depth;
+		public @RefId String refid;public @DepthInt int depth;
 		Placement(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
 	public static class PlacementCoords extends element{
-		public @RefId String refid;int depth;int x;int y;
+		public @RefId String refid;public @DepthInt int depth;public @XInt int x;public @YInt int y;
 		PlacementCoords(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
-	static class Remove extends element{
-		int depth;
+	public static class Remove extends element{
+		public @DepthInt int depth;
 		Remove(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
 	static class ShowFrame{ShowFrame(Object[]x){};ShowFrame(){};}
@@ -161,15 +167,15 @@ public class Elements {
 	}
 	static class SpriteNew extends element{SpriteNew(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}}
 	public static class SpritePlacement extends element{
-		public @SpriteId String spriteid;public @RefId String refid;int depth;
+		public @SpriteId String spriteid;public @RefId String refid;public @DepthInt int depth;
 		SpritePlacement(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
 	public static class SpritePlacementCoords extends element{
-		public @SpriteId String spriteid;public @RefId String refid;int depth;int x;int y;
+		public @SpriteId String spriteid;public @RefId String refid;public @DepthInt int depth;public @XInt int x;public @YInt int y;
 		SpritePlacementCoords(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
 	public static class SpriteRemove extends element{
-		public @SpriteId String spriteid;int depth;
+		public @SpriteId String spriteid;public @DepthInt int depth;
 		SpriteRemove(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
 	public static class SpriteShowFrame extends element{
@@ -180,12 +186,12 @@ public class Elements {
 	public static class ExportsAdd extends element{public @RefId String refid;String name;ExportsAdd(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}}
 	static class ExportsDone{ExportsDone(Object[]v){}}
 	
-	static class Action extends element{
-		String ac;
+	public static class Action extends element{
+		public @ActionStr String ac;
 		Action(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
-	public static class ActionSprite extends element{
-		public @SpriteId String spriteid;String ac;
-		ActionSprite(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
+	public static class SpriteAction extends element{
+		public @SpriteId String spriteid;public @ActionStr String ac;
+		SpriteAction(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
 }
