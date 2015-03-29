@@ -1,8 +1,12 @@
 package graphics;
 
+import java.awt.Button;
+import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Panel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.annotation.Annotation;
@@ -57,9 +61,11 @@ public class frame extends JPanel implements TreeSelectionListener{
 		sprites=new HashMap<String,frame.sprite_item>();
 	}
 	static JTree tree;
+	private frame_item[]frames;
 	void init(){
 		DefaultMutableTreeNode top=new DefaultMutableTreeNode();
-		noding(top,get_frames(ctag_root,null));
+		frames=get_frames(ctag_root,null);
+		noding(top,frames);
 		tree=new JTree(top);
 		tree.setRootVisible(false);
 		for(int i=0;i<tree.getRowCount();i++) {
@@ -305,7 +311,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 							if(c!=null){
 								int x;int y;
 								if(n.equals(placement)){x=0;y=0;}
-								else/*(n.equals(placementcoords))*/{
+								else/*(n.equals(placement coordinates))*/{
 									x=(int) t.x.get(el);y=(int) t.y.get(el);
 								}
 								items.add(new item(c,(int)t.depth.get(el),x,y));
@@ -317,15 +323,15 @@ public class frame extends JPanel implements TreeSelectionListener{
 				}
 			}
 		}
-		for(int d:removes)set_remove(d,frames);//cannot place and remove an item in the same frame
-		frames.add(new frame_item(items.toArray(new item[items.size()]),as));
+		for(int d:removes)set_remove(d,frames);								 //cannot place and remove an item
+		frames.add(new frame_item(items.toArray(new item[items.size()]),as));//in the same frame
 	}
 	private void set_remove(int d,List<frame_item>frames){
 		for(frame_item f:frames){
 			item[]els=f.elements;
 			for(item i:els){
 				if(i.depth==d){
-					i.remove=frames.size()-1;
+					i.remove=frames.size();//frames size is the current frame index
 					return;
 				}
 			}
@@ -340,24 +346,41 @@ public class frame extends JPanel implements TreeSelectionListener{
 				JDialog dg=new JDialog(SwingUtilities.getWindowAncestor(this),Dialog.ModalityType.DOCUMENT_MODAL);
 				dg.setTitle(it.character.value);
 
-				int sel_pos;int orientation;
+				int sel_pos;int orientation;int max_pos;
 				if(bar.is_sel_remove()){
-					int scope_frames=it.parent.getChildCount();
-					sel_pos=scope_frames;
+					max_pos=it.parent.getChildCount();
+					sel_pos=max_pos;
 					if(it.remove!=null)sel_pos=(int) it.remove;
 					orientation=JSlider.HORIZONTAL;
 				}else/*(bar.is_sel_depth())*/{
+					max_pos=0;for(frame_item f:frames)max_pos+=f.elements.length;
 					sel_pos=it.depth;
 					orientation=JSlider.VERTICAL;
 				}
 				
+				//JSlider slide=new JSlider(orientation,sel_pos,max_pos,sel_pos);
 				JSlider slide=new JSlider(orientation,sel_pos,sel_pos,sel_pos);
 				slide.setMajorTickSpacing(1);//This method will also set up a label table
 				slide.setPaintTicks(true);//By default, this property is false
 				slide.setPaintLabels(true);//By default, this property is false
 
 				JScrollPane s=new JScrollPane(slide);
-				dg.add(s);dg.pack();
+				
+				Container ctnr=dg.getContentPane();
+				ctnr.setLayout(new BoxLayout(ctnr,BoxLayout.Y_AXIS));
+				
+				ctnr.add(s);
+				
+				Button btn=new Button("OK");
+				btn.addActionListener(new ActionListener(){
+					public void actionPerformed(ActionEvent e) {
+						
+						dg.dispose();
+					}
+				});
+				//ctnr.add(btn);
+				
+				dg.pack();
 				dg.setVisible(true);
 				return;
 			}
