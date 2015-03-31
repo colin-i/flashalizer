@@ -3,9 +3,8 @@ package workspace;
 import java.util.ArrayList;
 import java.util.List;
 
-import graphics.character.DBLStr;
-import graphics.character.HeightInt;
-import graphics.character.WidthInt;
+import graphics.display.HeightInt;
+import graphics.display.WidthInt;
 import graphics.frame.RefId;
 import graphics.frame.SpriteId;
 import graphics.frame.ActionStr;
@@ -138,10 +137,10 @@ public class Elements {
 			}
 		}
 	}
-	public static class Image extends element{
-		public @DBLStr String imagepath;
+	/*public static class Image extends element{
+		public String imagepath;
 		Image(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
-	}
+	}*/
 	public static class DBL extends element{
 		String imagepath;
 		DBL(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
@@ -154,18 +153,20 @@ public class Elements {
 	public static class PlacementCoords extends element{
 		public @RefId String refid;public @DepthInt int depth;public @XInt int x;public @YInt int y;
 		PlacementCoords(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
+		public PlacementCoords(String string, int depth2, int x2, int y2){refid=string;depth=depth2;x=x2;y=y2;}
 	}
 	public static class Remove extends element{
 		public @DepthInt int depth;
 		Remove(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
+		public Remove(int d) {depth=d;}
 	}
-	static class ShowFrame{ShowFrame(Object[]x){};ShowFrame(){};}
+	public static class ShowFrame{ShowFrame(Object[]x){};public ShowFrame(){};}
 	
 	public static class SpriteDone extends element{
 		public @SpriteId String spriteid;
-		SpriteDone(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
+		public SpriteDone(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
-	static class SpriteNew extends element{SpriteNew(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}}
+	public static class SpriteNew extends element{public SpriteNew(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}}
 	public static class SpritePlacement extends element{
 		public @SpriteId String spriteid;public @RefId String refid;public @DepthInt int depth;
 		SpritePlacement(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
@@ -173,25 +174,33 @@ public class Elements {
 	public static class SpritePlacementCoords extends element{
 		public @SpriteId String spriteid;public @RefId String refid;public @DepthInt int depth;public @XInt int x;public @YInt int y;
 		SpritePlacementCoords(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
+		public SpritePlacementCoords(String sprite,String string,int depth2,int x2,int y2){spriteid=sprite;refid=string;depth=depth2;x=x2;y=y2;}
 	}
 	public static class SpriteRemove extends element{
 		public @SpriteId String spriteid;public @DepthInt int depth;
 		SpriteRemove(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
+		public SpriteRemove(String sprite, int d) {spriteid=sprite;depth=d;}
 	}
 	public static class SpriteShowFrame extends element{
 		public @SpriteId String spriteid;
 		SpriteShowFrame(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
+		public SpriteShowFrame(String sprite) {spriteid=sprite;}
 	}
 	
-	public static class ExportsAdd extends element{public @RefId String refid;String name;ExportsAdd(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}}
-	static class ExportsDone{ExportsDone(Object[]v){}}
+	public static class ExportsAdd extends element{public @RefId String refid;public String name;
+		ExportsAdd(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
+		public ExportsAdd(String r,String n){refid=r;name=n;}
+	}
+	public static class ExportsDone{ExportsDone(Object[]v){};public ExportsDone(){}}
 	
 	public static class Action extends element{
 		public @ActionStr String ac;
 		Action(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
+		public Action(String action){ac=action;}
 	}
 	public static class SpriteAction extends element{
 		public @SpriteId String spriteid;public @ActionStr String ac;
 		SpriteAction(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
+		public SpriteAction(String sprite, String action) {spriteid=sprite;ac=action;}
 	}
 }

@@ -14,7 +14,7 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 	int swf_font(String fontname,int font_flags);
 	int swf_text(int width,int height,String variablename,int flags,EditText structure);
 	int swf_shape(int width,int height,int[] args);
-	int swf_image(String imagepath);
+	//integer swf_image(String image path);{swf_dbl_width..,Image,new type(image..,Character.width..}
 	int swf_dbl(String imagepath);
 	
 	void swf_done();
@@ -42,8 +42,8 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 		Byte erbool_get();
 		void erbool_reset();
 		void abort();
-		int swf_dbl_width(String imagepath);
-		int swf_dbl_height(String imagepath);
+		//integer swf_dbl_width(String image path);
+		//integer swf_dbl_height(String image path);
 	}
 	
 	public static final int FillStyleType_none=-1;

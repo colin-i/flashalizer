@@ -222,16 +222,16 @@ public class WorkSpace {
 				
 				addSeparator();
 				ButtonGroup group = new ButtonGroup();
-				((JRadioButtonMenuItem)
-						add_radio(group,funcs)
-				).setSelected(true)
-				;
 				//((JRadioButtonMenuItem)
-						add_radio(group,graphs)
+						add_radio(group,funcs)
 				//).setSelected(true)
 				;
-				perspective=funcs;
-				//perspective=graphs;
+				((JRadioButtonMenuItem)
+						add_radio(group,graphs)
+				).setSelected(true)
+				;
+				//perspective=funcs;
+				perspective=graphs;
 				
 				menu.add(this);
 			}
@@ -248,7 +248,7 @@ public class WorkSpace {
 				@Override
 				public void actionPerformed(ActionEvent arg0){
 					try{
-						if(getPerspective()==Functions.container)Functions.table.update();
+						updateElements();
 						perspective=arg0.getActionCommand();
 						resetPerspective();
 					}catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e){
@@ -292,7 +292,7 @@ public class WorkSpace {
 				Container cp1=new Container();
 				cp1.setLayout(new FlowLayout());
 				cp1.add(new JLabel(img));
-				Label l=new Label("Version 1");
+				Label l=new Label("Logo");
 				cp1.add(l);
 				cp.add(cp1);
 				//2
@@ -323,7 +323,7 @@ public class WorkSpace {
 		}
 	}
 	public static Container container;
-	private Component getPerspective(){return container.getComponent(0);}
+	private static Component getPerspective(){return container.getComponent(0);}
 	private void resetPerspective(){
 		container.remove(getPerspective());
 		addPerspective();
@@ -341,6 +341,10 @@ public class WorkSpace {
 	private void addPerspective(){
 		if(perspective.equals(graphs))new Graphics();
 		else new Functions();
+	}
+	static void updateElements() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException{
+		if(getPerspective()==Functions.container)Functions.table.update();
+		else Graphics.update();
 	}
 	public void main(String[] args) {
 		//keep this order of declarations

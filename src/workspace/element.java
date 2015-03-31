@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 
 public class element{
+	element(){}
 	element(Object[]x) throws IllegalArgumentException, IllegalAccessException{
 		Element(x,this);
 	}

@@ -1,5 +1,7 @@
 package workspace;
 
+import graphics.frame.SpriteId;
+
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -167,7 +169,7 @@ public class Project{
 	}
 	void save(){
 		try {
-			Functions.table.update();
+			WorkSpace.updateElements();
 			xml x=new xml();x.write();
 		} catch (XMLStreamException | IOException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			e.printStackTrace();
@@ -179,25 +181,31 @@ public class Project{
 	void build(){
 		builder.build();
 	}
-	public Builder builder=new Builder();
-	public class Builder{
+	Builder builder=new Builder();
+	class Builder{
 		private ActionSwf as=ActionSwf.INSTANCE;
 		private privat prv=ActionSwf.privat.INST;
-		private Map<String, Integer>ids;
+		private Map<String, Integer>ids;private Map<String, Integer>ids_sprite;
 		private String error_msg;
-		private int ids_get(String name) throws Throwable{
-			if(ids.get(name)==null){
+		private int ids_get_ex(String name,boolean isSprite) throws Throwable{
+			Integer val;
+			if(isSprite==false)val=ids.get(name);
+			else val=ids_sprite.get(name);
+			if(val==null){
 				error_msg="Undeclared "+name;
 				prv.abort();
 				throw new Throwable();
 			}
-			return ids.get(name);
+			return val;
+		}
+		private int ids_get(String name) throws Throwable{
+			return ids_get_ex(name,false);
 		}
 		private void build(){
 			try{
 				error_msg=null;
-				Functions.table.update();
-				ids=new HashMap<String, Integer>();
+				WorkSpace.updateElements();
+				ids=new HashMap<String, Integer>();ids_sprite=new HashMap<String, Integer>();
 				caller("swf_new",swf_new__arguments());
 				for(int a=0;a<elements.size();a++){
 					Object element=elements.get(a);
@@ -214,8 +222,9 @@ public class Project{
 								f=Functions.f_list.get(z);
 								if(f_name.equals(f.name)){
 									for(int y=0;y<f.number_of_args;y++){
-										Object val=fields[y].get(element);
-										if(f.args_isNamed.get(y)==true)val=ids_get((String)val);
+										Field fld=fields[y];
+										Object val=fld.get(element);
+										if(f.args_isNamed.get(y)==true)val=ids_get_ex((String)val,fld.isAnnotationPresent(SpriteId.class));
 										else{
 											String tp=f.args_types.get(y);
 											if(tp.equals(Functions.ButtonData)||tp.equals(Functions.EditText)){
@@ -244,7 +253,12 @@ public class Project{
 							}
 							Object[]vals=values.toArray();
 							Object result=caller(elements_names_convertor(el_type,null),vals);
-							if(Functions.hasReturn(f))ids.put((String)c.getDeclaredField(NamedId).get(element),(Integer)result);
+							if(Functions.hasReturn(f)){
+								Map<String, Integer>map;
+								if(f_name.equals("swf_sprite_new"))map=ids_sprite;
+								else map=ids;
+								map.put((String)c.getDeclaredField(NamedId).get(element),(Integer)result);
+							}
 							break;
 						}
 					}
@@ -259,7 +273,7 @@ public class Project{
 		private Object caller(String f,Object[] params) throws Throwable{
 			return call(as,f,params);
 		}
-		public Object call(Object inter,String f,Object[] params) throws Throwable{
+		private Object call(Object inter,String f,Object[] params) throws Throwable{
 			Method[] m=inter.getClass().getDeclaredMethods();
 			for(int i=0;i<m.length;i++){
 				if(m[i].getName()==f){
@@ -286,7 +300,7 @@ public class Project{
 	public static final String font="Font";
 	public static final String text="Text";
 	public static final String shape="Shape";
-	public static final String image="Image";
+	//public static final String image="Image";
 	public static final String dbl="DBL";
 	public static final String placement="Placement";
 	public static final String placementcoords="PlacementCoords";
@@ -302,7 +316,7 @@ public class Project{
 	public static final String actionsprite=sprite+"Action";
 	public static String elements_names_convertor(String cName,String fName){
 		String[][]values={
-			{button,"swf_button"},{font,"swf_font"},{text,"swf_text"},{shape,"swf_shape"},{image,"swf_image"},{dbl,"swf_dbl"}
+			{button,"swf_button"},{font,"swf_font"},{text,"swf_text"},{shape,"swf_shape"}/*,{image,"swf_image"}*/,{dbl,"swf_dbl"}
 			,{placement,"swf_placeobject"},{placementcoords,"swf_placeobject_coords"},{remove,"swf_removeobject"},{showframe,"swf_showframe"}
 			,{spritedone,"swf_sprite_done"},{"SpriteNew","swf_sprite_new"},{spriteplacement,"swf_sprite_placeobject"},{spriteplacementcoords,"swf_sprite_placeobject_coords"},{spriteremove,"swf_sprite_removeobject"},{spriteshowframe,"swf_sprite_showframe"}
 			,{exportsadd,"swf_exports_add"},{"ExportsDone","swf_exports_done"}

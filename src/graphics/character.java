@@ -5,10 +5,10 @@ import static workspace.Project.button;
 import static workspace.Project.font;
 import static workspace.Project.text;
 import static workspace.Project.shape;
-import static workspace.Project.image;
 import static workspace.Project.dbl;
 import static workspace.Project.exportsadd;
 import static workspace.element.NamedId;
+import graphics.frame.frame_item;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -17,10 +17,6 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,18 +30,16 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
-import actionswf.ActionSwf;
 import workspace.WorkSpace;
 
-public class character extends JScrollPane{
+class character extends JScrollPane{
 	private static final long serialVersionUID = 1L;
 	character(){
 		setPreferredSize(new Dimension(200,WorkSpace.project.height));
 		setBorder(BorderFactory.createTitledBorder("Character"));
 		
-		DefaultMutableTreeNode top=new DefaultMutableTreeNode();
-		create_nodes(top);
-		JTree tree=new JTree(top);
+		create_nodes();
+		JTree tree=new JTree(root);
 		tree.setCellRenderer(new renderer());
 		tree.setRootVisible(false);
 		
@@ -73,57 +67,59 @@ public class character extends JScrollPane{
 		return new ImageIcon(bi);
 	}
 	class Character{
-		String value;
 		private char letter;
-		private boolean exported;
-		int width;int height;
-		private Character(String v,char l,boolean e){
-			value=v;letter=l;exported=e;
+		String export_name;
+		Object element;
+		private Character(type t,Object el,Field n,String e){
+			letter=t.letter;element=el;name=n;export_name=e;
+			for(type p:placeableTags){
+				if(p.name.equals(t.name)){isPlaceable=true;break;}
+			}
 		}
+		private Field name;
 		@Override
-		public String toString(){return value;}
+		public String toString(){
+			try {return (String) name.get(element);}
+			catch (IllegalArgumentException | IllegalAccessException e) {e.printStackTrace();}
+			return null;
+		}
+		private boolean isPlaceable;//Default Value false
+		frame_item[]frames;
 	}
 	private type Types[];
-	static Map<String,Character>placeables;
-	private class PlaceableTag{
-		private String name;
-		private Field width;
-		private Field height;
-		private PlaceableTag(String n){
-			name=n;
-			width=frame.getField(n,WidthInt.class);
-			height=frame.getField(n,HeightInt.class);
+	private type placeableTags[]={new type(button,'b'),new type(text,'t'),new type(shape,'s')/*,new type(image,'i')*/,new type(spritedone,'m')};
+	static Character placeableCharacter(String name){
+		int n=root.getChildCount();
+		for(int i=0;i<n;i++){
+			DefaultMutableTreeNode tn=(DefaultMutableTreeNode) root.getChildAt(i);
+			Character c=(Character)tn.getUserObject();
+			if(c.isPlaceable==true)if(name.equals(c.toString()))return c;
 		}
+		return null;
 	}
-	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)public @interface WidthInt{}
-	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)public @interface HeightInt{}
-	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)public @interface DBLStr{}
-	private void create_nodes(DefaultMutableTreeNode top){
+	
+	static DefaultMutableTreeNode root;
+	private void create_nodes(){
 		try{
-			placeables=new HashMap<String,Character>();
-			type plc[]={new type(button,'b'),new type(text,'t'),new type(shape,'s'),new type(image,'i'),new type(spritedone,'m')};
 			List<Object>els=WorkSpace.project.elements;
+			root=new DefaultMutableTreeNode();
 			
-			List<PlaceableTag>p=new ArrayList<PlaceableTag>();
 			List<type>t=new ArrayList<type>();
-			for(type x:plc){
-				t.add(x);
-				p.add(new PlaceableTag(x.name));
-			}
-			PlaceableTag[]PlaceableTags=p.toArray(new PlaceableTag[p.size()]);
+			for(type x:placeableTags)t.add(x);
 			t.add(new type(font,'f'));t.add(new type(dbl,'l'));
 			Types=t.toArray(new type[t.size()]);
 			
 			Field fd=frame.getRefField(exportsadd);
-			List<String>exports=new ArrayList<String>();
+			
+			Map<String,String>exports=new HashMap<String,String>();
 			for(int i=0;i<els.size();i++){
 				Object e=els.get(i);
 				if(e.getClass().getSimpleName().equals(exportsadd)){
-					exports.add((String)fd.get(e));
+					workspace.Elements.ExportsAdd el=(workspace.Elements.ExportsAdd)e;
+					exports.put((String)fd.get(e),el.name);
 				}
 			}
 			
-			Field fd_img=frame.getField(image,DBLStr.class);
 			for(int i=0;i<els.size();i++){
 				Object e=els.get(i);
 				for(int j=0;j<Types.length;j++){
@@ -131,29 +127,13 @@ public class character extends JScrollPane{
 					if(e.getClass().getSimpleName().equals(type)){
 						Field f=e.getClass().getDeclaredField(NamedId);
 						String name=(String)f.get(e);
-						boolean exported=false;
-						for(String n:exports){
-							if(n.equals(name)){exported=true;break;}
-						}
-						Character c=new Character(name,Types[j].letter,exported);
-						top.add(new DefaultMutableTreeNode(c));
-						for(PlaceableTag a:PlaceableTags){
+						Character c=new Character(Types[j],e,f,exports.get(name));
+						root.add(new DefaultMutableTreeNode(c));
+						for(type a:placeableTags){
 							if(a.name.equals(type)){
-								placeables.put(c.value,c);
 								if(Types[j].name.equals(spritedone)){
 									Field b=frame.getSpriteField(spritedone);
-									Graphics.frame.add_sprite(name,(String)b.get(e));
-								}else{
-									int w = 0;int h = 0;
-									if(type.equals(image)){
-										Object inter=ActionSwf.privat.INST;
-										Object[]obj={fd_img.get(e)};
-										try {
-											w=(int) workspace.WorkSpace.project.builder.call(inter,"swf_dbl_width",obj);
-											h=(int) workspace.WorkSpace.project.builder.call(inter,"swf_dbl_height",obj);
-										} catch (Throwable e1) {e1.printStackTrace();}
-									}else{w=(int)a.width.get(e);h=(int)a.height.get(e);}
-									c.width=w;c.height=h;
+									c.frames=Graphics.frame.sprite_frames((String)b.get(e));
 								}
 								break;
 							}
@@ -173,7 +153,7 @@ public class character extends JScrollPane{
 			if(v != null){//getting null for some data
 				for(int i=0;i<Types.length;i++){
 					if(Types[i].letter==v.letter){
-						if(v.exported)setIcon(Types[i].icon_exp);
+						if(v.export_name!=null)setIcon(Types[i].icon_exp);
 						else setIcon(Types[i].icon);
 						break;
 					}

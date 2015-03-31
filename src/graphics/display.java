@@ -5,6 +5,12 @@ import java.awt.Dimension;
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Field;
 
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
@@ -12,15 +18,13 @@ import javax.swing.JScrollPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
+import workspace.Elements;
 import workspace.WorkSpace;
 import static graphics.frame.tree;
-import static graphics.frame.sprites;
 import graphics.frame.item;
-import graphics.frame.sprite_item;
 import graphics.frame.frame_item;
-import graphics.frame.frame_entry;
 
-class display extends JScrollPane{
+public class display extends JScrollPane{
 	private static final long serialVersionUID = 1L;
 	private class content extends JComponent{
 		private static final long serialVersionUID = 1L;
@@ -39,17 +43,27 @@ class display extends JScrollPane{
 			g.fillRect(0,0,WorkSpace.project.width,WorkSpace.project.height);
 			
 			sel_path=tree.getSelectionPath();sel_pos=1;
-			if(sel_path==null)sel_path=tree.getPathForRow(0);//null if row >= getRowCount() 
-			/*if(sel_path!=null)there is at least one frame*/showFrame(((frame_entry)((DefaultMutableTreeNode)sel_path.getPathComponent(sel_pos)).getUserObject()).frame,true,g,0,0);
+			if(sel_path==null)sel_path=tree.getPathForRow(0);//null if row >= getRowCount()
+			/*if(sel_path!=null)there is at least one frame*/showFrame(
+					get_frame_item((DefaultMutableTreeNode)sel_path.getPathComponent(sel_pos))
+					,true,g,0,0);
+		}
+		private frame_item get_frame_item(DefaultMutableTreeNode f){
+			DefaultMutableTreeNode parent=(DefaultMutableTreeNode) f.getParent();
+			frame_item[]frms=frame.get_frame_items(parent);
+			for(int a=0;a<parent.getChildCount();a++){
+				if(parent.getChildAt(a)==f)return frms[a];
+			}
+			return null;
 		}
 		private TreePath sel_path;private int sel_pos;
 		private void showFrame(frame_item frame,boolean same_level,java.awt.Graphics g,int x_off,int y_off){
-			int sel_pos_depth=-1;DefaultMutableTreeNode next=null;
+			int sel_pos_depth=-1;
 			if(same_level==true){
 				int p=sel_pos+1;
 				if(p!=sel_path.getPathCount()){//is next an item?
 					DefaultMutableTreeNode node=(DefaultMutableTreeNode)sel_path.getPathComponent(sel_pos);
-					next=(DefaultMutableTreeNode)sel_path.getPathComponent(p);
+					DefaultMutableTreeNode next=(DefaultMutableTreeNode)sel_path.getPathComponent(p);
 					int n=node.getChildCount();
 					for(int i=0;i<n;i++){
 						if(node.getChildAt(i)==next){
@@ -62,25 +76,18 @@ class display extends JScrollPane{
 			item[]items=frame.eshow;
 			for(int i=0;i<items.length;i++){
 				item it=items[i];
-				sprite_item s=sprites.get(it.character.value);
+				frame_item[]s=it.character.frames;
 				int x_pos=x_off+it.x;int y_pos=y_off+it.y;
 				if(s!=null){
-					if(s.frames.length!=0){//no frames?
-						boolean level_bool=false;frame_item f=s.frames[0];
+					if(s.length!=0){//no frames?
+						boolean level_bool=false;frame_item f=s[0];
 						if(same_level==true){
 							if(it.depth==sel_pos_depth){//selected item
 								int in_pos=sel_pos+2;
 								if(in_pos<sel_path.getPathCount()){
 									//and has a selected frame
 									sel_pos=in_pos;//set next in the selected TreePath
-									DefaultMutableTreeNode nextframe=(DefaultMutableTreeNode)sel_path.getPathComponent(sel_pos);
-									int n=next.getChildCount();
-									for(int a=0;a<n;a++){
-										if(next.getChildAt(a)==nextframe){
-											f=((frame_entry)nextframe.getUserObject()).frame;//set frame
-											break;
-										}
-									}
+									f=get_frame_item((DefaultMutableTreeNode)sel_path.getPathComponent(sel_pos));//set frame
 									level_bool=true;//set same level boolean
 								}
 							}
@@ -89,13 +96,40 @@ class display extends JScrollPane{
 					}
 					continue;
 				}
-				g.drawImage(img,x_pos,y_pos,it.character.width,it.character.height,null);
+				Object el=it.character.element;
+				int w = 0;int h = 0;
+				try{
+					Field wd=getAField(el.getClass(),WidthInt.class);w=(int) wd.get(el);
+					Field hg=getAField(el.getClass(),HeightInt.class);h=(int) hg.get(el);
+				}catch (IllegalArgumentException | IllegalAccessException e) {e.printStackTrace();}
+				g.drawImage(img,x_pos,y_pos,w,h,null);
 			}
 		}
 	}
-	static JComponent component;
+	static Field getField(String elem,Class<? extends Annotation> annotationClass){
+		Class<?>[]cls=Elements.class.getDeclaredClasses();
+		for(Class<?>c:cls){
+			if(c.getSimpleName().equals(elem)){
+				return getAField(c,annotationClass);
+			}
+		}
+		return null;
+	}
+	private static Field getAField(Class<?>c,Class<? extends Annotation> annotationClass){
+		Field[]flds=c.getDeclaredFields();
+		for(Field fd:flds){
+			if(fd.isAnnotationPresent(annotationClass))return fd;
+		}
+		return null;
+	}
+	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)public @interface WidthInt{}
+	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)public @interface HeightInt{}
+	private static JComponent component;
 	display(){
 		component=new content();
 		setViewportView(component);
+	}
+	static void draw() {
+		component.repaint();
 	}
 }

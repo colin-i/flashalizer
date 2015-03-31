@@ -9,7 +9,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.lang.annotation.Annotation;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -17,9 +19,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -36,8 +36,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 
-import workspace.Elements;
 import workspace.WorkSpace;
 import static workspace.Project.showframe;
 import static workspace.Project.placement;
@@ -49,7 +51,6 @@ import static workspace.Project.spriteplacementcoords;
 import static workspace.Project.spriteremove;
 import static workspace.Project.action;
 import static workspace.Project.actionsprite;
-import static graphics.character.placeables;
 import graphics.character.Character;
 
 public class frame extends JPanel implements TreeSelectionListener{
@@ -58,22 +59,25 @@ public class frame extends JPanel implements TreeSelectionListener{
 		setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
 		setPreferredSize(new Dimension(200,WorkSpace.project.height));
 		setBorder(BorderFactory.createTitledBorder("Frame"));
-		sprites=new HashMap<String,frame.sprite_item>();
 	}
 	static JTree tree;
-	private frame_item[]frames;
+	static frame_item[]frames;
 	void init(){
 		DefaultMutableTreeNode top=new DefaultMutableTreeNode();
 		frames=get_frames(ctag_root,null);
 		noding(top,frames);
 		tree=new JTree(top);
+		expand();
 		tree.setRootVisible(false);
-		for(int i=0;i<tree.getRowCount();i++) {
-			tree.expandRow(i);
-		}
+		tree.addMouseListener(ml);
 		tree.addTreeSelectionListener(this);
 		JScrollPane s=new JScrollPane(tree);add(s);
 		add(new bar());
+	}
+	private void expand(){
+		for(int i=0;i<tree.getRowCount();i++) {
+			tree.expandRow(i);
+		}
 	}
 	private static class bar extends Panel{
 		private static final long serialVersionUID = 1L;
@@ -87,7 +91,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 		private bar(){
 			setLayout(new BoxLayout(this,BoxLayout.X_AXIS));
 			working_group=new ButtonGroup();
-			addItem(standard,"Standard").setSelected(true);addItem(remove,"On/Off remove tag");addItem('d',"On/Off depth of character");
+			addItem(standard,"Standard").setSelected(true);addItem(remove,"On/Off remove tag");addItem(depth,"On/Off depth of character");
 		}
 		private class working_radio extends JRadioButton{
 			private static final long serialVersionUID = 1L;
@@ -108,9 +112,10 @@ public class frame extends JPanel implements TreeSelectionListener{
 				else/*if(arg0.getStateChange()==ItemEvent.DESELECTED)*/rad.setIcon(rad.working_type_off);
 			}
 		}
-		private static final char standard='c';private static final char remove='r';
-		private static boolean is_sel_standard(){return is_sel(standard);}
+		private static final char standard='c';private static final char remove='r';private static final char depth='d';
+		//private static boolean is_sel_standard(){return is_sel(standard);}
 		private static boolean is_sel_remove(){return is_sel(remove);}
+		private static boolean is_sel_depth(){return is_sel(depth);}
 		private static boolean is_sel(char c){
 			for(Enumeration<AbstractButton> buttons=working_group.getElements();buttons.hasMoreElements();) {
 				AbstractButton button=buttons.nextElement();
@@ -148,39 +153,28 @@ public class frame extends JPanel implements TreeSelectionListener{
 		}
 	}
 	class item{
-		Character character;int depth;private Object remove;//remove=null or integer
-		private DefaultMutableTreeNode parent;
+		Character character;int depth;Integer remove;//remove=null or integer
 		int x;int y;
 		private item(Character c,int object,int x,int y){
 			character=c;depth=object;this.x=x;this.y=y;
 		}
 		@Override
 		public String toString(){
-			return character.value;
+			return character.toString();
 		}
-	}
-	class sprite_item{
-		frame_item[]frames;
-		private sprite_item(frame_item[]f){
-			frames=f;
-		}
-	}
-	static Map<String,sprite_item>sprites;
-	void add_sprite(String name,String preName){
-		sprites.put(name,new sprite_item(get_frames(ctag_sprite,preName)));
 	}
 	class frame_item{
-		private item[]elements;
+		item[]elements;
 		item[]eshow;
-		private String action;
+		String action;
 		private frame_item(item[]e,String a){
 			elements=e;action=a;
 		}
 	}
 	class frame_entry{
-		private String value;frame_item frame;
-		private frame_entry(DefaultMutableTreeNode n,frame_item f){
-			value="Frame"+n.getChildCount();frame=f;
+		private String value;
+		private frame_entry(DefaultMutableTreeNode n){
+			value="Frame"+n.getChildCount();
 		}
 		@Override
 		public String toString(){
@@ -189,13 +183,12 @@ public class frame extends JPanel implements TreeSelectionListener{
 	}
 	private void noding(DefaultMutableTreeNode parent,frame_item[]frames){
 		for(frame_item f:frames){
-			frame_entry fr=new frame_entry(parent,f);
+			frame_entry fr=new frame_entry(parent);
 			DefaultMutableTreeNode frame=new DefaultMutableTreeNode(fr);
 			for(item el:f.elements){
-				el.parent=parent;
 				DefaultMutableTreeNode node=new DefaultMutableTreeNode(el);
-				sprite_item s=sprites.get(el.character.value);
-				if(s!=null)noding(node,s.frames);
+				frame_item[]s=el.character.frames;
+				if(s!=null)noding(node,s);
 				frame.add(node);
 			}
 			if(f.action.length()!=0)fr.value+=" +Action";
@@ -209,6 +202,9 @@ public class frame extends JPanel implements TreeSelectionListener{
 		new ControlTagEx(action,actionsprite)
 	};
 	private ControlTagEx STag=new ControlTagEx(showframe,spriteshowframe);
+	frame_item[]sprite_frames(String n){
+		return get_frames(ctag_sprite,n);
+	}
 	private frame_item[]get_frames(int set,String sprite_name){
 		List<Object>els=WorkSpace.project.elements;
 		List<frame_item>frames=new ArrayList<frame_item>();
@@ -220,7 +216,14 @@ public class frame extends JPanel implements TreeSelectionListener{
 			}
 		}
 		frame_item[]contexts=frames.toArray(new frame_item[frames.size()]);
-		//reset the depth of all characters, to be adjusted with the user interface, and used at display items
+		//sort by depth and reset the depth of all characters, to be adjusted with the user interface, and used at display items
+		depths_set_sort(contexts);
+		//display elements list
+		build_eshow(contexts);
+		
+		return contexts;
+	}
+	private void depths_set_sort(frame_item[]contexts){
 		List<List<item>>elems=new ArrayList<List<item>>();int max=0;int i=max;
 		for(frame_item f:contexts){
 			elems.add(new ArrayList<item>());max+=f.elements.length;
@@ -253,7 +256,8 @@ public class frame extends JPanel implements TreeSelectionListener{
 			List<item>lst=elems.get(a);
 			contexts[a].elements=lst.toArray(new item[lst.size()]);
 		}
-		//display elements list
+	}
+	private void build_eshow(frame_item[]contexts){
 		List<item>last_list=new ArrayList<item>();
 		for(int a=0;a<contexts.length;a++){
 			List<item>current_list=new ArrayList<item>();//reset current list
@@ -273,10 +277,8 @@ public class frame extends JPanel implements TreeSelectionListener{
 			fr.eshow=current_list.toArray(new item[current_list.size()]);
 			last_list=current_list;
 		}
-		
-		return contexts;
 	}
-	private boolean place_remove_dependent(Object remove,int i){
+	private boolean place_remove_dependent(Integer remove,int i){
 		if(remove==null)return true;
 		if(i<((int)remove))return true;
 		return false;
@@ -307,7 +309,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 						else if(n.equals(remove))removes.add((Integer) t.depth.get(el));
 						else{
 							String name=(String)t.ref.get(el);
-							Character c=placeables.get(name);
+							Character c=character.placeableCharacter(name);
 							if(c!=null){
 								int x;int y;
 								if(n.equals(placement)){x=0;y=0;}
@@ -337,103 +339,141 @@ public class frame extends JPanel implements TreeSelectionListener{
 			}
 		}
 	}
-	@Override
-	public void valueChanged(TreeSelectionEvent arg0){
-		Object obj=((DefaultMutableTreeNode)arg0.getPath().getLastPathComponent()).getUserObject();
-		if(obj instanceof item){
-			if(bar.is_sel_standard()==false){
-				item it=(item)obj;
-				JDialog dg=new JDialog(SwingUtilities.getWindowAncestor(this),Dialog.ModalityType.DOCUMENT_MODAL);
-				dg.setTitle(it.character.value);
-
-				int sel_pos;int orientation;int max_pos;
-				if(bar.is_sel_remove()){
-					max_pos=it.parent.getChildCount();
-					sel_pos=max_pos;
-					if(it.remove!=null)sel_pos=(int) it.remove;
-					orientation=JSlider.HORIZONTAL;
-				}else/*(bar.is_sel_depth())*/{
-					max_pos=0;for(frame_item f:frames)max_pos+=f.elements.length;
-					sel_pos=it.depth;
-					orientation=JSlider.VERTICAL;
-				}
-				
-				//JSlider slide=new JSlider(orientation,sel_pos,max_pos,sel_pos);
-				JSlider slide=new JSlider(orientation,sel_pos,sel_pos,sel_pos);
-				slide.setMajorTickSpacing(1);//This method will also set up a label table
-				slide.setPaintTicks(true);//By default, this property is false
-				slide.setPaintLabels(true);//By default, this property is false
-
-				JScrollPane s=new JScrollPane(slide);
-				
-				Container ctnr=dg.getContentPane();
-				ctnr.setLayout(new BoxLayout(ctnr,BoxLayout.Y_AXIS));
-				
-				ctnr.add(s);
-				
-				Button btn=new Button("OK");
-				btn.addActionListener(new ActionListener(){
-					public void actionPerformed(ActionEvent e) {
-						
-						dg.dispose();
+	static frame_item[]get_frame_items(DefaultMutableTreeNode parent){
+		if(parent.getParent()==null)return frames;
+		else{
+			item sprite=(item)parent.getUserObject();
+			return sprite.character.frames;
+		}
+	}
+	private MouseListener ml = new MouseAdapter() {
+		private int max_pos;private int sel_pos;
+		DefaultMutableTreeNode parent;
+		@Override
+		public void mousePressed(MouseEvent e){
+			int selRow = tree.getRowForLocation(e.getX(), e.getY());
+			TreePath path=tree.getPathForLocation(e.getX(), e.getY());
+			if(selRow == -1)return;
+			Object obj=((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
+			if(obj instanceof item){
+				if(bar.is_sel_remove()||bar.is_sel_depth()){
+					item it=(item)obj;
+					JDialog dg=new JDialog(SwingUtilities.getWindowAncestor(tree),Dialog.ModalityType.DOCUMENT_MODAL);
+					dg.setTitle(it.character.toString());
+	
+					int orientation;int min_pos=0;
+					TreePath frame_path=path.getParentPath();
+					TreeNode frame=(TreeNode)frame_path.getLastPathComponent();
+					TreePath parent_path=frame_path.getParentPath();
+					parent=(DefaultMutableTreeNode)parent_path.getLastPathComponent();
+					if(bar.is_sel_remove()){
+						int n=parent.getChildCount();
+						for(int i=0;i<n;i++){
+							if(frame==parent.getChildAt(i)){
+								min_pos=i+1;
+								break;
+							}
+						}
+						max_pos=parent.getChildCount();
+						sel_pos=max_pos;
+						if(it.remove!=null)sel_pos=it.remove;
+						orientation=JSlider.HORIZONTAL;
+					}else/*(bar.is_sel_depth())*/{
+						max_pos=-1;//example: -1 + one element is 0, same as depth 0
+						for(frame_item f:frames)max_pos+=f.elements.length;
+						sel_pos=it.depth;
+						orientation=JSlider.VERTICAL;
 					}
-				});
-				//ctnr.add(btn);
-				
-				dg.pack();
-				dg.setVisible(true);
-				return;
-			}
-		}
-		display.component.repaint();
-	}
-	static Field getField(String elem,Class<? extends Annotation> annotationClass){
-		Class<?>[]cls=Elements.class.getDeclaredClasses();
-		for(Class<?>c:cls){
-			if(c.getSimpleName().equals(elem)){
-				Field[]flds=c.getDeclaredFields();
-				for(Field fd:flds){
-					if(fd.isAnnotationPresent(annotationClass))return fd;
+					
+					JSlider slide=new JSlider(orientation,min_pos,max_pos,sel_pos);
+					slide.setMajorTickSpacing(1);//This method will also set up a label table
+					slide.setPaintTicks(true);//By default, this property is false
+					slide.setPaintLabels(true);//By default, this property is false
+	
+					JScrollPane s=new JScrollPane(slide);
+					
+					Container ctnr=dg.getContentPane();
+					ctnr.setLayout(new BoxLayout(ctnr,BoxLayout.Y_AXIS));
+					
+					ctnr.add(s);
+					
+					Button btn=new Button("OK");
+					btn.addActionListener(new ActionListener(){
+						public void actionPerformed(ActionEvent e) {
+							int val=slide.getValue();
+							frame_item[]frms=get_frame_items(parent);
+							if(bar.is_sel_remove()){
+								Integer v=val;
+								if(val==max_pos)v=null;
+								it.remove=v;
+							}else/*(bar.is_sel_depth())*/{
+								for(frame_item f:frms){
+									for(item i:f.elements){
+										int d=i.depth;
+										if(sel_pos<d&&d<=val)i.depth--;
+										else if(val<=d&&d<sel_pos)i.depth++;
+									}
+								}
+								it.depth=val;
+								depths_set_sort(frms);
+								DefaultMutableTreeNode new_top=new DefaultMutableTreeNode();
+								noding(new_top,frms);
+								DefaultTreeModel model=(DefaultTreeModel)tree.getModel();
+								model.setRoot(new_top);expand();
+							}
+							build_eshow(frms);
+							display.draw();//used at bar.is_sel_depth()
+							dg.dispose();
+						}
+					});
+					ctnr.add(btn);
+					
+					dg.pack();
+					dg.setVisible(true);
+					return;
 				}
-				return null;
 			}
 		}
-		return null;
+	};
+	@Override
+	public void valueChanged(TreeSelectionEvent arg0) {
+		display.draw();
 	}
+	
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface RefId{}
 	static Field getRefField(String elem){
-		return getField(elem,RefId.class);
+		return display.getField(elem,RefId.class);
 	}
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface SpriteId{}
 	static Field getSpriteField(String elem){
-		return getField(elem,SpriteId.class);
+		return display.getField(elem,SpriteId.class);
 	}
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface ActionStr{}
 	private Field getActionField(String elem){
-		return getField(elem,ActionStr.class);
+		return display.getField(elem,ActionStr.class);
 	}
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface DepthInt{}
 	private Field getDepthField(String elem){
-		return getField(elem,DepthInt.class);
+		return display.getField(elem,DepthInt.class);
 	}
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface XInt{}
 	private Field getXField(String elem){
-		return getField(elem,XInt.class);
+		return display.getField(elem,XInt.class);
 	}
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface YInt{}
 	private Field getYField(String elem){
-		return getField(elem,YInt.class);
+		return display.getField(elem,YInt.class);
 	}
 }

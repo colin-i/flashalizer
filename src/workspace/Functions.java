@@ -475,7 +475,7 @@ public class Functions extends JTable{
 				else if(f.equals("swf_font"))tips=new Object[]{"FontName field",new String[]{"FontFlagsBold=1|FontFlagsItalic=2|FontFlagsWideCodes=4|FontFlagsWideOffsets=8","FontFlagsANSI=0x10|FontFlagsSmallText=0x20|FontFlagsShiftJIS=0x40|FontFlagsHasLayout=0x80"}};
 				else if(f.equals("swf_text"))tips=new Object[]{"Width in pixels","Height in pixels","VariableName field",new String[]{"HasFont=0x1|HasMaxLength=0x2|HasTextColor=0x4|ReadOnly=0x8","Password=0x10|Multiline=0x20|WordWrap=0x40|HasText=0x80","UseOutlines=0x100|HTML=0x200|WasStatic=0x400|Border=0x800","NoSelect=0x1000|HasLayout=0x2000|AutoSize=0x4000|HasFontClass=0x8000"},"EditText structure"};
 				else if(f.equals("swf_shape"))tips=new String[]{"Width in pixels","Height in pixels","SHAPEWITHSTYLE field"};
-				else if(f.equals("swf_image"))tips=new String[]{"DefineBitsLossless 1 or 2 image path"};
+				//else if(f.equals("swf_image"))tips=new String[]{"DefineBitsLossless 1 or 2 image path"};
 				else if(f.equals("swf_dbl"))tips=new String[]{"DefineBitsLossless 1 or 2 image path"};
 				
 				//else if(f.equals("swf_done"))
