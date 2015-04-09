@@ -15,10 +15,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -562,17 +560,7 @@ public class Functions extends JTable{
 											if(fields[z].getGenericType().getTypeName().equals("int"))o=Long.decode(o.toString()).intValue();
 											values.add(o);
 										}
-										Constructor<?>[]cts=c.getDeclaredConstructors();
-										Constructor<?>ctructor=cts[0];
-										Method[]ms=ctructor.getClass().getDeclaredMethods();
-										for(int z=0;z<ms.length;z++){
-											if(ms[z].getName().equals("newInstance")){
-												//passing the array is Object object=values.toArray();
-												Object object=new Object[]{(values.toArray())};
-												elems.add(ms[z].invoke(ctructor,object));
-												break;
-											}
-										}
+										elems.add(WorkSpace.project.runtime_instance(c,values));
 										break;
 									}
 								}

@@ -2,13 +2,11 @@ package workspace;
 
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.text.NumberFormat;
-import java.text.ParseException;
 
 class IntInputText extends InputText implements FocusListener{
 	private static final long serialVersionUID = 1L;
 	IntInputText(int i){
-		super(Integer.toString(i));verifier();
+		super(i);verifier();
 	}
 	IntInputText(){super();verifier();}
 	private void verifier(){
@@ -16,19 +14,7 @@ class IntInputText extends InputText implements FocusListener{
 	}
 	@Override
 	public void focusLost(FocusEvent x) {
-		String txt=getText();
-		try{
-			Long.decode(txt);//.intValue();
-		}
-		catch(NumberFormatException e){
-			e.printStackTrace();
-			try{
-				setText(NumberFormat.getNumberInstance().parse(txt).toString());
-			}catch(ParseException e1){
-				setText("0");
-				e1.printStackTrace();
-			}
-		}
+		super.focus_Lost();
 	}
 	@Override
 	public void focusGained(FocusEvent arg0){}

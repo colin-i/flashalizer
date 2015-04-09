@@ -1,30 +1,27 @@
 package graphics;
 
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.reflect.Field;
 
 import javax.imageio.ImageIO;
+import javax.swing.BoxLayout;
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
-import workspace.Elements;
 import workspace.WorkSpace;
 import static graphics.frame.tree;
 import graphics.frame.item;
 import graphics.frame.frame_item;
+import graphics.character.Character;
 
-public class display extends JScrollPane{
+class display extends JPanel{
 	private static final long serialVersionUID = 1L;
 	private class content extends JComponent{
 		private static final long serialVersionUID = 1L;
@@ -96,39 +93,28 @@ public class display extends JScrollPane{
 					}
 					continue;
 				}
-				Object el=it.character.element;
+				Character cr=it.character;Object el=cr.element;
 				int w = 0;int h = 0;
 				try{
-					Field wd=getAField(el.getClass(),WidthInt.class);w=(int) wd.get(el);
-					Field hg=getAField(el.getClass(),HeightInt.class);h=(int) hg.get(el);
+					w=(int)cr.width.get(el);
+					h=(int)cr.height.get(el);
 				}catch (IllegalArgumentException | IllegalAccessException e) {e.printStackTrace();}
 				g.drawImage(img,x_pos,y_pos,w,h,null);
 			}
 		}
 	}
-	static Field getField(String elem,Class<? extends Annotation> annotationClass){
-		Class<?>[]cls=Elements.class.getDeclaredClasses();
-		for(Class<?>c:cls){
-			if(c.getSimpleName().equals(elem)){
-				return getAField(c,annotationClass);
-			}
-		}
-		return null;
-	}
-	private static Field getAField(Class<?>c,Class<? extends Annotation> annotationClass){
-		Field[]flds=c.getDeclaredFields();
-		for(Field fd:flds){
-			if(fd.isAnnotationPresent(annotationClass))return fd;
-		}
-		return null;
-	}
-	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)public @interface WidthInt{}
-	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)public @interface HeightInt{}
 	private static JComponent component;
 	display(){
+		setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
 		component=new content();
-		setViewportView(component);
+		
+		JScrollPane s=new JScrollPane(component);
+		add(s);
+		
+		characterData=new Container();
+		add(characterData);
 	}
+	static Container characterData;
 	static void draw() {
 		component.repaint();
 	}

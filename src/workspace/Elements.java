@@ -3,8 +3,12 @@ package workspace;
 import java.util.ArrayList;
 import java.util.List;
 
-import graphics.display.HeightInt;
-import graphics.display.WidthInt;
+import workspace.Project.Errors1;
+import workspace.Project.Errors2;
+import graphics.character.HeightInt;
+import graphics.character.TEit;
+import graphics.character.TF;
+import graphics.character.WidthInt;
 import graphics.frame.RefId;
 import graphics.frame.SpriteId;
 import graphics.frame.ActionStr;
@@ -14,6 +18,7 @@ import graphics.frame.YInt;
 import static actionswf.ActionSwf.FillStyleType_none;
 
 public class Elements {
+	private static String untitled="Untitled";
 	public static class Button extends element{
 		public @WidthInt int width;
 		public @HeightInt int height;
@@ -29,14 +34,14 @@ public class Elements {
 			int xcurve;
 			int ycurve;
 			String text;
-			@NamedId String font_id;
+			@NamedId @Errors2 String font_id;
 			int font_height;
 			int font_vertical_offset;
 			String actions;
 			ButtonData(Object[]v) throws IllegalArgumentException, IllegalAccessException{element.Element(v,this);}
 			ButtonData(){
-				def_fill=0;def_line_sz=0;def_line=0;ov_fill=0;ov_line_sz=0;ov_line=0;xcurve=0;ycurve=0;
-				text="";font_id="";font_height=0;font_vertical_offset=0;
+				/*def_fill=0;def_line_sz=0;def_line=0;ov_fill=0;ov_line_sz=0;ov_line=0;xcurve=0;ycurve=0;*/
+				text="";font_id="";/*font_height=0;font_vertical_offset=0;*/
 				actions="";
 			}
 		}
@@ -45,21 +50,27 @@ public class Elements {
 	public static class Font extends element{
 		String fontname;int font_flags;
 		Font(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
+		public Font() throws IllegalArgumentException, IllegalAccessException{
+			this(new Object[]{"_sans",0,untitled});
+		}
 	}
 	public static class Text extends element{
 		public @WidthInt int width;
 		public @HeightInt int height;
 		String variablename;
-		int flags;
-		EditText structure;
+		public @TF int flags;
+		public EditText structure;
 		Text(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
-		static class EditText{
-			@NamedId String font_id;
+		public Text() throws IllegalArgumentException, IllegalAccessException{
+			this(new Object[]{100,50,"",0,new EditText(),untitled});
+		}
+		public static class EditText{
+			@NamedId @Errors1 String font_id;
 			int font_height;
 			String fontclassname;
 			int rgba;
 			int maxlength;
-			String initialtext;
+			public @TEit String initialtext;
 			int layout_align;
 			int layout_leftmargin;
 			int layout_rightmargin;
@@ -68,7 +79,7 @@ public class Elements {
 			//this constructor on the first position, getDeclaredConstructors()[0]
 			EditText(Object[]v) throws IllegalArgumentException, IllegalAccessException{element.Element(v,this);}
 			EditText(){
-				font_id="";font_height=0;fontclassname="";rgba=0;maxlength=0;initialtext="";layout_align=0;layout_leftmargin=0;layout_rightmargin=0;layout_indent=0;layout_leading=0;
+				font_id="";/*font_height=0;*/fontclassname="";/*rgba=0;maxlength=0;*/initialtext="";/*layout_align=0;layout_leftmargin=0;layout_rightmargin=0;layout_indent=0;layout_leading=0;*/
 			}
 		}
 	}
@@ -85,7 +96,7 @@ public class Elements {
 				fill=f;fill_arg=f_arg;line_height=lh;line_color=lc;records=r;
 			}
 			ShapeWithStyle(){
-				fill=FillStyleType_none;line_height=0;records=new Object[0];
+				fill=FillStyleType_none;/*line_height=0*/;records=new Object[0];
 			}
 			static int end_of_values=-1;
 			private static boolean phase;

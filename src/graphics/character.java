@@ -9,41 +9,80 @@ import static workspace.Project.dbl;
 import static workspace.Project.exportsadd;
 import static workspace.element.NamedId;
 import graphics.frame.frame_item;
+import graphics.frame.item;
 
 import java.awt.BasicStroke;
+import java.awt.Button;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.image.BufferedImage;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTree;
+import javax.swing.SwingConstants;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
 
+import workspace.Elements;
 import workspace.WorkSpace;
+import workspace.Elements.Font;
+import workspace.Elements.Text;
+import workspace.InputText;
+import static actionswf.ActionSwf.HasText;
 
-class character extends JScrollPane{
+public class character extends JPanel implements TreeSelectionListener{
 	private static final long serialVersionUID = 1L;
+	private JTree tree;
 	character(){
-		setPreferredSize(new Dimension(200,WorkSpace.project.height));
+		setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
+		Dimension d=new Dimension();d.width=200;
+		setPreferredSize(d);
 		setBorder(BorderFactory.createTitledBorder("Character"));
 		
 		create_nodes();
-		JTree tree=new JTree(root);
+		tree=new JTree(root);
 		tree.setCellRenderer(new renderer());
 		tree.setRootVisible(false);
+		tree.addTreeSelectionListener(this);
+		JScrollPane s=new JScrollPane(tree);
+		add(s);
 		
-		setViewportView(tree);
+		add(new bar());
 	}
 	private class type{
 		private String name;
@@ -66,26 +105,59 @@ class character extends JScrollPane{
 		g.dispose();
 		return new ImageIcon(bi);
 	}
-	class Character{
-		private char letter;
-		String export_name;
+	private class Character_pre{//using Character and Character_pre for not adding initialize() at every constructor
+		type type;
 		Object element;
-		private Character(type t,Object el,Field n,String e){
-			letter=t.letter;element=el;name=n;export_name=e;
+		Field name;Field width;Field height;
+		boolean isPlaceable;//Default Value false
+		private Character_pre(type t,Object el) throws NoSuchFieldException, SecurityException{
+			type=t;element=el;
+			
+			name=element.getClass().getDeclaredField(NamedId);
+			width=getAField(element.getClass(),WidthInt.class);
+			height=getAField(element.getClass(),HeightInt.class);
 			for(type p:placeableTags){
-				if(p.name.equals(t.name)){isPlaceable=true;break;}
+				if(p.name.equals(type.name)){isPlaceable=true;break;}
 			}
+			root.add(new DefaultMutableTreeNode(this));
 		}
-		private Field name;
+	}
+	class Character extends Character_pre{
+		String export_name;
+		private Character(type t,Object el,Map<String,String>exp) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException{
+			super(t,el);
+			export_name=exp.get((String)name.get(element));
+		}
+		private Character(type t,Object el) throws NoSuchFieldException, SecurityException{
+			super(t,el);
+		}
 		@Override
 		public String toString(){
 			try {return (String) name.get(element);}
 			catch (IllegalArgumentException | IllegalAccessException e) {e.printStackTrace();}
 			return null;
 		}
-		private boolean isPlaceable;//Default Value false
+		
 		frame_item[]frames;
 	}
+	static Field getField(String elem,Class<? extends Annotation> annotationClass){
+		Class<?>[]cls=Elements.class.getDeclaredClasses();
+		for(Class<?>c:cls){
+			if(c.getSimpleName().equals(elem)){
+				return getAField(c,annotationClass);
+			}
+		}
+		return null;
+	}
+	private static Field getAField(Class<?>c,Class<? extends Annotation> annotationClass){
+		Field[]flds=c.getDeclaredFields();
+		for(Field fd:flds){
+			if(fd.isAnnotationPresent(annotationClass))return fd;
+		}
+		return null;
+	}
+	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)public @interface WidthInt{}
+	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)public @interface HeightInt{}
 	private type Types[];
 	private type placeableTags[]={new type(button,'b'),new type(text,'t'),new type(shape,'s')/*,new type(image,'i')*/,new type(spritedone,'m')};
 	static Character placeableCharacter(String name){
@@ -125,10 +197,7 @@ class character extends JScrollPane{
 				for(int j=0;j<Types.length;j++){
 					String type=Types[j].name;
 					if(e.getClass().getSimpleName().equals(type)){
-						Field f=e.getClass().getDeclaredField(NamedId);
-						String name=(String)f.get(e);
-						Character c=new Character(Types[j],e,f,exports.get(name));
-						root.add(new DefaultMutableTreeNode(c));
+						Character c=new Character(Types[j],e,exports);
 						for(type a:placeableTags){
 							if(a.name.equals(type)){
 								if(Types[j].name.equals(spritedone)){
@@ -152,7 +221,7 @@ class character extends JScrollPane{
 			Character v=(Character)((DefaultMutableTreeNode)value).getUserObject();
 			if(v != null){//getting null for some data
 				for(int i=0;i<Types.length;i++){
-					if(Types[i].letter==v.letter){
+					if(Types[i].letter==v.type.letter){
 						if(v.export_name!=null)setIcon(Types[i].icon_exp);
 						else setIcon(Types[i].icon);
 						break;
@@ -160,6 +229,196 @@ class character extends JScrollPane{
 				}
 			}
 			return this;
+		}
+	}
+	private class bar extends Panel{
+		private static final long serialVersionUID = 1L;
+		private class elementAction extends AbstractAction{
+			private static final long serialVersionUID = 1L;
+			private Class<?>elementClass;private type type;
+			private elementAction(Class<?>elCls,type t){
+				super(t.name);elementClass=elCls;type=t;
+			}
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				Constructor<?>ctructor=elementClass.getDeclaredConstructors()[1];
+				Method[]ms=ctructor.getClass().getDeclaredMethods();
+				for(int z=0;z<ms.length;z++){
+					if(ms[z].getName().equals(workspace.WorkSpace.project.newInst)){
+						Object obj=new Object[]{};
+						try{new Character(type,ms[z].invoke(ctructor,obj));}
+						catch (NoSuchFieldException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e1) {e1.printStackTrace();}
+						break;
+					}
+				}
+				((DefaultTreeModel)tree.getModel()).reload();
+			}
+			
+		}
+		private bar(){
+			setLayout(new BoxLayout(this,BoxLayout.X_AXIS));//without this the height is too big and this will be good when more items will be added 
+			JButton b=new JButton(new ImageIcon("img/character.gif"));
+			b.setToolTipText("New Character");
+			
+			//Create the pop up menu.
+			JPopupMenu popup=new JPopupMenu();
+			for(type t:Types){
+				Class<?>elementClass=null;
+				if(t.name.equals(font))elementClass=Font.class;
+				else if(t.name.equals(text))elementClass=Text.class;
+				if(elementClass!=null)popup.add(new JMenuItem(new elementAction(elementClass,t)));
+			}
+			b.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e) {
+					popup.show((Component) e.getSource(),0,(int)-popup.getPreferredSize().getHeight());
+				}
+			});
+			
+			add(b);
+		}
+	}
+	@Override
+	public void valueChanged(TreeSelectionEvent arg0) {
+		Container parent=display.characterData.getParent();
+		parent.remove(display.characterData);
+		display.characterData=new Panel();
+		display.characterData.setLayout(new BoxLayout(display.characterData,BoxLayout.Y_AXIS));
+		DefaultMutableTreeNode node=(DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
+		if(node!=null){//only when adding new item and model.reload add comes null
+			Character chr=(Character)node.getUserObject();
+			Panel panel;
+			
+			panel=new_panel();
+			add_field(panel,"Name",chr.name,chr);
+			display.characterData.add(panel);
+			
+			if(chr.isPlaceable==true){
+				panel=new_panel();
+				if(chr.width!=null){
+					add_field(panel,"Width",chr.width,chr);
+					add_field(panel,"Height",chr.height,chr);
+				}
+				Button b=new Button("Place");
+				b.addActionListener(new ActionListener(){
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						JTree t=frame.tree;
+						DefaultTreeModel model;
+						model=(DefaultTreeModel)t.getModel();
+						int pos=0;
+						DefaultMutableTreeNode p=(DefaultMutableTreeNode)model.getRoot();
+						frame fr=Graphics.frame;
+						int new_pos=fr.get_max_depth(p)+1;
+						frame_item[]frms=frame.get_frame_items(p);
+						List<item>x=new ArrayList<item>();
+						for(item it:frms[pos].elements)x.add(it);
+						item it=fr.new item(chr,new_pos,0,0);
+						x.add(it);
+						frms[pos].elements=x.toArray(new item[x.size()]);
+						fr.build_eshow(frms);
+						DefaultMutableTreeNode n=(DefaultMutableTreeNode)t.getPathForRow(pos).getLastPathComponent();
+						DefaultMutableTreeNode nd=new DefaultMutableTreeNode(it);
+						if(chr.frames!=null)fr.noding(nd,chr.frames);
+						model.insertNodeInto(nd,n,n.getChildCount());
+						display.draw();
+					}});
+				add_one_field(panel,b);
+				display.characterData.add(panel);
+			}
+			
+			Object elem=chr.element;
+			if(elem instanceof Text){
+				panel=new_panel();
+				add_one_field(panel,new Label("Text"));
+				try{panel.add(new InputTextField_editText((Text)chr.element,TEit.class,HasText));}
+				catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {e.printStackTrace();}
+				display.characterData.add(panel);
+			}
+		}
+		parent.add(display.characterData);
+		display.characterData.revalidate();
+	}
+	private Panel new_panel(){
+		Panel panel=new Panel();
+		panel.setLayout(new BoxLayout(panel,BoxLayout.X_AXIS));
+		return panel;
+	}
+	private void add_field(Panel panel,String n,Field f,Character chr){
+		add_one_field(panel,new Label(n));
+		try{panel.add(new InputTextField(f,chr.element));}
+		catch (IllegalArgumentException | IllegalAccessException e) {e.printStackTrace();}
+	}
+	private void add_one_field(Panel panel,Component c){
+		panel.add(new JSeparator(SwingConstants.VERTICAL));
+		panel.add(c);
+	}
+	private class InputTextField extends InputText implements FocusListener{
+		private static final long serialVersionUID = 1L;
+		private Field field;private Object element;
+		private InputTextField(Field f,Object el) throws IllegalArgumentException, IllegalAccessException{
+			super(f.get(el));field=f;element=el;addFocusListener(this);
+		}
+		@Override
+		public void focusGained(FocusEvent arg0) {}
+		@Override
+		public void focusLost(FocusEvent arg0) {
+			try {
+				if(field.get(element) instanceof Integer){
+					super.focus_Lost();
+					field.set(element,Integer.parseInt(getText()));
+					
+					display.draw();
+				}else/*String*/{
+					field.set(element,getText());
+					
+					DefaultTreeModel model;
+					
+					model=(DefaultTreeModel)tree.getModel();
+					walk(model,model.getRoot(),false);
+					
+					model=(DefaultTreeModel)frame.tree.getModel();
+					walk(model,model.getRoot(),true);
+				}
+			}
+			catch (IllegalArgumentException | IllegalAccessException e) {e.printStackTrace();}
+		}
+		private void walk(DefaultTreeModel model,Object o,boolean isItem){
+			int  cc;
+			cc = model.getChildCount(o);
+			for( int i=0; i < cc; i++) {
+				DefaultMutableTreeNode child=(DefaultMutableTreeNode)model.getChild(o,i);
+				Object obj=child.getUserObject();
+				Object el=null;
+				if(isItem==true){if(obj instanceof item)el=((item)obj).character.element;}
+				else el=((Character)obj).element;
+				if(el!=null){
+					if(el==element){
+						model.nodeChanged(child);
+						continue;//continue,will be a loop if there is a same sub-child
+					}
+				}
+				if(!model.isLeaf(child))walk(model,child,isItem);
+			}
+		} 
+	}
+	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)public @interface TF{}
+	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)public @interface TEit{}
+	private class InputTextField_editText extends InputTextField{
+		private static final long serialVersionUID = 1L;
+		private InputTextField_editText(Text t,Class<? extends Annotation>an,int flag) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException{
+			super(getAField(t.structure.getClass(),an),t.structure);
+			this.flagField=character.getAField(t.getClass(),TF.class);this.text=t;this.flag=flag;
+		}
+		private Field flagField;private Object text;private int flag;
+		@Override
+		public void focusLost(FocusEvent arg0){
+			super.focusLost(arg0);
+			try{
+				int flags=(int)flagField.get(text);
+				flags|=flag;
+				flagField.set(text,flags);
+			}
+			catch (IllegalArgumentException | IllegalAccessException e) {e.printStackTrace();}
 		}
 	}
 }

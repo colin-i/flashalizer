@@ -57,7 +57,8 @@ public class frame extends JPanel implements TreeSelectionListener{
 	private static final long serialVersionUID = 1L;
 	frame(){
 		setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
-		setPreferredSize(new Dimension(200,WorkSpace.project.height));
+		Dimension d=new Dimension();d.width=200;
+		setPreferredSize(d);
 		setBorder(BorderFactory.createTitledBorder("Frame"));
 	}
 	static JTree tree;
@@ -155,7 +156,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 	class item{
 		Character character;int depth;Integer remove;//remove=null or integer
 		int x;int y;
-		private item(Character c,int object,int x,int y){
+		item(Character c,int object,int x,int y){
 			character=c;depth=object;this.x=x;this.y=y;
 		}
 		@Override
@@ -181,7 +182,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 			return value;
 		}
 	}
-	private void noding(DefaultMutableTreeNode parent,frame_item[]frames){
+	void noding(DefaultMutableTreeNode parent,frame_item[]frames){
 		for(frame_item f:frames){
 			frame_entry fr=new frame_entry(parent);
 			DefaultMutableTreeNode frame=new DefaultMutableTreeNode(fr);
@@ -257,7 +258,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 			contexts[a].elements=lst.toArray(new item[lst.size()]);
 		}
 	}
-	private void build_eshow(frame_item[]contexts){
+	void build_eshow(frame_item[]contexts){
 		List<item>last_list=new ArrayList<item>();
 		for(int a=0;a<contexts.length;a++){
 			List<item>current_list=new ArrayList<item>();//reset current list
@@ -346,6 +347,12 @@ public class frame extends JPanel implements TreeSelectionListener{
 			return sprite.character.frames;
 		}
 	}
+	int get_max_depth(DefaultMutableTreeNode parent){
+		frame_item[]fr=get_frame_items(parent);
+		int max_pos=-1;//example: -1 + one element is 0, same as depth 0
+		for(frame_item f:fr)max_pos+=f.elements.length;
+		return max_pos;
+	}
 	private MouseListener ml = new MouseAdapter() {
 		private int max_pos;private int sel_pos;
 		DefaultMutableTreeNode parent;
@@ -379,8 +386,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 						if(it.remove!=null)sel_pos=it.remove;
 						orientation=JSlider.HORIZONTAL;
 					}else/*(bar.is_sel_depth())*/{
-						max_pos=-1;//example: -1 + one element is 0, same as depth 0
-						for(frame_item f:frames)max_pos+=f.elements.length;
+						max_pos=get_max_depth(parent);
 						sel_pos=it.depth;
 						orientation=JSlider.VERTICAL;
 					}
@@ -444,36 +450,36 @@ public class frame extends JPanel implements TreeSelectionListener{
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface RefId{}
 	static Field getRefField(String elem){
-		return display.getField(elem,RefId.class);
+		return character.getField(elem,RefId.class);
 	}
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface SpriteId{}
 	static Field getSpriteField(String elem){
-		return display.getField(elem,SpriteId.class);
+		return character.getField(elem,SpriteId.class);
 	}
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface ActionStr{}
 	private Field getActionField(String elem){
-		return display.getField(elem,ActionStr.class);
+		return character.getField(elem,ActionStr.class);
 	}
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface DepthInt{}
 	private Field getDepthField(String elem){
-		return display.getField(elem,DepthInt.class);
+		return character.getField(elem,DepthInt.class);
 	}
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface XInt{}
 	private Field getXField(String elem){
-		return display.getField(elem,XInt.class);
+		return character.getField(elem,XInt.class);
 	}
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface YInt{}
 	private Field getYField(String elem){
-		return display.getField(elem,YInt.class);
+		return character.getField(elem,YInt.class);
 	}
 }

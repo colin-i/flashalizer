@@ -46,6 +46,7 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 		//integer swf_dbl_height(String image path);
 	}
 	
+	public static final int HasText=0x80;
 	public static final int FillStyleType_none=-1;
 	class EditText extends Structure{
 		//"..Structure has unknown size, ensure all fields are public"

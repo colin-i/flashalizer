@@ -3,6 +3,11 @@ package workspace;
 import graphics.frame.SpriteId;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -23,6 +28,7 @@ import xml.StaXWriter;
 import actionswf.ActionSwf;
 import actionswf.ActionSwf.privat;
 import static workspace.element.NamedId;
+import static actionswf.ActionSwf.HasText;
 
 public class Project{
 	private Path path;
@@ -66,6 +72,19 @@ public class Project{
 	}
 	boolean isShapeBitmap(int type){
 		return (0x40<=type&&type<=0x43);
+	}
+	public String newInst="newInstance";
+	Object runtime_instance(Class<?>c,List<Object>values) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException{
+		Constructor<?>ctructor=c.getDeclaredConstructors()[0];
+		Method[]ms=ctructor.getClass().getDeclaredMethods();
+		for(int z=0;z<ms.length;z++){
+			if(ms[z].getName().equals(newInst)){
+				//passing the array is Object object=values.toArray();
+				Object object=new Object[]{(values.toArray())};
+				return ms[z].invoke(ctructor,object);
+			}
+		}
+		return null;
 	}
 	private class xml{
 		private void write() throws XMLStreamException, IOException, IllegalAccessException{
@@ -151,17 +170,10 @@ public class Project{
 							else/*EditText,button*/values.add(read_base(rd,tp,c.getDeclaredClasses()));
 						}
 					}
-					Constructor<?>ctructor=c.getDeclaredConstructors()[0];
-					Method[]ms=ctructor.getClass().getDeclaredMethods();
-					for(int z=0;z<ms.length;z++){
-						if(ms[z].getName().equals("newInstance")){
-							//passing the array is Object object=values.toArray();
-							Object object=new Object[]{(values.toArray())};
-							//last reader advance
-							rd.advance();
-							return ms[z].invoke(ctructor,object);
-						}
-					}
+					
+					//last reader advance
+					rd.advance();
+					return runtime_instance(c,values);
 				}
 			}
 			return null;
@@ -186,24 +198,22 @@ public class Project{
 		private ActionSwf as=ActionSwf.INSTANCE;
 		private privat prv=ActionSwf.privat.INST;
 		private Map<String, Integer>ids;private Map<String, Integer>ids_sprite;
-		private String error_msg;
+		//private String error_msg;
 		private int ids_get_ex(String name,boolean isSprite) throws Throwable{
 			Integer val;
 			if(isSprite==false)val=ids.get(name);
 			else val=ids_sprite.get(name);
-			if(val==null){
-				error_msg="Undeclared "+name;
-				prv.abort();
-				throw new Throwable();
-			}
+			if(val==null)throw new ThrowAndStop("Undeclared "+name);
 			return val;
 		}
 		private int ids_get(String name) throws Throwable{
 			return ids_get_ex(name,false);
 		}
+		private class ThrowAndStop extends Throwable{
+			private static final long serialVersionUID = 1L;private ThrowAndStop(String s){super(s);}
+		}
 		private void build(){
 			try{
-				error_msg=null;
 				WorkSpace.updateElements();
 				ids=new HashMap<String, Integer>();ids_sprite=new HashMap<String, Integer>();
 				caller("swf_new",swf_new__arguments());
@@ -232,11 +242,37 @@ public class Project{
 												if(tp.equals(Functions.ButtonData))newobj=new ActionSwf.ButtonData();
 												else/*tp.equals(Functions.EditText)*/newobj=new ActionSwf.EditText();
 												Field[]vals=val.getClass().getDeclaredFields();Field[]newvals=newobj.getClass().getDeclaredFields();
+												boolean Error2=false;
 												for(int n=0;n<vals.length;n++){
+													boolean isError=false;
 													Object nv=vals[n].get(val);
-													if(vals[n].isAnnotationPresent(NamedId.class))nv=ids_get((String)nv);
-													newvals[n].set(newobj,nv);
+													if(vals[n].isAnnotationPresent(NamedId.class)){
+														String s=(String)nv;
+														try{nv=ids_get(s);}
+														catch(Throwable e){
+															isError=true;
+															if(s.length()==0){
+																Object[]ans={Errors1.class,Errors2.class};
+																for(Object cs:ans){
+																	@SuppressWarnings("unchecked")Class<? extends Annotation>cls=(Class<? extends Annotation>)cs;
+																	if(vals[n].isAnnotationPresent(cls)){
+																		if(cls==Errors1.class){
+																			if((((Elements.Text)element).flags&HasText)==0)isError=false;
+																		}
+																		else/*Errors2.class*/{
+																			Error2=true;isError=false;
+																		}
+																		break;
+																	}
+																}
+															}
+															if(isError)throw e;
+															else isError=true;//for not setting bad value bottom from here
+														}
+													}
+													if(isError==false)newvals[n].set(newobj,nv);
 												}
+												if(Error2==true)((ActionSwf.ButtonData)newobj).text=null;
 												val=newobj;
 											}else if(tp.equals("Object[]")){
 												Object[]src=((Object[])val).clone();
@@ -266,11 +302,11 @@ public class Project{
 				caller("swf_done",null);
 			} catch (Throwable e) {
 				e.printStackTrace();
-				if(error_msg == null)error_msg="Error(user input or space)";
-				JOptionPane.showMessageDialog(null,error_msg);
+				if(e instanceof ThrowAndStop)prv.abort();
+				JOptionPane.showMessageDialog(null,e.getMessage());
 			}
 		}
-		private Object caller(String f,Object[] params) throws Throwable{
+		private Object caller(String f,Object[]params) throws Throwable{
 			return call(as,f,params);
 		}
 		private Object call(Object inter,String f,Object[] params) throws Throwable{
@@ -288,13 +324,15 @@ public class Project{
 			Byte er=prv.erbool_get();
 			if(er!=0){
 				prv.erbool_reset();
-				throw new Throwable();
+				throw new Throwable("Error(user input or space)");
 			}
 		}
 		Object[] swf_new__arguments(){
 			return new Object[]{folder_file("swf"),width,height,backgroundcolor,fps};
 		}
 	}
+	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)@interface Errors1{}
+	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)@interface Errors2{}
 	private static final String sprite="Sprite";
 	public static final String button="Button";
 	public static final String font="Font";
