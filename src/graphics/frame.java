@@ -355,13 +355,14 @@ public class frame extends JPanel implements TreeSelectionListener{
 	}
 	private MouseListener ml = new MouseAdapter() {
 		private int max_pos;private int sel_pos;
-		DefaultMutableTreeNode parent;
+		private DefaultMutableTreeNode parent;
 		@Override
 		public void mousePressed(MouseEvent e){
 			int selRow = tree.getRowForLocation(e.getX(), e.getY());
 			TreePath path=tree.getPathForLocation(e.getX(), e.getY());
 			if(selRow == -1)return;
-			Object obj=((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
+			DefaultMutableTreeNode sel_node=(DefaultMutableTreeNode)path.getLastPathComponent();
+			Object obj=sel_node.getUserObject();
 			if(obj instanceof item){
 				if(bar.is_sel_remove()||bar.is_sel_depth()){
 					item it=(item)obj;
@@ -422,10 +423,11 @@ public class frame extends JPanel implements TreeSelectionListener{
 								}
 								it.depth=val;
 								depths_set_sort(frms);
-								DefaultMutableTreeNode new_top=new DefaultMutableTreeNode();
-								noding(new_top,frms);
+								//DefaultMutableTreeNode new_top=new DefaultMutableTreeNode();
+								//noding(new_top,frms);
 								DefaultTreeModel model=(DefaultTreeModel)tree.getModel();
-								model.setRoot(new_top);expand();
+								model.nodeChanged(sel_node);
+								//model.setRoot(new_top);expand();
 							}
 							build_eshow(frms);
 							display.draw();//used at bar.is_sel_depth()
