@@ -18,7 +18,7 @@ import javax.swing.undo.UndoManager;
 
 
 
-class PopUp extends JPopupMenu
+public class PopUp extends JPopupMenu
 	{
 		private final static long serialVersionUID = 0;
 

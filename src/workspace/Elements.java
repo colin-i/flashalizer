@@ -6,8 +6,6 @@ import java.util.List;
 import workspace.Project.Errors1;
 import workspace.Project.Errors2;
 import graphics.character.HeightInt;
-import graphics.character.TEit;
-import graphics.character.TF;
 import graphics.character.WidthInt;
 import graphics.frame.RefId;
 import graphics.frame.SpriteId;
@@ -58,20 +56,20 @@ public class Elements {
 		public @WidthInt int width;
 		public @HeightInt int height;
 		String variablename;
-		public @TF int flags;
+		public int flags;
 		public EditText structure;
 		Text(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 		public Text() throws IllegalArgumentException, IllegalAccessException{
 			this(new Object[]{100,50,"",0,new EditText(),untitled});
 		}
 		public static class EditText{
-			@NamedId @Errors1 String font_id;
-			int font_height;
+			public @NamedId @Errors1 String font_id;
+			public int font_height;
 			String fontclassname;
-			int rgba;
+			public int rgba;
 			int maxlength;
-			public @TEit String initialtext;
-			int layout_align;
+			public String initialtext;
+			public int layout_align;
 			int layout_leftmargin;
 			int layout_rightmargin;
 			int layout_indent;
@@ -79,7 +77,7 @@ public class Elements {
 			//this constructor on the first position, getDeclaredConstructors()[0]
 			EditText(Object[]v) throws IllegalArgumentException, IllegalAccessException{element.Element(v,this);}
 			EditText(){
-				font_id="";/*font_height=0;*/fontclassname="";/*rgba=0;maxlength=0;*/initialtext="";/*layout_align=0;layout_leftmargin=0;layout_rightmargin=0;layout_indent=0;layout_leading=0;*/
+				font_id="";font_height=20;fontclassname="";/*rgba=0;maxlength=0;*/initialtext="";/*layout_align=0;layout_leftmargin=0;layout_rightmargin=0;layout_indent=0;layout_leading=0;*/
 			}
 		}
 	}

@@ -75,7 +75,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 		JScrollPane s=new JScrollPane(tree);add(s);
 		add(new bar());
 	}
-	private void expand(){
+	private void expand(){//expand is at start and and depths when nodes are set
 		for(int i=0;i<tree.getRowCount();i++) {
 			tree.expandRow(i);
 		}

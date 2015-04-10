@@ -9,7 +9,7 @@ import javax.swing.undo.UndoManager;
 public class InputText extends JTextField{
 	private static final long serialVersionUID = 1L;
 	UndoManager umanager;
-	InputText(String string) {
+	public InputText(String string) {
 		setS(string);
 	}
 	private void setS(String string){
@@ -20,7 +20,7 @@ public class InputText extends JTextField{
 		setS(Integer.toString(string));
 	}
 	InputText(){WorkSpace.textPopup.add(this);}
-	protected void focus_Lost(){
+	public void focus_Lost(){
 		String txt=getText();
 		try{
 			Long.decode(txt);//.intValue();

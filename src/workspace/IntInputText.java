@@ -3,9 +3,9 @@ package workspace;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
-class IntInputText extends InputText implements FocusListener{
+public class IntInputText extends InputText implements FocusListener{
 	private static final long serialVersionUID = 1L;
-	IntInputText(int i){
+	public IntInputText(int i){
 		super(i);verifier();
 	}
 	IntInputText(){super();verifier();}
