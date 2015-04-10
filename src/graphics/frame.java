@@ -68,17 +68,11 @@ public class frame extends JPanel implements TreeSelectionListener{
 		frames=get_frames(ctag_root,null);
 		noding(top,frames);
 		tree=new JTree(top);
-		expand();
 		tree.setRootVisible(false);
 		tree.addMouseListener(ml);
 		tree.addTreeSelectionListener(this);
 		JScrollPane s=new JScrollPane(tree);add(s);
 		add(new bar());
-	}
-	private void expand(){//expand is at start and and depths when nodes are set
-		for(int i=0;i<tree.getRowCount();i++) {
-			tree.expandRow(i);
-		}
 	}
 	private static class bar extends Panel{
 		private static final long serialVersionUID = 1L;
@@ -423,11 +417,8 @@ public class frame extends JPanel implements TreeSelectionListener{
 								}
 								it.depth=val;
 								depths_set_sort(frms);
-								//DefaultMutableTreeNode new_top=new DefaultMutableTreeNode();
-								//noding(new_top,frms);
 								DefaultTreeModel model=(DefaultTreeModel)tree.getModel();
-								model.nodeChanged(sel_node);
-								//model.setRoot(new_top);expand();
+								walk(model,(DefaultMutableTreeNode)model.getRoot(),it);
 							}
 							build_eshow(frms);
 							display.draw();//used at bar.is_sel_depth()
@@ -443,6 +434,19 @@ public class frame extends JPanel implements TreeSelectionListener{
 			}
 		}
 	};
+	private void walk(DefaultTreeModel model,DefaultMutableTreeNode boss,item it){
+		int  cc=model.getChildCount(boss);
+		for( int i=0; i < cc; i++){
+			DefaultMutableTreeNode child=(DefaultMutableTreeNode)model.getChild(boss,i);
+			Object obj=child.getUserObject();
+			if(obj==it){
+				model.removeNodeFromParent(child);
+				model.insertNodeInto(child,boss,it.depth);
+				continue;//continue,will be a loop if there is a same sub-child
+			}
+			if(!model.isLeaf(child))walk(model,child,it);
+		}
+	} 
 	@Override
 	public void valueChanged(TreeSelectionEvent arg0) {
 		display.draw();
