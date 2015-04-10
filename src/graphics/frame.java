@@ -418,7 +418,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 								it.depth=val;
 								depths_set_sort(frms);
 								DefaultTreeModel model=(DefaultTreeModel)tree.getModel();
-								walk(model,(DefaultMutableTreeNode)model.getRoot(),it);
+								walk(model,(DefaultMutableTreeNode)model.getRoot(),it,node_pos_new(frms,val));
 							}
 							build_eshow(frms);
 							display.draw();//used at bar.is_sel_depth()
@@ -434,18 +434,29 @@ public class frame extends JPanel implements TreeSelectionListener{
 			}
 		}
 	};
-	private void walk(DefaultTreeModel model,DefaultMutableTreeNode boss,item it){
+	private int node_pos_new(frame_item[]frms,int depth){
+		for(frame_item f:frms){
+			int j=0;
+			for(item i:f.elements){
+				if(i.depth==depth)return j;
+				j++;
+			}
+		}
+		return 0;
+	}
+	private boolean walk(DefaultTreeModel model,DefaultMutableTreeNode boss,item it,int pos_new){
 		int  cc=model.getChildCount(boss);
 		for( int i=0; i < cc; i++){
 			DefaultMutableTreeNode child=(DefaultMutableTreeNode)model.getChild(boss,i);
 			Object obj=child.getUserObject();
 			if(obj==it){
 				model.removeNodeFromParent(child);
-				model.insertNodeInto(child,boss,it.depth);
-				continue;//continue,will be a loop if there is a same sub-child
+				model.insertNodeInto(child,boss,pos_new);
+				return false;//return,will be a loop if there is a same sub-child,at these frames the item is only once here at depths
 			}
-			if(!model.isLeaf(child))walk(model,child,it);
+			if(!model.isLeaf(child))if(walk(model,child,it,pos_new)==false)return true;
 		}
+		return true;
 	} 
 	@Override
 	public void valueChanged(TreeSelectionEvent arg0) {
