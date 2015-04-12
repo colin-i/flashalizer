@@ -42,8 +42,8 @@ class display extends JPanel{
 			sel_path=tree.getSelectionPath();sel_pos=1;
 			if(sel_path==null)sel_path=tree.getPathForRow(0);//null if row >= getRowCount()
 			/*if(sel_path!=null)there is at least one frame*/showFrame(
-					get_frame_item((DefaultMutableTreeNode)sel_path.getPathComponent(sel_pos))
-					,true,g,0,0);
+				get_frame_item((DefaultMutableTreeNode)sel_path.getPathComponent(sel_pos))
+				,true,g,0,0);
 		}
 		private frame_item get_frame_item(DefaultMutableTreeNode f){
 			DefaultMutableTreeNode parent=(DefaultMutableTreeNode) f.getParent();
@@ -111,9 +111,13 @@ class display extends JPanel{
 		JScrollPane s=new JScrollPane(component);
 		add(s);
 		
+		frameData=new Container();
+		add(frameData);
+		
 		characterData=new Container();
 		add(characterData);
 	}
+	static Container frameData;
 	static Container characterData;
 	static void draw() {
 		component.repaint();

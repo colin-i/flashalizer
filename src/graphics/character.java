@@ -8,6 +8,7 @@ import static workspace.Project.shape;
 import static workspace.Project.dbl;
 import static workspace.Project.exportsadd;
 import static workspace.element.NamedId;
+import graphics.frame.frame_entry;
 import graphics.frame.frame_item;
 import graphics.frame.item;
 
@@ -65,6 +66,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
 import workspace.Elements;
 import workspace.WorkSpace;
@@ -87,13 +89,15 @@ public class character extends JPanel implements TreeSelectionListener{
 		setPreferredSize(d);
 		setBorder(BorderFactory.createTitledBorder("Character"));
 		
-		create_nodes();
+		root=new DefaultMutableTreeNode();
 		tree=new JTree(root);
+		create_nodes();
 		tree.setCellRenderer(new renderer());
 		tree.setRootVisible(false);
 		tree.addTreeSelectionListener(this);
 		JScrollPane s=new JScrollPane(tree);
 		add(s);
+		((DefaultTreeModel)tree.getModel()).reload();
 		
 		add(new bar());
 	}
@@ -123,7 +127,7 @@ public class character extends JPanel implements TreeSelectionListener{
 		Object element;
 		Field name;Field width;Field height;
 		boolean isPlaceable;//Default Value false
-		private Character_pre(type t,Object el) throws NoSuchFieldException, SecurityException{
+		private Character_pre(type t,Object el) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException{
 			type=t;element=el;
 			
 			name=element.getClass().getDeclaredField(NamedId);
@@ -132,7 +136,19 @@ public class character extends JPanel implements TreeSelectionListener{
 			for(type p:placeableTags){
 				if(p.name.equals(type.name)){isPlaceable=true;break;}
 			}
-			root.add(new DefaultMutableTreeNode(this));
+			
+			DefaultTreeModel model=(DefaultTreeModel)tree.getModel();
+			int pos=root.getChildCount();
+			if(isPlaceable==false){
+				int n=root.getChildCount();
+				pos=0;
+				for(;pos<n;pos++){
+					Character c=(Character)((DefaultMutableTreeNode)root.getChildAt(pos)).getUserObject();
+					if(c.isPlaceable)break;
+				}
+			}
+			DefaultMutableTreeNode n=new DefaultMutableTreeNode(this);
+			model.insertNodeInto(n,root,pos);
 		}
 	}
 	class Character extends Character_pre{
@@ -141,7 +157,7 @@ public class character extends JPanel implements TreeSelectionListener{
 			super(t,el);
 			export_name=exp.get((String)name.get(element));
 		}
-		private Character(type t,Object el) throws NoSuchFieldException, SecurityException{
+		private Character(type t,Object el) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException{
 			super(t,el);
 		}
 		@Override
@@ -172,6 +188,7 @@ public class character extends JPanel implements TreeSelectionListener{
 	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)public @interface WidthInt{}
 	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)public @interface HeightInt{}
 	private type Types[];
+	private type[]usedInImportantTags={new type(font,'f'),new type(dbl,'l')};
 	private type placeableTags[]={new type(button,'b'),new type(text,'t'),new type(shape,'s')/*,new type(image,'i')*/,new type(spritedone,'m')};
 	static Character placeableCharacter(String name){
 		int n=root.getChildCount();
@@ -187,11 +204,10 @@ public class character extends JPanel implements TreeSelectionListener{
 	private void create_nodes(){
 		try{
 			List<Object>els=WorkSpace.project.elements;
-			root=new DefaultMutableTreeNode();
 			
 			List<type>t=new ArrayList<type>();
+			for(type x:usedInImportantTags)t.add(x);
 			for(type x:placeableTags)t.add(x);
-			t.add(new type(font,'f'));t.add(new type(dbl,'l'));
 			Types=t.toArray(new type[t.size()]);
 			
 			Field fd=frame.getRefField(exportsadd);
@@ -264,7 +280,6 @@ public class character extends JPanel implements TreeSelectionListener{
 						break;
 					}
 				}
-				((DefaultTreeModel)tree.getModel()).reload();
 			}
 			
 		}
@@ -297,166 +312,197 @@ public class character extends JPanel implements TreeSelectionListener{
 		display.characterData=new Panel();
 		display.characterData.setLayout(new BoxLayout(display.characterData,BoxLayout.Y_AXIS));
 		DefaultMutableTreeNode node=(DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
-		if(node!=null){//only when adding new item and model.reload add comes null
-			Character chr=(Character)node.getUserObject();
-			Panel panel;
-			
+
+		Character chr=(Character)node.getUserObject();
+		Panel panel;
+		
+		panel=new_panel();
+		add_field(panel,"Name",chr.name,chr);
+		display.characterData.add(panel);
+		
+		if(chr.isPlaceable==true){
 			panel=new_panel();
-			add_field(panel,"Name",chr.name,chr);
+			if(chr.width!=null){
+				add_field(panel,"Width",chr.width,chr);
+				add_field(panel,"Height",chr.height,chr);
+			}
+			Button b=new Button("Place");
+			b.addActionListener(new ActionListener(){
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					JTree t=frame.tree;
+					DefaultTreeModel model;
+					model=(DefaultTreeModel)t.getModel();
+					
+					int pos=0;DefaultMutableTreeNode p=(DefaultMutableTreeNode)model.getRoot();
+					TreePath pt=t.getSelectionPath();
+					if(pt!=null){
+						for(;;){
+							DefaultMutableTreeNode nd=(DefaultMutableTreeNode) pt.getLastPathComponent();
+							Object nd_obj=nd.getUserObject();
+							if(nd_obj instanceof frame_entry){
+								p=(DefaultMutableTreeNode)pt.getParentPath().getLastPathComponent();
+								break;
+							}
+							pt=pt.getParentPath();
+						}
+					}
+					
+					frame fr=Graphics.frame;
+					int new_pos=fr.get_max_depth(p)+1;
+					frame_item[]frms=frame.get_frame_items(p);
+					List<item>x=new ArrayList<item>();
+					for(item it:frms[pos].elements)x.add(it);
+					item it=fr.new item(chr,new_pos,0,0);
+					x.add(it);
+					frms[pos].elements=x.toArray(new item[x.size()]);
+					fr.build_eshow(frms);
+					
+					DefaultMutableTreeNode nd=new DefaultMutableTreeNode(it);
+					if(chr.frames!=null)fr.noding(nd,chr.frames);
+					step(model,(DefaultMutableTreeNode)model.getRoot(),frms,pos,nd);
+					fr.value_changed();
+					display.draw();
+				}});
+			add_one_field(panel,b);
 			display.characterData.add(panel);
-			
-			if(chr.isPlaceable==true){
-				panel=new_panel();
-				if(chr.width!=null){
-					add_field(panel,"Width",chr.width,chr);
-					add_field(panel,"Height",chr.height,chr);
-				}
-				Button b=new Button("Place");
-				b.addActionListener(new ActionListener(){
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						JTree t=frame.tree;
-						DefaultTreeModel model;
-						model=(DefaultTreeModel)t.getModel();
-						int pos=0;
-						DefaultMutableTreeNode p=(DefaultMutableTreeNode)model.getRoot();
-						frame fr=Graphics.frame;
-						int new_pos=fr.get_max_depth(p)+1;
-						frame_item[]frms=frame.get_frame_items(p);
-						List<item>x=new ArrayList<item>();
-						for(item it:frms[pos].elements)x.add(it);
-						item it=fr.new item(chr,new_pos,0,0);
-						x.add(it);
-						frms[pos].elements=x.toArray(new item[x.size()]);
-						fr.build_eshow(frms);
-						DefaultMutableTreeNode n=(DefaultMutableTreeNode)t.getPathForRow(pos).getLastPathComponent();
-						DefaultMutableTreeNode nd=new DefaultMutableTreeNode(it);
-						if(chr.frames!=null)fr.noding(nd,chr.frames);
-						model.insertNodeInto(nd,n,n.getChildCount());
-						display.draw();
-					}});
-				add_one_field(panel,b);
-				display.characterData.add(panel);
-			}
-			
-			Object elem=chr.element;
-			if(elem instanceof Text){
-				try{
-					Text t=(Text)chr.element;
-					
-					panel=new_panel();
-					add_one_field(panel,new Label("Text"));
-					TextArea tx=new TextArea(t.structure.initialtext);
-					tx.addFocusListener(new FocusListener(){
-						@Override
-						public void focusGained(FocusEvent arg0){}
-						@Override
-						public void focusLost(FocusEvent arg0){
-							String value=tx.getText();
-							value=value.replace("\r\n","\n");
-							t.structure.initialtext=value;
-							flags_set(value,t,HasText);
-						}
-					});
-					WorkSpace.textPopup.add(tx);
-					panel.add(tx);
-					display.characterData.add(panel);
-					
-					panel=new_panel();
-					
-					add_one_field(panel,new Label("Font"));
-					InputText txt=new InputText(t.structure.font_id);
-					txt.addFocusListener(new FocusListener(){
-						@Override
-						public void focusGained(FocusEvent e){}
-						@Override
-						public void focusLost(FocusEvent e){
-							String value=txt.getText();
-							t.structure.font_id=value;
-							flags_set(value,t,HasFont);
-						}
-					});
-					panel.add(txt);
-					
-					add_one_field(panel,new Label("Height"));
-					IntInputText fH=new IntInputText(t.structure.font_height);
-					fH.addFocusListener(new FocusListener(){
-						@Override
-						public void focusGained(FocusEvent e){}
-						@Override
-						public void focusLost(FocusEvent e){
-							fH.focus_Lost();
-							int value=Integer.parseInt(fH.getText());
-							t.structure.font_height=value;
-						}
-					});
-					panel.add(fH);
-					
-					int color=t.structure.rgba;
-					Color c=new Color(color&(0xff00*0x100*0x100),color&(0xff00*0x100),color&0xff00,color==0?0xff:color&0xff);
-					Button new_color_b=new Button();
-					new_color_b.setBackground(c);
-					JColorChooser colorChooser=new JColorChooser();colorChooser.setColor(c);
-					Dialog dialog =JColorChooser.createDialog(
-						new_color_b,"Pick a Color",
-						true,//modal
-						colorChooser,
-						new ActionListener(){
-							 public void actionPerformed(ActionEvent e){
-								Color c=colorChooser.getColor();
-								new_color_b.setBackground(c);
-								t.structure.rgba=(c.getRed()*0x100*0x100*0x100)|(c.getGreen()*0x100*0x100)|(c.getBlue()*0x100)|c.getAlpha();
-								flags_set(t.structure.rgba,t,HasTextColor);
-							}
-						}
-						,null);
-					new_color_b.addActionListener(new ActionListener(){
-						public void actionPerformed(ActionEvent e){
-							dialog.setVisible(true);
-						}
-					});
-					panel.add(new_color_b);
-					
-					JCheckBox chk=new JCheckBox("Multiline");
-					if((t.flags&Multiline)!=0)chk.setSelected(true);
-					chk.addActionListener(new ActionListener(){
-						public void actionPerformed(ActionEvent e){
-							if(chk.isSelected())t.flags|=Multiline;
-							else t.flags&=~Multiline;
-						}
-					});
-					panel.add(chk);
-					
-					add_one_field(panel,new Label("Align"));
-					ButtonGroup group = new ButtonGroup();
-					JRadioButtonMenuItem radio;
-					ActionListener al=new ActionListener(){
-						@Override
-						public void actionPerformed(ActionEvent e){
-							int i=0;
-							for(Enumeration<AbstractButton> buttons=group.getElements();buttons.hasMoreElements();) {
-								AbstractButton button=buttons.nextElement();
-								if(button.isSelected()){
-									t.structure.layout_align=i;
-									t.flags|=HasLayout;
-									break;
-								}
-								i++;
-							}
-						}
-					};
-					radio=new JRadioButtonMenuItem("Left");radio.addActionListener(al);group.add(radio);panel.add(radio);
-					radio=new JRadioButtonMenuItem("Right");radio.addActionListener(al);group.add(radio);panel.add(radio);
-					radio=new JRadioButtonMenuItem("Center");radio.addActionListener(al);group.add(radio);panel.add(radio);
-					radio=new JRadioButtonMenuItem("Justify");radio.addActionListener(al);group.add(radio);panel.add(radio);
-					
-					display.characterData.add(panel);
-				}
-				catch (IllegalArgumentException | SecurityException e) {e.printStackTrace();}
-			}
 		}
+		
+		Object elem=chr.element;
+		if(elem instanceof Text){
+			try{
+				Text t=(Text)chr.element;
+				
+				panel=new_panel();
+				add_one_field(panel,new Label("Text"));
+				TextArea tx=new TextArea(t.structure.initialtext);
+				tx.addFocusListener(new FocusListener(){
+					@Override
+					public void focusGained(FocusEvent arg0){}
+					@Override
+					public void focusLost(FocusEvent arg0){
+						String value=tx.getText();
+						value=value.replace("\r\n","\n");
+						t.structure.initialtext=value;
+						flags_set(value,t,HasText);
+					}
+				});
+				WorkSpace.textPopup.add(tx);
+				panel.add(tx);
+				display.characterData.add(panel);
+				
+				panel=new_panel();
+				
+				add_one_field(panel,new Label("Font"));
+				InputText txt=new InputText(t.structure.font_id);
+				txt.addFocusListener(new FocusListener(){
+					@Override
+					public void focusGained(FocusEvent e){}
+					@Override
+					public void focusLost(FocusEvent e){
+						String value=txt.getText();
+						t.structure.font_id=value;
+						flags_set(value,t,HasFont);
+					}
+				});
+				panel.add(txt);
+				
+				add_one_field(panel,new Label("Height"));
+				IntInputText fH=new IntInputText(t.structure.font_height);
+				fH.addFocusListener(new FocusListener(){
+					@Override
+					public void focusGained(FocusEvent e){}
+					@Override
+					public void focusLost(FocusEvent e){
+						fH.focus_Lost();
+						int value=Integer.parseInt(fH.getText());
+						t.structure.font_height=value;
+					}
+				});
+				panel.add(fH);
+				
+				int color=t.structure.rgba;
+				Color c=new Color(color&(0xff00*0x100*0x100),color&(0xff00*0x100),color&0xff00,color==0?0xff:color&0xff);
+				Button new_color_b=new Button();
+				new_color_b.setBackground(c);
+				JColorChooser colorChooser=new JColorChooser();colorChooser.setColor(c);
+				Dialog dialog =JColorChooser.createDialog(
+					new_color_b,"Pick a Color",
+					true,//modal
+					colorChooser,
+					new ActionListener(){
+						 public void actionPerformed(ActionEvent e){
+							Color c=colorChooser.getColor();
+							new_color_b.setBackground(c);
+							t.structure.rgba=(c.getRed()*0x100*0x100*0x100)|(c.getGreen()*0x100*0x100)|(c.getBlue()*0x100)|c.getAlpha();
+							flags_set(t.structure.rgba,t,HasTextColor);
+						}
+					}
+					,null);
+				new_color_b.addActionListener(new ActionListener(){
+					public void actionPerformed(ActionEvent e){
+						dialog.setVisible(true);
+					}
+				});
+				panel.add(new_color_b);
+				
+				JCheckBox chk=new JCheckBox("Multiline");
+				if((t.flags&Multiline)!=0)chk.setSelected(true);
+				chk.addActionListener(new ActionListener(){
+					public void actionPerformed(ActionEvent e){
+						if(chk.isSelected())t.flags|=Multiline;
+						else t.flags&=~Multiline;
+					}
+				});
+				panel.add(chk);
+				
+				add_one_field(panel,new Label("Align"));
+				ButtonGroup group = new ButtonGroup();
+				JRadioButtonMenuItem radio;
+				ActionListener al=new ActionListener(){
+					@Override
+					public void actionPerformed(ActionEvent e){
+						int i=0;
+						for(Enumeration<AbstractButton> buttons=group.getElements();buttons.hasMoreElements();) {
+							AbstractButton button=buttons.nextElement();
+							if(button.isSelected()){
+								t.structure.layout_align=i;
+								t.flags|=HasLayout;
+								break;
+							}
+							i++;
+						}
+					}
+				};
+				radio=new JRadioButtonMenuItem("Left");radio.addActionListener(al);group.add(radio);panel.add(radio);
+				radio=new JRadioButtonMenuItem("Right");radio.addActionListener(al);group.add(radio);panel.add(radio);
+				radio=new JRadioButtonMenuItem("Center");radio.addActionListener(al);group.add(radio);panel.add(radio);
+				radio=new JRadioButtonMenuItem("Justify");radio.addActionListener(al);group.add(radio);panel.add(radio);
+				
+				display.characterData.add(panel);
+				}
+			catch (IllegalArgumentException | SecurityException e) {e.printStackTrace();}
+		}
+		
 		parent.add(display.characterData);
 		display.characterData.revalidate();
+	}
+	private void step(DefaultTreeModel model,DefaultMutableTreeNode main,frame_item[]frames,int pos,DefaultMutableTreeNode new_node){
+		frame_item[]frms=frame.get_frame_items(main);
+		if(frms==frames){
+			DefaultMutableTreeNode frame=(DefaultMutableTreeNode) main.getChildAt(pos);
+			model.insertNodeInto(new_node,frame,frame.getChildCount());
+			return;
+		}
+		int  cc=model.getChildCount(main);
+		for( int i=0; i < cc; i++){
+			DefaultMutableTreeNode frame=(DefaultMutableTreeNode)model.getChild(main,i);
+			int n=frame.getChildCount();
+			for(int j=0;j<n;j++){
+				DefaultMutableTreeNode x=(DefaultMutableTreeNode)model.getChild(frame,j);
+				if(!model.isLeaf(x))step(model,x,frames,pos,new_node);
+			}
+		}
 	}
 	private Panel new_panel(){
 		Panel panel=new Panel();

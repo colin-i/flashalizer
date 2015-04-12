@@ -1,38 +1,24 @@
 package graphics;
 
-import java.awt.Button;
 import java.awt.Container;
-import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Panel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 
-import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
-import javax.swing.JDialog;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTree;
-import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -69,55 +55,8 @@ public class frame extends JPanel implements TreeSelectionListener{
 		noding(top,frames);
 		tree=new JTree(top);
 		tree.setRootVisible(false);
-		tree.addMouseListener(ml);
 		tree.addTreeSelectionListener(this);
 		JScrollPane s=new JScrollPane(tree);add(s);
-		add(new bar());
-	}
-	private static class bar extends Panel{
-		private static final long serialVersionUID = 1L;
-		private static ButtonGroup working_group;
-		private JRadioButton addItem(char x,String tip){
-			JRadioButton r=new working_radio(x);r.setToolTipText(tip);
-			r.addItemListener(new working_type());
-			working_group.add(r);add(r);
-			return r;
-		}
-		private bar(){
-			setLayout(new BoxLayout(this,BoxLayout.X_AXIS));
-			working_group=new ButtonGroup();
-			addItem(standard,"Standard").setSelected(true);addItem(remove,"On/Off remove tag");addItem(depth,"On/Off depth of character");
-		}
-		private class working_radio extends JRadioButton{
-			private static final long serialVersionUID = 1L;
-			private ImageIcon working_type_on;
-			private ImageIcon working_type_off;
-			private char type;
-			private working_radio(char c){
-				super(new ImageIcon("img/frame/"+c+".gif"));type=c;
-				working_type_off=(ImageIcon)getIcon();
-				working_type_on=character.image_border(working_type_off);
-			}
-		}
-		private class working_type implements ItemListener{
-			@Override
-			public void itemStateChanged(ItemEvent arg0){
-				working_radio rad=(working_radio)arg0.getSource();
-				if(arg0.getStateChange()==ItemEvent.SELECTED)rad.setIcon(rad.working_type_on);
-				else/*if(arg0.getStateChange()==ItemEvent.DESELECTED)*/rad.setIcon(rad.working_type_off);
-			}
-		}
-		private static final char standard='c';private static final char remove='r';private static final char depth='d';
-		//private static boolean is_sel_standard(){return is_sel(standard);}
-		private static boolean is_sel_remove(){return is_sel(remove);}
-		private static boolean is_sel_depth(){return is_sel(depth);}
-		private static boolean is_sel(char c){
-			for(Enumeration<AbstractButton> buttons=working_group.getElements();buttons.hasMoreElements();) {
-				AbstractButton button=buttons.nextElement();
-				if(button.isSelected())return((working_radio)button).type==c;
-			}
-			return false;
-		}
 	}
 	private class ControlTag{
 		private String name;
@@ -347,93 +286,6 @@ public class frame extends JPanel implements TreeSelectionListener{
 		for(frame_item f:fr)max_pos+=f.elements.length;
 		return max_pos;
 	}
-	private MouseListener ml = new MouseAdapter() {
-		private int max_pos;private int sel_pos;
-		private DefaultMutableTreeNode parent;
-		@Override
-		public void mousePressed(MouseEvent e){
-			int selRow = tree.getRowForLocation(e.getX(), e.getY());
-			TreePath path=tree.getPathForLocation(e.getX(), e.getY());
-			if(selRow == -1)return;
-			DefaultMutableTreeNode sel_node=(DefaultMutableTreeNode)path.getLastPathComponent();
-			Object obj=sel_node.getUserObject();
-			if(obj instanceof item){
-				if(bar.is_sel_remove()||bar.is_sel_depth()){
-					item it=(item)obj;
-					JDialog dg=new JDialog(SwingUtilities.getWindowAncestor(tree),Dialog.ModalityType.DOCUMENT_MODAL);
-					dg.setTitle(it.character.toString());
-	
-					int orientation;int min_pos=0;
-					TreePath frame_path=path.getParentPath();
-					TreeNode frame=(TreeNode)frame_path.getLastPathComponent();
-					TreePath parent_path=frame_path.getParentPath();
-					parent=(DefaultMutableTreeNode)parent_path.getLastPathComponent();
-					if(bar.is_sel_remove()){
-						int n=parent.getChildCount();
-						for(int i=0;i<n;i++){
-							if(frame==parent.getChildAt(i)){
-								min_pos=i+1;
-								break;
-							}
-						}
-						max_pos=parent.getChildCount();
-						sel_pos=max_pos;
-						if(it.remove!=null)sel_pos=it.remove;
-						orientation=JSlider.HORIZONTAL;
-					}else/*(bar.is_sel_depth())*/{
-						max_pos=get_max_depth(parent);
-						sel_pos=it.depth;
-						orientation=JSlider.VERTICAL;
-					}
-					
-					JSlider slide=new JSlider(orientation,min_pos,max_pos,sel_pos);
-					slide.setMajorTickSpacing(1);//This method will also set up a label table
-					slide.setPaintTicks(true);//By default, this property is false
-					slide.setPaintLabels(true);//By default, this property is false
-	
-					JScrollPane s=new JScrollPane(slide);
-					
-					Container ctnr=dg.getContentPane();
-					ctnr.setLayout(new BoxLayout(ctnr,BoxLayout.Y_AXIS));
-					
-					ctnr.add(s);
-					
-					Button btn=new Button("OK");
-					btn.addActionListener(new ActionListener(){
-						public void actionPerformed(ActionEvent e) {
-							int val=slide.getValue();
-							frame_item[]frms=get_frame_items(parent);
-							if(bar.is_sel_remove()){
-								Integer v=val;
-								if(val==max_pos)v=null;
-								it.remove=v;
-							}else/*(bar.is_sel_depth())*/{
-								for(frame_item f:frms){
-									for(item i:f.elements){
-										int d=i.depth;
-										if(sel_pos<d&&d<=val)i.depth--;
-										else if(val<=d&&d<sel_pos)i.depth++;
-									}
-								}
-								it.depth=val;
-								depths_set_sort(frms);
-								DefaultTreeModel model=(DefaultTreeModel)tree.getModel();
-								walk(model,(DefaultMutableTreeNode)model.getRoot(),it,node_pos_new(frms,val));
-							}
-							build_eshow(frms);
-							display.draw();//used at bar.is_sel_depth()
-							dg.dispose();
-						}
-					});
-					ctnr.add(btn);
-					
-					dg.pack();
-					dg.setVisible(true);
-					return;
-				}
-			}
-		}
-	};
 	private int node_pos_new(frame_item[]frms,int depth){
 		for(frame_item f:frms){
 			int j=0;
@@ -457,12 +309,113 @@ public class frame extends JPanel implements TreeSelectionListener{
 			if(!model.isLeaf(child))if(walk(model,child,it,pos_new)==false)return true;
 		}
 		return true;
-	} 
+	}
 	@Override
 	public void valueChanged(TreeSelectionEvent arg0) {
+		value_changed();
+	}
+	void value_changed(){
+		Container disp=display.frameData.getParent();
+		int component_pos=0;
+		for(;component_pos<disp.getComponentCount();component_pos++){
+			if(disp.getComponent(component_pos)==display.frameData)break;
+		}
+		disp.remove(display.frameData);
+		display.frameData=new Panel();
+		display.frameData.setLayout(new BoxLayout(display.frameData,BoxLayout.Y_AXIS));
+		
+		DefaultMutableTreeNode sel_node=(DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
+		if(sel_node!=null){//there is lost of selection at depth when removing and inserting||||||and place new object at character
+			Object obj=sel_node.getUserObject();
+			if(obj instanceof item){
+				item it=(item)obj;
+				TreePath frame_path=tree.getSelectionPath().getParentPath();
+				TreeNode frame=(TreeNode)frame_path.getLastPathComponent();
+				TreePath parent_path=frame_path.getParentPath();
+				DefaultMutableTreeNode parent=(DefaultMutableTreeNode)parent_path.getLastPathComponent();
+				int min_pos = 0;int max_pos;int sel_pos;
+				
+				int n=parent.getChildCount();
+				for(int i=0;i<n;i++){
+					if(frame==parent.getChildAt(i)){
+						min_pos=i+1;
+						break;
+					}
+				}
+				max_pos=parent.getChildCount();
+				sel_pos=max_pos;
+				if(it.remove!=null)sel_pos=it.remove;
+				slider rem=new slider(min_pos,max_pos,sel_pos,parent);
+				rem.run=new slider_run(){
+					public void Run(slider source){
+						Integer v=source.value;
+						if(source.value==source.max_pos)v=null;
+						it.remove=v;
+					}
+				};
+				
+				max_pos=get_max_depth(parent);
+				sel_pos=it.depth;
+				slider dpt=new slider(0,max_pos,sel_pos,parent);
+				dpt.run=new slider_run(){
+					public void Run(slider source){
+						for(frame_item f:source.frames){
+							for(item i:f.elements){
+								int d=i.depth;
+								if(source.sel_pos<d&&d<=source.value)i.depth--;
+								else if(source.value<=d&&d<source.sel_pos)i.depth++;
+							}
+						}
+						it.depth=source.value;
+						depths_set_sort(source.frames);
+						DefaultTreeModel model=(DefaultTreeModel)tree.getModel();
+						walk(model,(DefaultMutableTreeNode)model.getRoot(),it,node_pos_new(source.frames,source.value));
+					}
+				};
+				
+				JScrollPane remv=new JScrollPane(rem);
+				remv.setBorder(BorderFactory.createTitledBorder("RemoveTag"));
+				display.frameData.add(remv);
+				JScrollPane dpth=new JScrollPane(dpt);
+				dpth.setBorder(BorderFactory.createTitledBorder("Depth"));
+				display.frameData.add(dpth);
+			}
+		}
+		
+		disp.add(display.frameData,component_pos);
+		display.frameData.revalidate();
+		
 		display.draw();
 	}
-	
+	private interface slider_run{
+		void Run(slider s);
+	}
+	private class slider extends JSlider implements ChangeListener{
+		private static final long serialVersionUID = 1L;
+		slider(int min,int max,int sel,DefaultMutableTreeNode p){
+			super(min,max,sel);parent=p;sel_pos=sel;max_pos=max;
+			setMajorTickSpacing(1);//This method will also set up a label table
+			setPaintTicks(true);//By default, this property is false
+			setPaintLabels(true);//By default, this property is false
+			addChangeListener(this);
+			int n=max-min;Dimension dim=new Dimension();dim.width=20*n;dim.height=50;setPreferredSize(dim);
+		}
+		private DefaultMutableTreeNode parent;
+		private int value;
+		private frame_item[]frames;
+		private slider_run run;
+		private int sel_pos;private int max_pos;
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			if(!getValueIsAdjusting()){
+				value=getValue();
+				frames=get_frame_items(parent);
+				run.Run(this);
+				build_eshow(frames);
+				display.draw();//used at depth and after build elements show
+			}
+		}
+	}
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface RefId{}
