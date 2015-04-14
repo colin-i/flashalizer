@@ -367,15 +367,47 @@ public class character extends JPanel implements TreeSelectionListener{
 						if(chr.frames!=null){
 							fr.noding(nd,chr.frames);
 							if(p!=f_root){
+								
+								DefaultTreeModel md=(DefaultTreeModel) tree.getModel();
 								//this is also the small web format rule, will have "symbol (B) not defined" : example: Sprite A , this is Sprite B placed in Sprite A; sort for the ordered build time: Sprite B,Sprite A
-								Character cr=((item)p.getUserObject()).character;
-								int ps=get_char_pos(cr);
-								int ps_this=get_char_pos(chr);
-								if(ps<ps_this){
-									DefaultTreeModel md=(DefaultTreeModel) tree.getModel();
-									md.removeNodeFromParent(node);
-									md.insertNodeInto(node,root,ps);
+								List<Character>chars_unsorted=new ArrayList<Character>();//get movies from list
+								List<DefaultMutableTreeNode>chars_sorted=new ArrayList<DefaultMutableTreeNode>();//keep nodes
+								for(int i=0;i<root.getChildCount();i++){
+									DefaultMutableTreeNode n=(DefaultMutableTreeNode) root.getChildAt(i);
+									Character c=(Character)n.getUserObject();
+									if(c.frames!=null){
+										chars_unsorted.add(c);
+										chars_sorted.add(n);
+										md.removeNodeFromParent(n);
+									}
 								}
+								for(int i=0;i<chars_unsorted.size();i++){
+									Character unsorted_char=chars_unsorted.get(i);//every unsorted, if A in B and B in A then infinite loop if not from 0 to size only once
+									int sorted_pos=0;
+									for(;sorted_pos<chars_sorted.size();sorted_pos++){//current sorted position
+										Character sorted_char=(Character)((DefaultMutableTreeNode)chars_sorted.get(sorted_pos)).getUserObject();
+										if(sorted_char==unsorted_char)break;
+									}
+									for(frame_item f:unsorted_char.frames){
+										for(item itm:f.elements){
+											if(itm.character.frames!=null){//all inner movies
+												int current_pos=sorted_pos+1;//not including the sorted position, forward
+												for(;current_pos<chars_sorted.size();current_pos++){
+													DefaultMutableTreeNode nod=(DefaultMutableTreeNode)chars_sorted.get(current_pos);
+													Character char_s=(Character)nod.getUserObject();
+													if(char_s==chr){//is placed wrong
+														chars_sorted.remove(current_pos);
+														chars_sorted.add(sorted_pos,nod);//in place of the sorted position
+														sorted_pos++;//advance the sorted position
+														break;
+													}
+												}
+											}
+										}
+									}
+								}
+								for(int i=0;i<chars_sorted.size();i++)md.insertNodeInto(chars_sorted.get(i),root,root.getChildCount());
+								
 							}
 						}
 						step(model,(DefaultMutableTreeNode)model.getRoot(),frms,pos,nd);
@@ -505,14 +537,6 @@ public class character extends JPanel implements TreeSelectionListener{
 		
 		parent.add(display.characterData);
 		display.characterData.revalidate();
-	}
-	private int get_char_pos(Character c){
-		int n=root.getChildCount();
-		for(int i=0;i<n;i++){
-			DefaultMutableTreeNode nd=(DefaultMutableTreeNode) root.getChildAt(i);
-			if(c==nd.getUserObject())return i;
-		}
-		return n;
 	}
 	private void step(DefaultTreeModel model,DefaultMutableTreeNode main,frame_item[]frames,int pos,DefaultMutableTreeNode new_node){
 		frame_item[]frms=frame.get_frame_items(main);
