@@ -17,13 +17,16 @@ import java.awt.Button;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Label;
 import java.awt.Panel;
+import java.awt.Point;
 import java.awt.TextArea;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -338,6 +341,7 @@ public class character extends JPanel implements TreeSelectionListener{
 						DefaultTreeModel model;
 						model=(DefaultTreeModel)t.getModel();
 						
+						//frame to add the object
 						int pos=0;DefaultMutableTreeNode f_root=(DefaultMutableTreeNode)model.getRoot();
 						DefaultMutableTreeNode p=f_root;
 						TreePath pt=t.getSelectionPath();
@@ -353,20 +357,40 @@ public class character extends JPanel implements TreeSelectionListener{
 							}
 						}
 						
+						frame_item[]frms=frame.get_frame_items(p);
+						//initial sprite in sprite infinite loop verification
+						if(chr.frames!=null){
+							if(p!=f_root){
+								if(loop_check(chr.frames,frms)){
+									Component c=(Component)arg0.getSource();
+									Cursor initial_cursor=c.getCursor();
+									c.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(new ImageIcon("img/no.png").getImage(),new Point(),null));
+									ActionListener taskPerformer = new ActionListener() {
+										public void actionPerformed(ActionEvent evt) {
+											c.setCursor(initial_cursor);
+										}
+									};
+									new javax.swing.Timer(1000,taskPerformer).start();
+									return;
+								}
+							}
+						}
+						
+						//add the placement
 						frame fr=Graphics.frame;
 						int new_pos=fr.get_max_depth(p)+1;
-						frame_item[]frms=frame.get_frame_items(p);
 						List<item>x=new ArrayList<item>();
 						for(item it:frms[pos].elements)x.add(it);
 						item it=fr.new item(chr,new_pos,0,0);
 						x.add(it);
 						frms[pos].elements=x.toArray(new item[x.size()]);
 						fr.build_eshow(frms);
-						
 						DefaultMutableTreeNode nd=new DefaultMutableTreeNode(it);
+						
+						//more actions
 						if(chr.frames!=null){
-							fr.noding(nd,chr.frames);
-							if(p!=f_root){
+							fr.noding(nd,chr.frames);//children
+							if(p!=f_root){//sort rule
 								
 								DefaultTreeModel md=(DefaultTreeModel) tree.getModel();
 								//this is also the small web format rule, will have "symbol (B) not defined" : example: Sprite A , this is Sprite B placed in Sprite A; sort for the ordered build time: Sprite B,Sprite A
@@ -382,7 +406,7 @@ public class character extends JPanel implements TreeSelectionListener{
 									}
 								}
 								for(int i=0;i<chars_unsorted.size();i++){
-									Character unsorted_char=chars_unsorted.get(i);//every unsorted, if A in B and B in A then infinite loop if not from 0 to size only once
+									Character unsorted_char=chars_unsorted.get(i);//every unsorted
 									int sorted_pos=0;
 									for(;sorted_pos<chars_sorted.size();sorted_pos++){//current sorted position
 										Character sorted_char=(Character)((DefaultMutableTreeNode)chars_sorted.get(sorted_pos)).getUserObject();
@@ -410,6 +434,8 @@ public class character extends JPanel implements TreeSelectionListener{
 								
 							}
 						}
+						
+						//frame, frame options and display
 						step(model,(DefaultMutableTreeNode)model.getRoot(),frms,pos,nd);
 						fr.value_changed();
 						display.draw();
@@ -537,6 +563,17 @@ public class character extends JPanel implements TreeSelectionListener{
 		
 		parent.add(display.characterData);
 		display.characterData.revalidate();
+	}
+	private boolean loop_check(frame_item[]new_frames,frame_item[]parent_frames){
+		if(parent_frames==new_frames)return true;
+		for(frame_item f:new_frames){
+			for(item it:f.elements){
+				if(it.character.frames!=null){
+					if(loop_check(it.character.frames,parent_frames))return true;
+				}
+			}
+		}
+		return false;
 	}
 	private void step(DefaultTreeModel model,DefaultMutableTreeNode main,frame_item[]frames,int pos,DefaultMutableTreeNode new_node){
 		frame_item[]frms=frame.get_frame_items(main);
