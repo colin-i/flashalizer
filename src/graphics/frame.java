@@ -2,6 +2,7 @@ package graphics;
 
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Label;
 import java.awt.Panel;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -38,6 +39,7 @@ import static workspace.Project.spriteremove;
 import static workspace.Project.action;
 import static workspace.Project.actionsprite;
 import graphics.character.Character;
+import static graphics.character.getAField;
 
 public class frame extends JPanel implements TreeSelectionListener{
 	private static final long serialVersionUID = 1L;
@@ -88,7 +90,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 	}
 	class item{
 		Character character;int depth;Integer remove;//remove=null or integer
-		int x;int y;
+		@X int x;@Y int y;
 		item(Character c,int object,int x,int y){
 			character=c;depth=object;this.x=x;this.y=y;
 		}
@@ -379,6 +381,16 @@ public class frame extends JPanel implements TreeSelectionListener{
 				JScrollPane dpth=new JScrollPane(dpt);
 				dpth.setBorder(BorderFactory.createTitledBorder("Depth"));
 				display.frameData.add(dpth);
+				
+				//also add x y
+				try {
+					Panel xy=new Panel();xy.setLayout(new BoxLayout(xy,BoxLayout.X_AXIS));
+					xy.add(new Label("X"));
+					xy.add(Graphics.character.new InputTextField(getAField(item.class,X.class),it));
+					xy.add(new Label("Y"));
+					xy.add(Graphics.character.new InputTextField(getAField(item.class,Y.class),it));
+					display.frameData.add(xy);
+				}catch (IllegalArgumentException | IllegalAccessException e) {e.printStackTrace();}
 			}
 		}
 		
@@ -387,6 +399,8 @@ public class frame extends JPanel implements TreeSelectionListener{
 		
 		display.draw();
 	}
+	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)private @interface X{}
+	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)private @interface Y{}
 	private interface slider_run{
 		void Run(slider s);
 	}

@@ -29,19 +29,19 @@ import workspace.Elements.Remove;
 
 public class Graphics extends JComponent{
 	private static final long serialVersionUID = 1L;
-	static frame frame;
+	static frame frame;static character character;
 	public Graphics(){
 		setLayout(new BoxLayout(this,BoxLayout.X_AXIS));
 		frame=new frame();
 		add(frame);
-		add(new display());
-		add(new character());//using frame.add_sprite(x)
+		add(new display());character=new character();
+		add(character);//using frame.add_sprite(x)
 		frame.init();//using character.characters
 		WorkSpace.container.add(this);
 	}
 	public static void update() throws IllegalArgumentException, IllegalAccessException{
 		List<Object>elems=new ArrayList<Object>();
-		TreeNode chars=character.root;
+		TreeNode chars=graphics.character.root;
 		int n=chars.getChildCount();int sprites=0;
 		for(int i=0;i<n;i++){
 			DefaultMutableTreeNode t=(DefaultMutableTreeNode) chars.getChildAt(i);

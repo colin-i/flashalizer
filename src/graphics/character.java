@@ -193,7 +193,7 @@ public class character extends JPanel implements TreeSelectionListener{
 		}
 		return null;
 	}
-	private static Field getAField(Class<?>c,Class<? extends Annotation> annotationClass){
+	static Field getAField(Class<?>c,Class<? extends Annotation> annotationClass){
 		Field[]flds=c.getDeclaredFields();
 		for(Field fd:flds){
 			if(fd.isAnnotationPresent(annotationClass))return fd;
@@ -392,6 +392,7 @@ public class character extends JPanel implements TreeSelectionListener{
 							fr.noding(nd,chr.frames);//children
 							if(p!=f_root){//sort rule
 								
+								//a,b,c b;a c,b,c b;c b,a c,b;b,c b,a c (of course and b)
 								DefaultTreeModel md=(DefaultTreeModel) tree.getModel();
 								//this is also the small web format rule, will have "symbol (B) not defined" : example: Sprite A , this is Sprite B placed in Sprite A; sort for the ordered build time: Sprite B,Sprite A
 								List<Character>chars_unsorted=new ArrayList<Character>();//get movies from list
@@ -606,10 +607,10 @@ public class character extends JPanel implements TreeSelectionListener{
 		panel.add(new JSeparator(SwingConstants.VERTICAL));
 		panel.add(c);
 	}
-	private class InputTextField extends InputText implements FocusListener{
+	class InputTextField extends InputText implements FocusListener{
 		private static final long serialVersionUID = 1L;
 		Field field;Object element;
-		private InputTextField(Field f,Object el) throws IllegalArgumentException, IllegalAccessException{
+		InputTextField(Field f,Object el) throws IllegalArgumentException, IllegalAccessException{
 			super(f.get(el));field=f;element=el;addFocusListener(this);
 		}
 		@Override
