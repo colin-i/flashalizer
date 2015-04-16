@@ -4,6 +4,8 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Label;
 import java.awt.Panel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -14,6 +16,8 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
@@ -59,6 +63,49 @@ public class frame extends JPanel implements TreeSelectionListener{
 		tree.setRootVisible(false);
 		tree.addTreeSelectionListener(this);
 		JScrollPane s=new JScrollPane(tree);add(s);
+		
+		Panel pan=new bar();
+		add(pan);
+	}
+	private class bar extends Panel{
+		private static final long serialVersionUID = 1L;
+		private bar(){
+			setLayout(new BoxLayout(this,BoxLayout.X_AXIS));//without this the height is too big and this will be good when more items will be added
+			JButton b=new JButton(new ImageIcon("img/frame.gif"));
+			b.setToolTipText("Add Frame");
+			b.addActionListener(new ActionListener(){
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					DefaultMutableTreeNode top=current_top();
+					frame_item[]frms=get_frame_items(top);int total=frms.length;
+					frame_entry frm=new frame_entry(top);DefaultTreeModel md=(DefaultTreeModel) tree.getModel();md.insertNodeInto(frm.node,top,total);
+					List<frame_item>lst=new ArrayList<frame_item>();
+					for(int i=0;i<total;i++)lst.add(frms[i]);lst.add(new frame_item());
+					frms=lst.toArray(new frame_item[lst.size()]);
+					build_eshow(frms);
+					set_frame_items(top,frms);
+					display.draw();
+					value_changed();
+				}});
+			add(b);
+		}
+	}
+	TreePath selection_frame(){
+		TreePath pt=tree.getSelectionPath();
+		if(pt!=null){
+			for(;;){
+				DefaultMutableTreeNode nd=(DefaultMutableTreeNode)pt.getLastPathComponent();
+				Object nd_obj=nd.getUserObject();
+				if(nd_obj instanceof frame_entry)break;
+				pt=pt.getParentPath();
+			}
+		}
+		return pt;
+	}
+	DefaultMutableTreeNode current_top(){
+		TreePath sel=selection_frame();
+		if(sel==null)return (DefaultMutableTreeNode) ((DefaultTreeModel)tree.getModel()).getRoot();
+		return (DefaultMutableTreeNode)sel.getParentPath().getLastPathComponent();
 	}
 	private class ControlTag{
 		private String name;
@@ -106,11 +153,17 @@ public class frame extends JPanel implements TreeSelectionListener{
 		private frame_item(item[]e,String a){
 			elements=e;action=a;
 		}
+		private frame_item(){
+			elements=new item[0];action="";
+		}
 	}
 	class frame_entry{
 		private String value;
+		private DefaultMutableTreeNode node;
 		private frame_entry(DefaultMutableTreeNode n){
-			value="Frame"+n.getChildCount();
+			int pos=n.getChildCount();
+			value="Frame"+pos;
+			node=new DefaultMutableTreeNode(this);
 		}
 		@Override
 		public String toString(){
@@ -120,15 +173,15 @@ public class frame extends JPanel implements TreeSelectionListener{
 	void noding(DefaultMutableTreeNode parent,frame_item[]frames){
 		for(frame_item f:frames){
 			frame_entry fr=new frame_entry(parent);
-			DefaultMutableTreeNode frame=new DefaultMutableTreeNode(fr);
+			DefaultMutableTreeNode frame_node=fr.node;
 			for(item el:f.elements){
 				DefaultMutableTreeNode node=new DefaultMutableTreeNode(el);
 				frame_item[]s=el.character.frames;
 				if(s!=null)noding(node,s);
-				frame.add(node);
+				frame_node.add(node);
 			}
 			if(f.action.length()!=0)fr.value+=" +Action";
-			parent.add(frame);
+			parent.add(frame_node);
 		}
 	}
 	private ControlTagEx[]CTags={
@@ -280,6 +333,13 @@ public class frame extends JPanel implements TreeSelectionListener{
 		else{
 			item sprite=(item)parent.getUserObject();
 			return sprite.character.frames;
+		}
+	}
+	private void set_frame_items(DefaultMutableTreeNode parent,frame_item[]frms){
+		if(parent.getParent()==null)frames=frms;
+		else{
+			item sprite=(item)parent.getUserObject();
+			sprite.character.frames=frms;
 		}
 	}
 	int get_max_depth(DefaultMutableTreeNode parent){

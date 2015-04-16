@@ -8,7 +8,6 @@ import static workspace.Project.shape;
 import static workspace.Project.dbl;
 import static workspace.Project.exportsadd;
 import static workspace.element.NamedId;
-import graphics.frame.frame_entry;
 import graphics.frame.frame_item;
 import graphics.frame.item;
 
@@ -340,24 +339,19 @@ public class character extends JPanel implements TreeSelectionListener{
 						JTree t=frame.tree;
 						DefaultTreeModel model;
 						model=(DefaultTreeModel)t.getModel();
+						frame fr=Graphics.frame;
 						
 						//frame to add the object
-						int pos=0;DefaultMutableTreeNode f_root=(DefaultMutableTreeNode)model.getRoot();
-						DefaultMutableTreeNode p=f_root;
-						TreePath pt=t.getSelectionPath();
+						TreePath pt=fr.selection_frame();
+						DefaultMutableTreeNode p=fr.current_top();
+						int pos=0;
 						if(pt!=null){
-							for(;;){
-								DefaultMutableTreeNode nd=(DefaultMutableTreeNode) pt.getLastPathComponent();
-								Object nd_obj=nd.getUserObject();
-								if(nd_obj instanceof frame_entry){
-									p=(DefaultMutableTreeNode)pt.getParentPath().getLastPathComponent();
-									break;
-								}
-								pt=pt.getParentPath();
-							}
+							DefaultMutableTreeNode frame_node=(DefaultMutableTreeNode)pt.getLastPathComponent();
+							for(;pos<p.getChildCount();pos++)if(p.getChildAt(pos)==frame_node)break;
 						}
-						
+						DefaultMutableTreeNode f_root=(DefaultMutableTreeNode)model.getRoot();
 						frame_item[]frms=frame.get_frame_items(p);
+						
 						//initial sprite in sprite infinite loop verification
 						if(chr.frames!=null){
 							if(p!=f_root){
@@ -377,7 +371,6 @@ public class character extends JPanel implements TreeSelectionListener{
 						}
 						
 						//add the placement
-						frame fr=Graphics.frame;
 						int new_pos=fr.get_max_depth(p)+1;
 						List<item>x=new ArrayList<item>();
 						for(item it:frms[pos].elements)x.add(it);

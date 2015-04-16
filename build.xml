@@ -9,11 +9,11 @@
     </target>
 
     <target name="compile">
-        <javac srcdir="src" destdir="build" includeantruntime="false"/>
+        <javac srcdir="src" destdir="build" classpath="build/jna.jar;build/javassist.jar" includeantruntime="false"/>
     </target>
 
     <target name="run">
-        <java classpath="build" classname="flashalizer" fork="true"/>
+        <java classpath="build;build/jna.jar;build/javassist.jar" classname="flashalizer" fork="true"/>
     </target>
 
 </project>
