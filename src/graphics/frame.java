@@ -91,7 +91,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 					set_frame_items(top,frms);//required at next step(and not only)
 					
 					DefaultTreeModel md=(DefaultTreeModel) tree.getModel();
-					Graphics.character.step(md,(DefaultMutableTreeNode) md.getRoot(),frms,-1,new DefaultMutableTreeNode(f_i.entry));
+					Graphics.character.step(md,(DefaultMutableTreeNode) md.getRoot(),frms,-1,f_i.entry);
 					
 					build_eshow(frms);
 					display.draw();
