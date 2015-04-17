@@ -378,12 +378,10 @@ public class character extends JPanel implements TreeSelectionListener{
 						x.add(it);
 						frms[pos].elements=x.toArray(new item[x.size()]);
 						fr.build_eshow(frms);
-						DefaultMutableTreeNode nd=new DefaultMutableTreeNode(it);
 						
-						//more actions
+						//sort rule
 						if(chr.frames!=null){
-							fr.noding(nd,chr.frames);//children
-							if(p!=f_root){//sort rule
+							if(p!=f_root){
 								
 								//a,b,c b;a c,b,c b;c b,a c,b;b,c b,a c (of course and b)
 								DefaultTreeModel md=(DefaultTreeModel) tree.getModel();
@@ -430,7 +428,7 @@ public class character extends JPanel implements TreeSelectionListener{
 						}
 						
 						//frame, frame options and display
-						step(model,(DefaultMutableTreeNode)model.getRoot(),frms,pos,nd);
+						step(model,(DefaultMutableTreeNode)model.getRoot(),frms,pos,it);
 						fr.value_changed();
 						display.draw();
 					}});
@@ -569,11 +567,18 @@ public class character extends JPanel implements TreeSelectionListener{
 		}
 		return false;
 	}
-	private void step(DefaultTreeModel model,DefaultMutableTreeNode main,frame_item[]frames,int pos,DefaultMutableTreeNode new_node){
+	void step(DefaultTreeModel model,DefaultMutableTreeNode main,frame_item[]frames,int pos,Object new_entry){
 		frame_item[]frms=frame.get_frame_items(main);
 		if(frms==frames){
-			DefaultMutableTreeNode frame=(DefaultMutableTreeNode) main.getChildAt(pos);
-			model.insertNodeInto(new_node,frame,frame.getChildCount());
+			DefaultMutableTreeNode new_node=new DefaultMutableTreeNode(new_entry);
+			DefaultMutableTreeNode parent=main;
+			if(pos!=-1){
+				parent=(DefaultMutableTreeNode) main.getChildAt(pos);
+				frame_item[]frs=((item)new_entry).character.frames;
+				if(frs!=null)Graphics.frame.noding(new_node,frs);
+			}
+			int p=parent.getChildCount();
+			model.insertNodeInto(new_node,parent,p);
 			return;
 		}
 		int  cc=model.getChildCount(main);
@@ -582,7 +587,7 @@ public class character extends JPanel implements TreeSelectionListener{
 			int n=frame.getChildCount();
 			for(int j=0;j<n;j++){
 				DefaultMutableTreeNode x=(DefaultMutableTreeNode)model.getChild(frame,j);
-				if(!model.isLeaf(x))step(model,x,frames,pos,new_node);
+				if(!model.isLeaf(x))step(model,x,frames,pos,new_entry);
 			}
 		}
 	}

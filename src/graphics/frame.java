@@ -69,25 +69,95 @@ public class frame extends JPanel implements TreeSelectionListener{
 	}
 	private class bar extends Panel{
 		private static final long serialVersionUID = 1L;
+		private void add_button(char img,String tip,ActionListener aclst){
+			JButton b=new JButton(new ImageIcon("img/frame/"+img+".gif"));
+			b.setToolTipText(tip);
+			b.addActionListener(aclst);
+			add(b);
+		}
 		private bar(){
-			setLayout(new BoxLayout(this,BoxLayout.X_AXIS));//without this the height is too big and this will be good when more items will be added
-			JButton b=new JButton(new ImageIcon("img/frame.gif"));
-			b.setToolTipText("Add Frame");
-			b.addActionListener(new ActionListener(){
+			setLayout(new BoxLayout(this,BoxLayout.X_AXIS));
+			add_button('f',"Add Frame",new ActionListener(){
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					DefaultMutableTreeNode top=current_top();
 					frame_item[]frms=get_frame_items(top);int total=frms.length;
-					frame_entry frm=new frame_entry(top);DefaultTreeModel md=(DefaultTreeModel) tree.getModel();md.insertNodeInto(frm.node,top,total);
 					List<frame_item>lst=new ArrayList<frame_item>();
-					for(int i=0;i<total;i++)lst.add(frms[i]);lst.add(new frame_item());
+					for(int i=0;i<total;i++)lst.add(frms[i]);
+					frame_item f_i=new frame_item(total);
+					lst.add(f_i);
 					frms=lst.toArray(new frame_item[lst.size()]);
+					
+					set_frame_items(top,frms);//required at next step(and not only)
+					
+					DefaultTreeModel md=(DefaultTreeModel) tree.getModel();
+					Graphics.character.step(md,(DefaultMutableTreeNode) md.getRoot(),frms,-1,new DefaultMutableTreeNode(f_i.entry));
+					
 					build_eshow(frms);
-					set_frame_items(top,frms);
 					display.draw();
 					value_changed();
-				}});
-			add(b);
+				}
+			});
+			add_button('d',"Delete",new ActionListener(){
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					TreePath pt=tree.getSelectionPath();
+					if(pt!=null){
+						DefaultMutableTreeNode nd=(DefaultMutableTreeNode)pt.getLastPathComponent();
+						Object nd_obj=nd.getUserObject();
+						DefaultMutableTreeNode top=current_top();
+						frame_item[]frms=get_frame_items(top);
+						DefaultTreeModel md=(DefaultTreeModel) tree.getModel();
+						if(nd_obj instanceof item){
+							for(int i=0;i<frms.length;i++){
+								frame_item f=frms[i];
+								for(item it:f.elements){
+									if(it==nd_obj){
+										List<item>its=new ArrayList<item>();
+										for(item itm:f.elements)if(itm!=nd_obj)its.add(itm);
+										frms[i].elements=its.toArray(new item[its.size()]);
+										
+										walk(md,(DefaultMutableTreeNode)md.getRoot(),it,-1);
+										depths_set_sort(frms);
+										build_eshow(frms);
+										display.draw();
+										
+										value_changed();
+										break;
+									}
+								}
+							}
+						}else/*if(nd_obj instance of frame_entry)*/{
+							if(1<top.getChildCount()){//do not delete last frame
+								int pos=0;for(;pos<top.getChildCount();pos++)if(top.getChildAt(pos)==nd)break;
+								frame_item out_frame=frms[pos];
+								List<frame_item>frs=new ArrayList<frame_item>();
+								for(frame_item f:frms)if(out_frame!=f)frs.add(f);
+								frms=frs.toArray(new frame_item[frs.size()]);
+								
+								Integer total=frms.length;
+								for(int i=0;i<total;i++){
+									frame_item f=frms[i];
+									if(i>=pos)f.entry.setValue(i,f.action);
+									//verify for lost of removeTag if placed in last frame that is deleted
+									for(item it:f.elements){
+										if(it.remove==total){
+											it.remove=null;
+										}
+									}
+								}
+								
+								set_frame_items(top,frms);
+								
+								walk(md,(DefaultMutableTreeNode)md.getRoot(),out_frame.entry,-1);
+								depths_set_sort(frms);
+								build_eshow(frms);
+								display.draw();
+							}
+						}
+					}
+				}
+			});
 		}
 	}
 	TreePath selection_frame(){
@@ -150,20 +220,20 @@ public class frame extends JPanel implements TreeSelectionListener{
 		item[]elements;
 		item[]eshow;
 		String action;
-		private frame_item(item[]e,String a){
-			elements=e;action=a;
+		frame_entry entry;
+		private frame_item(item[]e,String a,int pos){
+			elements=e;action=a;entry=new frame_entry(pos,a);
 		}
-		private frame_item(){
-			elements=new item[0];action="";
+		private frame_item(int pos){
+			elements=new item[0];action="";entry=new frame_entry(pos,action);
 		}
 	}
 	class frame_entry{
 		private String value;
-		private DefaultMutableTreeNode node;
-		private frame_entry(DefaultMutableTreeNode n){
-			int pos=n.getChildCount();
+		private frame_entry(int pos,String a){setValue(pos,a);}
+		private void setValue(int pos,String a){
 			value="Frame"+pos;
-			node=new DefaultMutableTreeNode(this);
+			if(a.length()!=0)value+=" +Action";
 		}
 		@Override
 		public String toString(){
@@ -172,15 +242,13 @@ public class frame extends JPanel implements TreeSelectionListener{
 	}
 	void noding(DefaultMutableTreeNode parent,frame_item[]frames){
 		for(frame_item f:frames){
-			frame_entry fr=new frame_entry(parent);
-			DefaultMutableTreeNode frame_node=fr.node;
+			DefaultMutableTreeNode frame_node=new DefaultMutableTreeNode(f.entry);
 			for(item el:f.elements){
 				DefaultMutableTreeNode node=new DefaultMutableTreeNode(el);
 				frame_item[]s=el.character.frames;
 				if(s!=null)noding(node,s);
 				frame_node.add(node);
 			}
-			if(f.action.length()!=0)fr.value+=" +Action";
 			parent.add(frame_node);
 		}
 	}
@@ -315,7 +383,8 @@ public class frame extends JPanel implements TreeSelectionListener{
 			}
 		}
 		for(int d:removes)set_remove(d,frames);								 //cannot place and remove an item
-		frames.add(new frame_item(items.toArray(new item[items.size()]),as));//in the same frame
+		int pos=frames.size();
+		frames.add(new frame_item(items.toArray(new item[items.size()]),as,pos));//in the same frame
 	}
 	private void set_remove(int d,List<frame_item>frames){
 		for(frame_item f:frames){
@@ -358,17 +427,17 @@ public class frame extends JPanel implements TreeSelectionListener{
 		}
 		return 0;
 	}
-	private boolean walk(DefaultTreeModel model,DefaultMutableTreeNode boss,item it,int pos_new){
+	private boolean walk(DefaultTreeModel model,DefaultMutableTreeNode boss,Object tree_entry,int pos_new){
 		int  cc=model.getChildCount(boss);
 		for( int i=0; i < cc; i++){
 			DefaultMutableTreeNode child=(DefaultMutableTreeNode)model.getChild(boss,i);
 			Object obj=child.getUserObject();
-			if(obj==it){
+			if(obj==tree_entry){
 				model.removeNodeFromParent(child);
-				model.insertNodeInto(child,boss,pos_new);
+				if(pos_new!=-1)model.insertNodeInto(child,boss,pos_new);
 				return false;//return,will be a loop if there is a same sub-child,at these frames the item is only once here at depths
 			}
-			if(!model.isLeaf(child))if(walk(model,child,it,pos_new)==false)return true;
+			if(!model.isLeaf(child))if(walk(model,child,tree_entry,pos_new)==false)return true;
 		}
 		return true;
 	}
