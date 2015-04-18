@@ -48,6 +48,7 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 	
 	public static final int HasFont=0x1;
 	public static final int HasTextColor=0x4;
+	public static final int ReadOnly=0x8;
 	public static final int Multiline=0x20;
 	public static final int HasText=0x80;
 	public static final int HasLayout=0x2000;

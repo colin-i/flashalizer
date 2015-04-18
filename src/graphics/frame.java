@@ -153,7 +153,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 			});
 		}
 	}
-	private void delete_item(frame_item[]frms,int row,item it){
+	void delete_item(frame_item[]frms,int row,item it){
 		frame_item f=frms[row];
 		List<item>its=new ArrayList<item>();
 		for(item itm:f.elements)if(itm!=it)its.add(itm);
