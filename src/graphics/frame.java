@@ -107,21 +107,13 @@ public class frame extends JPanel implements TreeSelectionListener{
 						Object nd_obj=nd.getUserObject();
 						DefaultMutableTreeNode top=current_top();
 						frame_item[]frms=get_frame_items(top);
-						DefaultTreeModel md=(DefaultTreeModel) tree.getModel();
 						if(nd_obj instanceof item){
 							for(int i=0;i<frms.length;i++){
 								frame_item f=frms[i];
 								for(item it:f.elements){
 									if(it==nd_obj){
-										List<item>its=new ArrayList<item>();
-										for(item itm:f.elements)if(itm!=nd_obj)its.add(itm);
-										frms[i].elements=its.toArray(new item[its.size()]);
-										
-										walk(md,(DefaultMutableTreeNode)md.getRoot(),it,-1);
-										depths_set_sort(frms);
-										build_eshow(frms);
+										delete_item(frms,i,it);
 										display.draw();
-										
 										value_changed();
 										break;
 									}
@@ -129,6 +121,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 							}
 						}else/*if(nd_obj instance of frame_item)*/{
 							if(1<top.getChildCount()){//do not delete last frame
+								DefaultTreeModel md=(DefaultTreeModel) tree.getModel();
 								int pos=0;for(;pos<top.getChildCount();pos++)if(top.getChildAt(pos)==nd)break;
 								frame_item out_frame=frms[pos];
 								List<frame_item>frs=new ArrayList<frame_item>();
@@ -159,6 +152,17 @@ public class frame extends JPanel implements TreeSelectionListener{
 				}
 			});
 		}
+	}
+	private void delete_item(frame_item[]frms,int row,item it){
+		frame_item f=frms[row];
+		List<item>its=new ArrayList<item>();
+		for(item itm:f.elements)if(itm!=it)its.add(itm);
+		frms[row].elements=its.toArray(new item[its.size()]);
+		
+		DefaultTreeModel md=(DefaultTreeModel) tree.getModel();
+		walk(md,(DefaultMutableTreeNode)md.getRoot(),it,-1);
+		depths_set_sort(frms);
+		build_eshow(frms);
 	}
 	TreePath selection_frame(){
 		TreePath pt=tree.getSelectionPath();

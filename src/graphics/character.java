@@ -156,7 +156,7 @@ public class character extends JPanel implements TreeSelectionListener{
 					Character c=(Character)((DefaultMutableTreeNode)root.getChildAt(position)).getUserObject();
 					if(c.isPlaceable)break;
 				}
-				if(frames==null){
+				if(isPlaceable==true){
 					for(;position<n;position++){
 						Character c=(Character)((DefaultMutableTreeNode)root.getChildAt(position)).getUserObject();
 						if(c.frames!=null)break;
@@ -288,12 +288,16 @@ public class character extends JPanel implements TreeSelectionListener{
 			}
 			
 		}
+		private void add_button(char img,String tip,ActionListener aclst){
+			JButton b=new JButton(new ImageIcon("img/character/"+img+".gif"));
+			b.setToolTipText(tip);
+			b.addActionListener(aclst);
+			add(b);
+		}
 		private bar(){
-			setLayout(new BoxLayout(this,BoxLayout.X_AXIS));//without this the height is too big and this will be good when more items will be added 
-			JButton b=new JButton(new ImageIcon("img/character.gif"));
-			b.setToolTipText("New Character");
+			setLayout(new BoxLayout(this,BoxLayout.X_AXIS)); 
 			
-			//Create the pop up menu.
+			//Create the pop up menu for add item
 			JPopupMenu popup=new JPopupMenu();
 			for(type t:Types){
 				Class<?>elementClass=null;
@@ -301,13 +305,11 @@ public class character extends JPanel implements TreeSelectionListener{
 				else if(t.name.equals(text))elementClass=Text.class;
 				if(elementClass!=null)popup.add(new JMenuItem(new elementAction(elementClass,t)));
 			}
-			b.addActionListener(new ActionListener(){
+			add_button('a',"New Character",new ActionListener(){
 				public void actionPerformed(ActionEvent e) {
 					popup.show((Component) e.getSource(),0,(int)-popup.getPreferredSize().getHeight());
 				}
 			});
-			
-			add(b);
 		}
 	}
 	@Override
