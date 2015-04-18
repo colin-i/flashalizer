@@ -91,7 +91,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 					set_frame_items(top,frms);//required at next step(and not only)
 					
 					DefaultTreeModel md=(DefaultTreeModel) tree.getModel();
-					Graphics.character.step(md,(DefaultMutableTreeNode) md.getRoot(),frms,-1,f_i.entry);
+					Graphics.character.step(md,(DefaultMutableTreeNode) md.getRoot(),frms,-1,f_i);
 					
 					build_eshow(frms);
 					display.draw();
@@ -127,7 +127,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 									}
 								}
 							}
-						}else/*if(nd_obj instance of frame_entry)*/{
+						}else/*if(nd_obj instance of frame_item)*/{
 							if(1<top.getChildCount()){//do not delete last frame
 								int pos=0;for(;pos<top.getChildCount();pos++)if(top.getChildAt(pos)==nd)break;
 								frame_item out_frame=frms[pos];
@@ -138,7 +138,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 								Integer total=frms.length;
 								for(int i=0;i<total;i++){
 									frame_item f=frms[i];
-									if(i>=pos)f.entry.setValue(i,f.action);
+									if(i>=pos)f.setPos(i);
 									//verify for lost of removeTag if placed in last frame that is deleted
 									for(item it:f.elements){
 										if(it.remove==total){
@@ -149,7 +149,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 								
 								set_frame_items(top,frms);
 								
-								walk(md,(DefaultMutableTreeNode)md.getRoot(),out_frame.entry,-1);
+								walk(md,(DefaultMutableTreeNode)md.getRoot(),out_frame,-1);
 								depths_set_sort(frms);
 								build_eshow(frms);
 								display.draw();
@@ -166,7 +166,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 			for(;;){
 				DefaultMutableTreeNode nd=(DefaultMutableTreeNode)pt.getLastPathComponent();
 				Object nd_obj=nd.getUserObject();
-				if(nd_obj instanceof frame_entry)break;
+				if(nd_obj instanceof frame_item)break;
 				pt=pt.getParentPath();
 			}
 		}
@@ -220,29 +220,24 @@ public class frame extends JPanel implements TreeSelectionListener{
 		item[]elements;
 		item[]eshow;
 		String action;
-		frame_entry entry;
-		private frame_item(item[]e,String a,int pos){
-			elements=e;action=a;entry=new frame_entry(pos,a);
+		private int pos;
+		private frame_item(item[]e,String a,int p){
+			elements=e;action=a;pos=p;
 		}
-		private frame_item(int pos){
-			elements=new item[0];action="";entry=new frame_entry(pos,action);
+		private frame_item(int p){
+			elements=new item[0];action="";pos=p;
 		}
-	}
-	class frame_entry{
-		private String value;
-		private frame_entry(int pos,String a){setValue(pos,a);}
-		private void setValue(int pos,String a){
-			value="Frame"+pos;
-			if(a.length()!=0)value+=" +Action";
-		}
+		private void setPos(int p){pos=p;}
 		@Override
 		public String toString(){
+			String value="Frame"+pos;
+			if(action.length()!=0)value+=" +Action";
 			return value;
 		}
 	}
 	void noding(DefaultMutableTreeNode parent,frame_item[]frames){
 		for(frame_item f:frames){
-			DefaultMutableTreeNode frame_node=new DefaultMutableTreeNode(f.entry);
+			DefaultMutableTreeNode frame_node=new DefaultMutableTreeNode(f);
 			for(item el:f.elements){
 				DefaultMutableTreeNode node=new DefaultMutableTreeNode(el);
 				frame_item[]s=el.character.frames;
