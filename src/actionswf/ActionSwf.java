@@ -54,9 +54,9 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 	public static final int Multiline=0x20;
 	public static final int WordWrap=0x40;
 	public static final int HasText=0x80;
-	//#define UseOutlines=0x100     no text detected at a test
+	//#define UseOutlines=0x100     maybe no HasFont no HasFontClass and some .ttf imported
 	public static final int HTML=0x200;
-	//#define WasStatic=0x400   nothing
+	//#define WasStatic=0x400   Authored as dynamic text/Authored as static text           ;what is the current use if was static only at the beginning?
 	public static final int Border=0x800;
 	public static final int NoSelect=0x1000;
 	public static final int HasLayout=0x2000;

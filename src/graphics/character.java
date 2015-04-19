@@ -20,8 +20,6 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Label;
-import java.awt.Panel;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -48,6 +46,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -257,7 +256,7 @@ public class character extends JPanel implements TreeSelectionListener{
 			return this;
 		}
 	}
-	private class bar extends Panel{
+	private class bar extends JPanel{
 		private static final long serialVersionUID = 1L;
 		private class elementAction extends AbstractAction{
 			private static final long serialVersionUID = 1L;
@@ -342,19 +341,18 @@ public class character extends JPanel implements TreeSelectionListener{
 		} 
 	}
 	private void value_changed(){
-		Container parent=display.characterData.getParent();
-		parent.remove(display.characterData);
-		display.characterData=new Panel();
-		display.characterData.setLayout(new BoxLayout(display.characterData,BoxLayout.Y_AXIS));
+		Container currentCharacterData=Graphics.characterData;
+		Graphics.characterData=new JPanel();
+		Graphics.characterData.setLayout(new BoxLayout(Graphics.characterData,BoxLayout.Y_AXIS));
 		DefaultMutableTreeNode node=(DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
 
 		if(node!=null){//is lost of selection, is Place B in A, is A,B; is example bottom
 			Character chr=(Character)node.getUserObject();
-			Panel panel;
+			JPanel panel;
 			
 			panel=new_panel();
 			add_field(panel,"Name",chr.name,chr);
-			display.characterData.add(panel);
+			Graphics.characterData.add(panel);
 			
 			if(chr.isPlaceable==true){
 				panel=new_panel();
@@ -463,15 +461,19 @@ public class character extends JPanel implements TreeSelectionListener{
 						display.draw();
 					}});
 				add_one_field(panel,b);
-				display.characterData.add(panel);
+				Graphics.characterData.add(panel);
 			}
 			
 			Object elem=chr.element;
 			if(elem instanceof Text)new text(chr);
 		}
 		
-		parent.add(display.characterData);
-		display.characterData.revalidate();
+		Container c=currentCharacterData.getParent().getParent();
+		Container parent=c.getParent();
+		parent.remove(c);
+		JScrollPane s=new JScrollPane(Graphics.characterData);
+		parent.add(s);
+		parent.revalidate();
 	}
 	@Override
 	public void valueChanged(TreeSelectionEvent arg0) {
@@ -512,20 +514,20 @@ public class character extends JPanel implements TreeSelectionListener{
 			}
 		}
 	}
-	Panel new_panel(){
-		Panel panel=new Panel();
+	JPanel new_panel(){
+		JPanel panel=new JPanel();
 		panel.setLayout(new BoxLayout(panel,BoxLayout.X_AXIS));
 		return panel;
 	}
-	private void add_field(Panel panel,String n,Field f,Character chr){
-		add_one_field(panel,new Label(n));
+	private void add_field(JPanel panel,String n,Field f,Character chr){
+		add_one_field(panel,new JLabel(n));
 		try{panel.add(new InputTextField(f,chr.element));}
 		catch (IllegalArgumentException | IllegalAccessException e) {e.printStackTrace();}
 	}
-	void add_one_field(Panel panel,Component c){
-		panel.add(new JSeparator(SwingConstants.VERTICAL));
-		panel.add(c);
+	void add_one_field(JPanel panel,Component c){
+		add_separator(panel);panel.add(c);
 	}
+	void add_separator(JPanel panel){panel.add(new JSeparator(SwingConstants.VERTICAL));}
 	class InputTextField extends InputText implements FocusListener{
 		private static final long serialVersionUID = 1L;
 		Field field;Object element;

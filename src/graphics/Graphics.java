@@ -3,13 +3,16 @@ package graphics;
 import graphics.frame.frame_item;
 import graphics.frame.item;
 
+import java.awt.Container;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.BoxLayout;
-import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 
@@ -27,17 +30,29 @@ import workspace.Elements.ShowFrame;
 import workspace.Elements.SpriteRemove;
 import workspace.Elements.Remove;
 
-public class Graphics extends JComponent{
+public class Graphics extends JSplitPane{
 	private static final long serialVersionUID = 1L;
 	static frame frame;static character character;
+	static Container frameData;
+	static Container characterData;
 	public Graphics(){
-		setLayout(new BoxLayout(this,BoxLayout.X_AXIS));
+		super(JSplitPane.VERTICAL_SPLIT);
+		
+		JPanel p=new JPanel();p.setLayout(new BoxLayout(p,BoxLayout.X_AXIS));
 		frame=new frame();
-		add(frame);
-		add(new display());character=new character();
-		add(character);//using frame.add_sprite(x)
+		p.add(frame);
+		p.add(new display());
+		character=new character();p.add(character);//using frame.add_sprite(x)
 		frame.init();//using character.characters
 		WorkSpace.container.add(this);
+		add(p);
+		
+		JPanel pane=new JPanel();pane.setLayout(new BoxLayout(pane,BoxLayout.Y_AXIS));
+		frameData=new Container();
+		pane.add(frameData);
+		characterData=new Container();
+		pane.add(new JScrollPane(characterData));
+		add(pane);
 	}
 	public static void update() throws IllegalArgumentException, IllegalAccessException{
 		List<Object>elems=new ArrayList<Object>();

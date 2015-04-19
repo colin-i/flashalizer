@@ -14,12 +14,10 @@ import static actionswf.ActionSwf.NoSelect;
 import static actionswf.ActionSwf.HasLayout;
 import static actionswf.ActionSwf.AutoSize;
 
+import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Color;
 import java.awt.Dialog;
-import java.awt.Label;
-import java.awt.Panel;
-import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -30,7 +28,11 @@ import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 import workspace.InputText;
 import workspace.IntInputText;
@@ -42,11 +44,11 @@ class text{
 		try{
 			Text t=(Text)chr.element;
 			character cr=Graphics.character;
-			Panel panel;
+			JPanel panel;
 			
-			panel=cr.new_panel();
-			cr.add_one_field(panel,new Label("Text"));
-			TextArea tx=new TextArea(t.structure.initialtext);
+			panel=new JPanel();panel.setLayout(new BorderLayout());
+			panel.add(new JLabel("Text"),BorderLayout.WEST);
+			JTextArea tx=new JTextArea(t.structure.initialtext);tx.setRows(5);
 			tx.addFocusListener(new FocusListener(){
 				@Override
 				public void focusGained(FocusEvent arg0){}
@@ -59,12 +61,11 @@ class text{
 				}
 			});
 			WorkSpace.textPopup.add(tx);
-			panel.add(tx);
-			display.characterData.add(panel);
+			JScrollPane sc=new JScrollPane(tx);panel.add(sc);
+			Graphics.characterData.add(panel);
 			
 			panel=cr.new_panel();
-			
-			cr.add_one_field(panel,new Label("Font"));
+			cr.add_one_field(panel,new JLabel("Font"));
 			InputText txt=new InputText(t.structure.font_id);
 			txt.addFocusListener(new FocusListener(){
 				@Override
@@ -77,8 +78,7 @@ class text{
 				}
 			});
 			panel.add(txt);
-			
-			cr.add_one_field(panel,new Label("Height"));
+			cr.add_one_field(panel,new JLabel("Height"));
 			IntInputText fH=new IntInputText(t.structure.font_height);
 			fH.addFocusListener(new FocusListener(){
 				@Override
@@ -91,7 +91,6 @@ class text{
 				}
 			});
 			panel.add(fH);
-			
 			int color=t.structure.rgba;
 			Color c=new Color(color&(0xff00*0x100*0x100),color&(0xff00*0x100),color&0xff00,color==0?0xff:color&0xff);
 			Button new_color_b=new Button();
@@ -116,8 +115,35 @@ class text{
 				}
 			});
 			panel.add(new_color_b);
+			cr.add_one_field(panel,new JLabel("MaxLength"));
+			IntInputText fL=new IntInputText(t.structure.maxlength);
+			fL.addFocusListener(new FocusListener(){
+				@Override
+				public void focusGained(FocusEvent e){}
+				@Override
+				public void focusLost(FocusEvent e){
+					fL.focus_Lost();
+					int value=Integer.parseInt(fL.getText());
+					t.structure.maxlength=value;
+					flags_set(value,t,HasMaxLength);
+				}
+			});
+			panel.add(fL);
+			Graphics.characterData.add(panel);
 			
-			cr.add_one_field(panel,new Label("Align"));
+			panel=cr.new_panel();
+			add_flag(panel,t,"Multiline",Multiline);
+			add_flag(panel,t,"ReadOnly",ReadOnly);
+			add_flag(panel,t,"NoSelect",NoSelect);
+			add_flag(panel,t,"HTML",HTML);
+			add_flag(panel,t,"Border",Border);
+			add_flag(panel,t,"WordWrap",WordWrap);
+			add_flag(panel,t,"Password",Password);
+			add_flag(panel,t,"AutoSize",AutoSize);
+			Graphics.characterData.add(panel);
+			
+			panel=cr.new_panel();
+			cr.add_one_field(panel,new JLabel("Align"));
 			ButtonGroup group = new ButtonGroup();
 			JRadioButtonMenuItem radio;
 			ActionListener al=new ActionListener(){
@@ -139,36 +165,34 @@ class text{
 			radio=new JRadioButtonMenuItem("Right");radio.addActionListener(al);group.add(radio);panel.add(radio);
 			radio=new JRadioButtonMenuItem("Center");radio.addActionListener(al);group.add(radio);panel.add(radio);
 			radio=new JRadioButtonMenuItem("Justify");radio.addActionListener(al);group.add(radio);panel.add(radio);
-			
-			cr.add_one_field(panel,new Label("MaxLength"));
-			IntInputText fL=new IntInputText(t.structure.maxlength);
-			fL.addFocusListener(new FocusListener(){
-				@Override
-				public void focusGained(FocusEvent e){}
-				@Override
-				public void focusLost(FocusEvent e){
-					fL.focus_Lost();
-					int value=Integer.parseInt(fL.getText());
-					t.structure.maxlength=value;
-					flags_set(value,t,HasMaxLength);
-				}
-			});
-			panel.add(fL);
-			
-			display.characterData.add(panel);
-			
-			panel=cr.new_panel();
-			
-			add_flag(panel,t,"Multiline",Multiline);
-			add_flag(panel,t,"ReadOnly",ReadOnly);
-			add_flag(panel,t,"NoSelect",NoSelect);
-			add_flag(panel,t,"HTML",HTML);
-			add_flag(panel,t,"Border",Border);
-			add_flag(panel,t,"WordWrap",WordWrap);
-			add_flag(panel,t,"Password",Password);
-			add_flag(panel,t,"AutoSize",AutoSize);
-			
-			display.characterData.add(panel);
+			cr.add_separator(panel);panel.add(new JLabel("Margin"));
+			new TextLayoutIntInputText(
+				t.structure.layout_leftmargin,t,
+				new text_Runnable(){@Override public void run(Text t, int value) {t.structure.layout_leftmargin=value;}}
+				,panel
+				," Left"
+			);
+			new TextLayoutIntInputText(
+				t.structure.layout_rightmargin,t,
+				new text_Runnable(){@Override public void run(Text t, int value) {t.structure.layout_rightmargin=value;}}
+				,panel
+				," Right"
+			);
+			cr.add_separator(panel);
+			new TextLayoutIntInputText(
+				t.structure.layout_indent,t,
+				new text_Runnable(){@Override public void run(Text t, int value) {t.structure.layout_indent=value;}}
+				,panel
+				,"Indent"
+			);
+			cr.add_separator(panel);
+			new TextLayoutIntInputText(
+				t.structure.layout_leading,t,
+				new text_Runnable(){@Override public void run(Text t, int value) {t.structure.layout_leading=value;}}
+				,panel
+				,"Leading"
+			);
+			Graphics.characterData.add(panel);
 		}
 		catch (IllegalArgumentException | SecurityException e) {e.printStackTrace();}
 	}
@@ -181,7 +205,7 @@ class text{
 		else flags&=~flag;
 		t.flags=flags;
 	}
-	private void add_flag(Panel panel,Text t,String nm,int flag){
+	private void add_flag(JPanel panel,Text t,String nm,int flag){
 		JCheckBox chk=new JCheckBox(nm);
 		if((t.flags&flag)!=0)chk.setSelected(true);
 		chk.addActionListener(new ActionListener(){
@@ -191,5 +215,27 @@ class text{
 			}
 		});
 		panel.add(chk);
+	}
+	private interface text_Runnable{
+		void run(Text t,int value);
+	}
+	private class TextLayoutIntInputText extends IntInputText{
+		private static final long serialVersionUID = 1L;
+		private TextLayoutIntInputText(int i,Text t,text_Runnable r,JPanel p,String n){
+			super(i);IntInputText ths=this;
+			addFocusListener(new FocusListener(){
+				@Override
+				public void focusGained(FocusEvent e){}
+				@Override
+				public void focusLost(FocusEvent e){
+					ths.focus_Lost();
+					int value=Integer.parseInt(ths.getText());
+					r.run(t,value);
+					t.flags|=HasLayout;
+				}
+			});
+			p.add(new JLabel(n));
+			p.add(this);
+		}
 	}
 }

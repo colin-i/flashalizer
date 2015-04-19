@@ -70,10 +70,10 @@ public class Elements {
 			public int maxlength;
 			public String initialtext;
 			public int layout_align;
-			int layout_leftmargin;
-			int layout_rightmargin;
-			int layout_indent;
-			int layout_leading;
+			public int layout_leftmargin;
+			public int layout_rightmargin;
+			public int layout_indent;
+			public int layout_leading;
 			//this constructor on the first position, getDeclaredConstructors()[0]
 			EditText(Object[]v) throws IllegalArgumentException, IllegalAccessException{element.Element(v,this);}
 			EditText(){

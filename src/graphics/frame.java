@@ -445,14 +445,14 @@ public class frame extends JPanel implements TreeSelectionListener{
 		value_changed();
 	}
 	void value_changed(){
-		Container disp=display.frameData.getParent();
+		Container disp=Graphics.frameData.getParent();
 		int component_pos=0;
 		for(;component_pos<disp.getComponentCount();component_pos++){
-			if(disp.getComponent(component_pos)==display.frameData)break;
+			if(disp.getComponent(component_pos)==Graphics.frameData)break;
 		}
-		disp.remove(display.frameData);
-		display.frameData=new Panel();
-		display.frameData.setLayout(new BoxLayout(display.frameData,BoxLayout.Y_AXIS));
+		disp.remove(Graphics.frameData);
+		Graphics.frameData=new Panel();
+		Graphics.frameData.setLayout(new BoxLayout(Graphics.frameData,BoxLayout.Y_AXIS));
 		
 		DefaultMutableTreeNode sel_node=(DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
 		if(sel_node!=null){//there is lost of selection at depth when removing and inserting||||||and place new object at character
@@ -505,10 +505,10 @@ public class frame extends JPanel implements TreeSelectionListener{
 				
 				JScrollPane remv=new JScrollPane(rem);
 				remv.setBorder(BorderFactory.createTitledBorder("RemoveTag"));
-				display.frameData.add(remv);
+				Graphics.frameData.add(remv);
 				JScrollPane dpth=new JScrollPane(dpt);
 				dpth.setBorder(BorderFactory.createTitledBorder("Depth"));
-				display.frameData.add(dpth);
+				Graphics.frameData.add(dpth);
 				
 				//also add x y
 				try {
@@ -517,13 +517,13 @@ public class frame extends JPanel implements TreeSelectionListener{
 					xy.add(Graphics.character.new InputTextField(getAField(item.class,X.class),it));
 					xy.add(new Label("Y"));
 					xy.add(Graphics.character.new InputTextField(getAField(item.class,Y.class),it));
-					display.frameData.add(xy);
+					Graphics.frameData.add(xy);
 				}catch (IllegalArgumentException | IllegalAccessException e) {e.printStackTrace();}
 			}
 		}
 		
-		disp.add(display.frameData,component_pos);
-		display.frameData.revalidate();
+		disp.add(Graphics.frameData,component_pos);
+		Graphics.frameData.revalidate();
 		
 		display.draw();
 	}

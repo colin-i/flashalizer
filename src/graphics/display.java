@@ -1,16 +1,13 @@
 package graphics;
 
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
-import javax.swing.BoxLayout;
 import javax.swing.JComponent;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
@@ -21,7 +18,7 @@ import graphics.frame.item;
 import graphics.frame.frame_item;
 import graphics.character.Character;
 
-class display extends JPanel{
+class display extends JScrollPane{
 	private static final long serialVersionUID = 1L;
 	private class content extends JComponent{
 		private static final long serialVersionUID = 1L;
@@ -105,20 +102,9 @@ class display extends JPanel{
 	}
 	private static JComponent component;
 	display(){
-		setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
 		component=new content();
-		
-		JScrollPane s=new JScrollPane(component);
-		add(s);
-		
-		frameData=new Container();
-		add(frameData);
-		
-		characterData=new Container();
-		add(characterData);
+		this.setViewportView(new content());
 	}
-	static Container frameData;
-	static Container characterData;
 	static void draw() {
 		component.repaint();
 	}
