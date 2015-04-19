@@ -47,11 +47,21 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 	}
 	
 	public static final int HasFont=0x1;
+	public static final int HasMaxLength=0x2;//used when typing, initial text and variable set ignore this
 	public static final int HasTextColor=0x4;
 	public static final int ReadOnly=0x8;
+	public static final int Password=0x10;
 	public static final int Multiline=0x20;
+	public static final int WordWrap=0x40;
 	public static final int HasText=0x80;
+	//#define UseOutlines=0x100     no text detected at a test
+	public static final int HTML=0x200;
+	//#define WasStatic=0x400   nothing
+	public static final int Border=0x800;
+	public static final int NoSelect=0x1000;
 	public static final int HasLayout=0x2000;
+	public static final int AutoSize=0x4000;//only when size goes outside the bounds
+	//#define HasFontClass=0x8000     SymbolClass
 	public static final int FillStyleType_none=-1;
 	class EditText extends Structure{
 		//"..Structure has unknown size, ensure all fields are public"

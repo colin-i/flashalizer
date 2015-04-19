@@ -67,7 +67,7 @@ public class Elements {
 			public int font_height;
 			String fontclassname;
 			public int rgba;
-			int maxlength;
+			public int maxlength;
 			public String initialtext;
 			public int layout_align;
 			int layout_leftmargin;

@@ -1,11 +1,18 @@
 package graphics;
 
 import static actionswf.ActionSwf.HasFont;
-import static actionswf.ActionSwf.HasLayout;
-import static actionswf.ActionSwf.HasText;
+import static actionswf.ActionSwf.HasMaxLength;
 import static actionswf.ActionSwf.HasTextColor;
-import static actionswf.ActionSwf.Multiline;
 import static actionswf.ActionSwf.ReadOnly;
+import static actionswf.ActionSwf.Password;
+import static actionswf.ActionSwf.Multiline;
+import static actionswf.ActionSwf.WordWrap;
+import static actionswf.ActionSwf.HasText;
+import static actionswf.ActionSwf.HTML;
+import static actionswf.ActionSwf.Border;
+import static actionswf.ActionSwf.NoSelect;
+import static actionswf.ActionSwf.HasLayout;
+import static actionswf.ActionSwf.AutoSize;
 
 import java.awt.Button;
 import java.awt.Color;
@@ -133,11 +140,34 @@ class text{
 			radio=new JRadioButtonMenuItem("Center");radio.addActionListener(al);group.add(radio);panel.add(radio);
 			radio=new JRadioButtonMenuItem("Justify");radio.addActionListener(al);group.add(radio);panel.add(radio);
 			
+			cr.add_one_field(panel,new Label("MaxLength"));
+			IntInputText fL=new IntInputText(t.structure.maxlength);
+			fL.addFocusListener(new FocusListener(){
+				@Override
+				public void focusGained(FocusEvent e){}
+				@Override
+				public void focusLost(FocusEvent e){
+					fL.focus_Lost();
+					int value=Integer.parseInt(fL.getText());
+					t.structure.maxlength=value;
+					flags_set(value,t,HasMaxLength);
+				}
+			});
+			panel.add(fL);
+			
 			display.characterData.add(panel);
 			
 			panel=cr.new_panel();
+			
 			add_flag(panel,t,"Multiline",Multiline);
 			add_flag(panel,t,"ReadOnly",ReadOnly);
+			add_flag(panel,t,"NoSelect",NoSelect);
+			add_flag(panel,t,"HTML",HTML);
+			add_flag(panel,t,"Border",Border);
+			add_flag(panel,t,"WordWrap",WordWrap);
+			add_flag(panel,t,"Password",Password);
+			add_flag(panel,t,"AutoSize",AutoSize);
+			
 			display.characterData.add(panel);
 		}
 		catch (IllegalArgumentException | SecurityException e) {e.printStackTrace();}
