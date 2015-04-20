@@ -103,7 +103,7 @@ class display extends JScrollPane{
 	private static JComponent component;
 	display(){
 		component=new content();
-		this.setViewportView(new content());
+		setViewportView(component);
 	}
 	static void draw() {
 		component.repaint();

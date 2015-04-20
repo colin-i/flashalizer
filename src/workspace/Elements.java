@@ -151,8 +151,9 @@ public class Elements {
 		Image(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}*/
 	public static class DBL extends element{
-		String imagepath;
+		public String imagepath;
 		DBL(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
+		public DBL() throws IllegalArgumentException, IllegalAccessException{this(new Object[]{"",untitled});}
 	}
 	
 	public static class Placement extends element{

@@ -66,6 +66,7 @@ import workspace.Elements;
 import workspace.WorkSpace;
 import workspace.Elements.Font;
 import workspace.Elements.Text;
+import workspace.Elements.DBL;
 import workspace.InputText;
 
 public class character extends JPanel implements TreeSelectionListener{
@@ -93,10 +94,14 @@ public class character extends JPanel implements TreeSelectionListener{
 		private String name;
 		private char letter;
 		private ImageIcon icon;private ImageIcon icon_exp;
+		private String screenName;
 		private type(String n,char l){
 			name=n;letter=l;
 			icon=new ImageIcon("img/char/"+letter+".gif");
 			icon_exp=image_border(icon);
+		}
+		private type(String n,char l,String s){
+			this(n,l);screenName=s;
 		}
 	}
 	static ImageIcon image_border(ImageIcon icon){
@@ -193,7 +198,7 @@ public class character extends JPanel implements TreeSelectionListener{
 	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)public @interface WidthInt{}
 	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)public @interface HeightInt{}
 	private type Types[];
-	private type[]usedInImportantTags={new type(font,'f'),new type(dbl,'l')};
+	private type[]usedInImportantTags={new type(font,'f'),new type(dbl,'i',"Image")};
 	private type placeableTags[]={new type(button,'b'),new type(text,'t'),new type(shape,'s')/*,new type(image,'i')*/,new type(spritedone,'m')};
 	static Character placeableCharacter(String name){
 		int n=root.getChildCount();
@@ -262,7 +267,7 @@ public class character extends JPanel implements TreeSelectionListener{
 			private static final long serialVersionUID = 1L;
 			private Class<?>elementClass;private type type;
 			private elementAction(Class<?>elCls,type t){
-				super(t.name);elementClass=elCls;type=t;
+				super(t.screenName==null?t.name:t.screenName);elementClass=elCls;type=t;
 			}
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -277,7 +282,6 @@ public class character extends JPanel implements TreeSelectionListener{
 					}
 				}
 			}
-			
 		}
 		private void add_button(char img,String tip,ActionListener aclst){
 			JButton b=new JButton(new ImageIcon("img/character/"+img+".gif"));
@@ -294,6 +298,7 @@ public class character extends JPanel implements TreeSelectionListener{
 				Class<?>elementClass=null;
 				if(t.name.equals(font))elementClass=Font.class;
 				else if(t.name.equals(text))elementClass=Text.class;
+				else if(t.name.equals(dbl))elementClass=DBL.class;
 				if(elementClass!=null)popup.add(new JMenuItem(new elementAction(elementClass,t)));
 			}
 			add_button('a',"New Character",new ActionListener(){
@@ -354,6 +359,7 @@ public class character extends JPanel implements TreeSelectionListener{
 			add_field(panel,"Name",chr.name,chr);
 			Graphics.characterData.add(panel);
 			
+			Object elem=chr.element;
 			if(chr.isPlaceable==true){
 				panel=new_panel();
 				if(chr.width!=null){
@@ -462,10 +468,24 @@ public class character extends JPanel implements TreeSelectionListener{
 					}});
 				add_one_field(panel,b);
 				Graphics.characterData.add(panel);
+				
+				if(elem instanceof Text)new text(chr);
+			}else{
+				if(elem instanceof DBL){
+					DBL dbl=(DBL)elem;
+					panel=new_panel();
+					panel.add(new JLabel("Path"));
+					InputText pth=new InputText(dbl.imagepath);
+					pth.addFocusListener(new FocusListener(){
+						@Override public void focusGained(FocusEvent arg0) {}
+						@Override
+						public void focusLost(FocusEvent arg0) {
+							dbl.imagepath=pth.getText();
+						}});
+					panel.add(pth);
+					Graphics.characterData.add(panel);
+				}
 			}
-			
-			Object elem=chr.element;
-			if(elem instanceof Text)new text(chr);
 		}
 		
 		Container c=currentCharacterData.getParent().getParent();
@@ -504,7 +524,7 @@ public class character extends JPanel implements TreeSelectionListener{
 			model.insertNodeInto(new_node,parent,p);
 			return;
 		}
-		int  cc=model.getChildCount(main);
+		int cc=model.getChildCount(main);
 		for( int i=0; i < cc; i++){
 			DefaultMutableTreeNode frame=(DefaultMutableTreeNode)model.getChild(main,i);
 			int n=frame.getChildCount();
