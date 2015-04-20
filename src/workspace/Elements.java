@@ -176,7 +176,10 @@ public class Elements {
 		public @SpriteId String spriteid;
 		public SpriteDone(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
-	public static class SpriteNew extends element{public SpriteNew(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}}
+	public static class SpriteNew extends element{
+		public SpriteNew(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
+		public SpriteNew() throws IllegalArgumentException, IllegalAccessException{this(new Object[]{untitled});}
+	}
 	public static class SpritePlacement extends element{
 		public @SpriteId String spriteid;public @RefId String refid;public @DepthInt int depth;
 		SpritePlacement(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}

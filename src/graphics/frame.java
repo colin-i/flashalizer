@@ -228,8 +228,8 @@ public class frame extends JPanel implements TreeSelectionListener{
 		private frame_item(item[]e,String a,int p){
 			elements=e;action=a;pos=p;
 		}
-		private frame_item(int p){
-			elements=new item[0];action="";pos=p;
+		frame_item(int p){
+			elements=new item[0];eshow=new item[0];action="";pos=p;
 		}
 		private void setPos(int p){pos=p;}
 		@Override

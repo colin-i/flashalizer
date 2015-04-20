@@ -63,6 +63,7 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 import workspace.Elements;
+import workspace.Elements.SpriteNew;
 import workspace.WorkSpace;
 import workspace.Elements.Font;
 import workspace.Elements.Text;
@@ -131,8 +132,12 @@ public class character extends JPanel implements TreeSelectionListener{
 				if(p.name.equals(type.name)){
 					isPlaceable=true;
 					if(type.name.equals(spritedone)){
-						Field b=frame.getSpriteField(spritedone);
-						frames=Graphics.frame.sprite_frames((String)b.get(element));
+						if(element instanceof SpriteNew){
+							frames=new frame_item[1];frames[0]=Graphics.frame.new frame_item(0);
+						}else{
+							Field b=frame.getSpriteField(spritedone);
+							frames=Graphics.frame.sprite_frames((String)b.get(element));
+						}
 					}
 					break;
 				}
@@ -199,7 +204,7 @@ public class character extends JPanel implements TreeSelectionListener{
 	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)public @interface HeightInt{}
 	private type Types[];
 	private type[]usedInImportantTags={new type(font,'f'),new type(dbl,'i',"Image")};
-	private type placeableTags[]={new type(button,'b'),new type(text,'t'),new type(shape,'s')/*,new type(image,'i')*/,new type(spritedone,'m')};
+	private type placeableTags[]={new type(button,'b'),new type(text,'t'),new type(shape,'s')/*,new type(image,'i')*/,new type(spritedone,'m',"Movie")};
 	static Character placeableCharacter(String name){
 		int n=root.getChildCount();
 		for(int i=0;i<n;i++){
@@ -299,6 +304,7 @@ public class character extends JPanel implements TreeSelectionListener{
 				if(t.name.equals(font))elementClass=Font.class;
 				else if(t.name.equals(text))elementClass=Text.class;
 				else if(t.name.equals(dbl))elementClass=DBL.class;
+				else if(t.name.equals(spritedone))elementClass=SpriteNew.class;
 				if(elementClass!=null)popup.add(new JMenuItem(new elementAction(elementClass,t)));
 			}
 			add_button('a',"New Character",new ActionListener(){
