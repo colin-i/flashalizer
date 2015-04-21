@@ -77,6 +77,15 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 		public int layout_indent;
 		public int layout_leading;
 	}
+	public static final int FontFlagsBold=1;
+	public static final int FontFlagsItalic=2; 
+	//const FontFlagsWideCodes=4        codes if NumGlyphs>0
+	//const FontFlagsWideOffsets=8      offsets if NumGlyphs>0
+	//const FontFlagsANSI=0x10          when codes
+	//const FontFlagsSmallText=0x20       nothing detected at device fonts
+	//const FontFlagsShiftJIS=0x40      when codes
+	//const FontFlagsHasLayout=0x80     not implemented
+	
 	class ButtonData extends Structure{//the object is passed through com.sun.jna.Library, Structure is required,+public(throwing error otherwise)
 		public int def_fill;
 		public int def_line_sz;

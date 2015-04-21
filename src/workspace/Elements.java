@@ -16,7 +16,7 @@ import graphics.frame.YInt;
 import static actionswf.ActionSwf.FillStyleType_none;
 
 public class Elements {
-	private static String untitled="Untitled";
+	private static final String untitled="Untitled";
 	public static class Button extends element{
 		public @WidthInt int width;
 		public @HeightInt int height;
@@ -44,12 +44,13 @@ public class Elements {
 			}
 		}
 	}
+	public static final String[]default_fonts={"_sans","_serif","_typewriter"};
 	//if not static then Field[] from getDeclaredFields on previous static will have 3 fields: font.. font_flags and "this"
 	public static class Font extends element{
-		String fontname;int font_flags;
+		public String fontname;public int font_flags;
 		Font(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 		public Font() throws IllegalArgumentException, IllegalAccessException{
-			this(new Object[]{"_sans",0,untitled});
+			this(new Object[]{default_fonts[0],0,untitled});
 		}
 	}
 	public static class Text extends element{

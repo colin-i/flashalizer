@@ -46,6 +46,8 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -69,6 +71,10 @@ import workspace.Elements.Font;
 import workspace.Elements.Text;
 import workspace.Elements.DBL;
 import workspace.InputText;
+
+import static workspace.Elements.default_fonts;
+import static actionswf.ActionSwf.FontFlagsBold;
+import static actionswf.ActionSwf.FontFlagsItalic;
 
 public class character extends JPanel implements TreeSelectionListener{
 	private static final long serialVersionUID = 1L;
@@ -490,6 +496,26 @@ public class character extends JPanel implements TreeSelectionListener{
 						}});
 					panel.add(pth);
 					Graphics.characterData.add(panel);
+				}else/* if(element instance of Font)*/{
+					Font fnt=(Font)elem;
+					panel=new_panel();
+					
+					JComboBox<String> name=new JComboBox<String>();
+					for(int i=0;i<default_fonts.length;i++){
+						name.addItem(default_fonts[i]);
+						if(default_fonts[i].equals(fnt.fontname))name.setSelectedItem(default_fonts[i]);
+					}
+					name.addActionListener(new ActionListener(){
+						@Override
+						public void actionPerformed(ActionEvent arg0) {
+							fnt.fontname=name.getSelectedItem().toString();
+						}});
+					panel.add(name);
+					
+					add_flag_font(panel,fnt,"Bold",FontFlagsBold);
+					add_flag_font(panel,fnt,"Italic",FontFlagsItalic);
+					
+					Graphics.characterData.add(panel);
 				}
 			}
 		}
@@ -500,6 +526,17 @@ public class character extends JPanel implements TreeSelectionListener{
 		JScrollPane s=new JScrollPane(Graphics.characterData);
 		parent.add(s);
 		parent.revalidate();
+	}
+	private void add_flag_font(JPanel panel,Font f,String nm,int flag){
+		JCheckBox chk=new JCheckBox(nm);
+		if((f.font_flags&flag)!=0)chk.setSelected(true);
+		chk.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				if(chk.isSelected())f.font_flags|=flag;
+				else f.font_flags&=~flag;
+			}
+		});
+		panel.add(chk);
 	}
 	@Override
 	public void valueChanged(TreeSelectionEvent arg0) {
