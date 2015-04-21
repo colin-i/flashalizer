@@ -500,11 +500,12 @@ public class character extends JPanel implements TreeSelectionListener{
 					Font fnt=(Font)elem;
 					panel=new_panel();
 					
-					JComboBox<String> name=new JComboBox<String>();
+					JComboBox<String> name=new JComboBox<String>();int indx=-1;
 					for(int i=0;i<default_fonts.length;i++){
 						name.addItem(default_fonts[i]);
-						if(default_fonts[i].equals(fnt.fontname))name.setSelectedItem(default_fonts[i]);
+						if(default_fonts[i].equals(fnt.fontname))indx=i;
 					}
+					name.setSelectedIndex(indx);
 					name.addActionListener(new ActionListener(){
 						@Override
 						public void actionPerformed(ActionEvent arg0) {
