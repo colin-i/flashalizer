@@ -71,7 +71,6 @@ import workspace.Elements.Font;
 import workspace.Elements.Text;
 import workspace.Elements.DBL;
 import workspace.InputText;
-
 import static workspace.Elements.default_fonts;
 import static actionswf.ActionSwf.FontFlagsBold;
 import static actionswf.ActionSwf.FontFlagsItalic;
@@ -482,6 +481,7 @@ public class character extends JPanel implements TreeSelectionListener{
 				Graphics.characterData.add(panel);
 				
 				if(elem instanceof Text)new text(chr);
+				else if(elem instanceof workspace.Elements.Button)new button(chr);
 			}else{
 				if(elem instanceof DBL){
 					DBL dbl=(DBL)elem;
@@ -638,5 +638,11 @@ public class character extends JPanel implements TreeSelectionListener{
 				if(!model.isLeaf(child))walk(model,child,isItem);
 			}
 		} 
+	}
+	Color rgba2color(int color){
+		return new Color(color>>>(8+8+8),(color>>>(8+8))&0xff,(color>>>8)&0xff,color==0?0xff:color&0xff);
+	}
+	int color2rgba(Color c){
+		return (c.getRed()*0x100*0x100*0x100)|(c.getGreen()*0x100*0x100)|(c.getBlue()*0x100)|c.getAlpha();
 	}
 }

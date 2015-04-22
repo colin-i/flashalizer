@@ -20,22 +20,22 @@ public class Elements {
 	public static class Button extends element{
 		public @WidthInt int width;
 		public @HeightInt int height;
-		ButtonData structure;
+		public ButtonData structure;
 		Button(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
-		static class ButtonData{
-			int def_fill;
-			int def_line_sz;
-			int def_line;
-			int ov_fill;
-			int ov_line_sz;
-			int ov_line;
-			int xcurve;
-			int ycurve;
-			String text;
-			@NamedId @Errors2 String font_id;
-			int font_height;
-			int font_vertical_offset;
-			String actions;
+		public static class ButtonData{
+			public int def_fill;
+			public int def_line_sz;
+			public int def_line;
+			public int ov_fill;
+			public int ov_line_sz;
+			public int ov_line;
+			public int xcurve;
+			public int ycurve;
+			public String text;
+			public @NamedId @Errors2 String font_id;
+			public int font_height;
+			public int font_vertical_offset;
+			public String actions;
 			ButtonData(Object[]v) throws IllegalArgumentException, IllegalAccessException{element.Element(v,this);}
 			ButtonData(){
 				/*def_fill=0;def_line_sz=0;def_line=0;ov_fill=0;ov_line_sz=0;ov_line=0;xcurve=0;ycurve=0;*/

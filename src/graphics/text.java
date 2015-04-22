@@ -92,7 +92,7 @@ class text{
 			});
 			panel.add(fH);
 			int color=t.structure.rgba;
-			Color c=new Color(color&(0xff00*0x100*0x100),color&(0xff00*0x100),color&0xff00,color==0?0xff:color&0xff);
+			Color c=cr.rgba2color(color);
 			Button new_color_b=new Button();
 			new_color_b.setBackground(c);
 			JColorChooser colorChooser=new JColorChooser();colorChooser.setColor(c);
@@ -104,7 +104,7 @@ class text{
 					 public void actionPerformed(ActionEvent e){
 						Color c=colorChooser.getColor();
 						new_color_b.setBackground(c);
-						t.structure.rgba=(c.getRed()*0x100*0x100*0x100)|(c.getGreen()*0x100*0x100)|(c.getBlue()*0x100)|c.getAlpha();
+						t.structure.rgba=cr.color2rgba(c);
 						flags_set(t.structure.rgba,t,HasTextColor);
 					}
 				}
