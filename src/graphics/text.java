@@ -86,7 +86,7 @@ class text{
 				@Override
 				public void focusLost(FocusEvent e){
 					fH.focus_Lost();
-					int value=Integer.parseInt(fH.getText());
+					int value=(Long.decode(fH.getText())).intValue();
 					t.structure.font_height=value;
 				}
 			});
@@ -123,7 +123,7 @@ class text{
 				@Override
 				public void focusLost(FocusEvent e){
 					fL.focus_Lost();
-					int value=Integer.parseInt(fL.getText());
+					int value=(Long.decode(fL.getText())).intValue();
 					t.structure.maxlength=value;
 					flags_set(value,t,HasMaxLength);
 				}
@@ -229,7 +229,7 @@ class text{
 				@Override
 				public void focusLost(FocusEvent e){
 					ths.focus_Lost();
-					int value=Integer.parseInt(ths.getText());
+					int value=(Long.decode(ths.getText())).intValue();
 					r.run(t,value);
 					t.flags|=HasLayout;
 				}

@@ -605,7 +605,7 @@ public class character extends JPanel implements TreeSelectionListener{
 			try {
 				if(field.get(element) instanceof Integer){
 					super.focus_Lost();
-					field.set(element,Integer.parseInt(getText()));
+					field.set(element,(Long.decode(getText())).intValue());
 					
 					display.draw();
 				}else/*String*/{

@@ -4,32 +4,105 @@ import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 import workspace.Elements.Button;
 import workspace.Elements.Button.ButtonData;
+import workspace.InputText;
+import workspace.WorkSpace;
 import static graphics.Graphics.characterData;
 
 class button {
-	private JPanel panel;
+	private JPanel subpanel;
 	button(graphics.character.Character chr){
 		character cr=Graphics.character;
 		Button bt=(Button)chr.element;
 		ButtonData data=bt.structure;
+		JPanel panel;
 		
 		panel=cr.new_panel();
-		panel.setBorder(BorderFactory.createTitledBorder("Normal"));
-		color_chooser(data.def_fill,new button_Runnable(){@Override public void run(Color c){data.def_fill=Graphics.character.color2rgba(c);}});
+		subpanel=cr.new_panel();
+		subpanel.setBorder(BorderFactory.createTitledBorder("Normal"));
+		subpanel.add(color_chooser(data.def_fill,new button_Runnable_int(){@Override public void run(int c){data.def_fill=c;}}));
+		line(new ButtonInputText(data.def_line_sz,new button_Runnable_int(){@Override public void run(int val){data.def_line_sz=val;}}),
+			color_chooser(data.def_line,new button_Runnable_int(){@Override public void run(int c){data.def_line=c;}}));
+		panel.add(subpanel);
+		subpanel=cr.new_panel();
+		subpanel.setBorder(BorderFactory.createTitledBorder("Over"));
+		subpanel.add(color_chooser(data.ov_fill,new button_Runnable_int(){@Override public void run(int c){data.ov_fill=c;}}));
+		line(new ButtonInputText(data.ov_line_sz,new button_Runnable_int(){@Override public void run(int val){data.ov_line_sz=val;}}),
+			color_chooser(data.ov_line,new button_Runnable_int(){@Override public void run(int c){data.ov_line=c;}}));
+		panel.add(subpanel);
+		characterData.add(panel);
+		
+		panel=cr.new_panel();
+		panel.setBorder(BorderFactory.createTitledBorder("Curve"));
+		panel.add(new JLabel("X"));
+		panel.add(new ButtonInputText(data.xcurve,new button_Runnable_int(){@Override public void run(int val){data.xcurve=val;}}));
+		panel.add(new JLabel("Y"));
+		panel.add(new ButtonInputText(data.ycurve,new button_Runnable_int(){@Override public void run(int val){data.ycurve=val;}}));
+		characterData.add(panel);
+		
+		panel=cr.new_panel();panel.setBorder(BorderFactory.createTitledBorder("Label"));
+		panel.add(new ButtonInputText(data.text,new button_Runnable_String(){@Override public void run(String val){data.text=val;}}));
+		cr.add_one_field(panel,new JLabel("Font"));panel.add(new ButtonInputText(data.font_id,new button_Runnable_String(){@Override public void run(String val){data.font_id=val;}}));
+		cr.add_one_field(panel,new JLabel("Height"));panel.add(new ButtonInputText(data.font_height,new button_Runnable_int(){@Override public void run(int val){data.font_height=val;}}));
+		cr.add_one_field(panel,new JLabel("Y Offset"));panel.add(new ButtonInputText(data.font_vertical_offset,new button_Runnable_int(){@Override public void run(int val){data.font_vertical_offset=val;}}));
+		characterData.add(panel);
+		
+		panel=cr.new_panel();panel.setBorder(BorderFactory.createTitledBorder("Action"));
+		JTextArea tx=new JTextArea(data.actions);tx.setRows(5);
+		tx.addFocusListener(new FocusListener(){
+			@Override public void focusGained(FocusEvent arg0){}
+			@Override public void focusLost(FocusEvent arg0){data.actions=tx.getText();}
+		});
+		WorkSpace.textPopup.add(tx);
+		JScrollPane sc=new JScrollPane(tx);panel.add(sc);
 		characterData.add(panel);
 	}
-	private interface button_Runnable{
-		void run(Color c);
+	private void line(ButtonInputText sz,JButton clr){
+		JPanel pan=new JPanel();pan.setLayout(new BoxLayout(pan,BoxLayout.X_AXIS));
+		pan.setBorder(BorderFactory.createTitledBorder("Line"));
+		pan.add(new JLabel("Size"));pan.add(sz);pan.add(clr);
+		subpanel.add(pan);
 	}
-	private void color_chooser(int rgba,button_Runnable b){
+	private class ButtonInputText extends InputText implements FocusListener{
+		private static final long serialVersionUID = 1L;
+		private button_Runnable run;
+		private ButtonInputText(Object in,button_Runnable r){
+			super(in);run=r;
+			addFocusListener(this);
+		}
+		@Override public void focusGained(FocusEvent arg0){}
+		@Override
+		public void focusLost(FocusEvent arg0){
+			String txt=getText();
+			if(run instanceof button_Runnable_int){
+				super.focus_Lost();
+				((button_Runnable_int)run).run((Long.decode(txt)).intValue());
+			}else/*String*/{
+				((button_Runnable_String)run).run(txt);
+			}
+		}
+	}
+	private interface button_Runnable{}
+	private interface button_Runnable_int extends button_Runnable{
+		void run(int val);
+	}
+	private interface button_Runnable_String extends button_Runnable{
+		void run(String val);
+	}
+	private JButton color_chooser(int rgba,button_Runnable b){
 		JColorChooser chooser;Color c;JButton bt;
 		c=Graphics.character.rgba2color(rgba);
 		bt=new JButton();bt.setBackground(c);
@@ -42,7 +115,7 @@ class button {
 				 public void actionPerformed(ActionEvent e){
 					Color c=chooser.getColor();
 					bt.setBackground(c);
-					b.run(c);
+					((button_Runnable_int)b).run(Graphics.character.color2rgba(c));
 				}
 			}
 			,null
@@ -52,6 +125,6 @@ class button {
 				dialog.setVisible(true);
 			}
 		});
-		panel.add(bt);
+		return bt;
 	}
 }
