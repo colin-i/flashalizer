@@ -35,11 +35,12 @@ public class Elements {
 			public @NamedId @Errors2 String font_id;
 			public int font_height;
 			public int font_vertical_offset;
+			public int font_color;
 			public String actions;
 			ButtonData(Object[]v) throws IllegalArgumentException, IllegalAccessException{element.Element(v,this);}
 			ButtonData(){
 				/*def_fill=0;def_line_sz=0;def_line=0;ov_fill=0;ov_line_sz=0;ov_line=0;xcurve=0;ycurve=0;*/
-				text="";font_id="";/*font_height=0;font_vertical_offset=0;*/
+				text="";font_id="";/*font_height=0;font_vertical_offset=0;font_color=0;*/
 				actions="";
 			}
 		}

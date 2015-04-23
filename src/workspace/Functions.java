@@ -61,7 +61,7 @@ public class Functions extends JTable{
 						if(f.getName().equals("def_fill"))txt.setToolTipText("Shape fill color");else if(f.getName().equals("def_line_sz"))txt.setToolTipText("Shape line size");else if(f.getName().equals("def_line"))txt.setToolTipText("Shape line color");
 						else if(f.getName().equals("ov_fill"))txt.setToolTipText("Shape mouse over fill color");else if(f.getName().equals("ov_line_sz"))txt.setToolTipText("Shape mouse over line size");else if(f.getName().equals("ov_line"))txt.setToolTipText("Shape mouse over line color");
 						else if(f.getName().equals("xcurve"))txt.setToolTipText("Shape curve size on x");else if(f.getName().equals("ycurve"))txt.setToolTipText("Shape curve size on y");
-						else if(f.getName().equals("text"))txt.setToolTipText("Button text");else if(f.getName().equals("font_id"))txt.setToolTipText("Text font id");else if(f.getName().equals("font_height"))txt.setToolTipText("Text font height");else if(f.getName().equals("font_vertical_offset"))txt.setToolTipText("Text font vertical offset");
+						else if(f.getName().equals("text"))txt.setToolTipText("Button text");else if(f.getName().equals("font_id"))txt.setToolTipText("Text font id");else if(f.getName().equals("font_height"))txt.setToolTipText("Text font height");else if(f.getName().equals("font_vertical_offset"))txt.setToolTipText("Text font vertical offset");else if(f.getName().equals("font_color"))txt.setToolTipText("Font rgba color");
 						else/*if(f.getName().equals("actions"))*/txt.setToolTipText("ActionScript on press");
 					}
 				};

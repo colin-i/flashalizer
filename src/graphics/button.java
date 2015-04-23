@@ -58,6 +58,7 @@ class button {
 		cr.add_one_field(panel,new JLabel("Font"));panel.add(new ButtonInputText(data.font_id,new button_Runnable_String(){@Override public void run(String val){data.font_id=val;}}));
 		cr.add_one_field(panel,new JLabel("Height"));panel.add(new ButtonInputText(data.font_height,new button_Runnable_int(){@Override public void run(int val){data.font_height=val;}}));
 		cr.add_one_field(panel,new JLabel("Y Offset"));panel.add(new ButtonInputText(data.font_vertical_offset,new button_Runnable_int(){@Override public void run(int val){data.font_vertical_offset=val;}}));
+		cr.add_one_field(panel,color_chooser(data.font_color,new button_Runnable_int(){@Override public void run(int c){data.font_color=c;}}));
 		characterData.add(panel);
 		
 		panel=cr.new_panel();panel.setBorder(BorderFactory.createTitledBorder("Action"));

@@ -99,6 +99,7 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 		public int font_id;
 		public int font_height;
 		public int font_vertical_offset;
+		public int font_color;
 		public String actions;
 	}
 }
