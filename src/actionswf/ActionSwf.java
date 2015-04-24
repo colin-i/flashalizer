@@ -82,7 +82,7 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 	//const FontFlagsWideCodes=4        codes if NumGlyphs>0
 	//const FontFlagsWideOffsets=8      offsets if NumGlyphs>0
 	//const FontFlagsANSI=0x10          when codes
-	//const FontFlagsSmallText=0x20       nothing detected at device fonts
+	//const FontFlagsSmallText=0x20     nothing detected at device fonts
 	//const FontFlagsShiftJIS=0x40      when codes
 	//const FontFlagsHasLayout=0x80     not implemented
 	

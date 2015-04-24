@@ -14,11 +14,12 @@ import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
+import javax.swing.text.JTextComponent;
 import javax.swing.undo.UndoManager;
 
 
 
-public class PopUp extends JPopupMenu
+class PopUp extends JPopupMenu
 	{
 		private final static long serialVersionUID = 0;
 
@@ -31,7 +32,7 @@ public class PopUp extends JPopupMenu
 		private JMenuItem jmenuItem_delete;
 		private JMenuItem jmenuItem_selectAll;
 
-		private InputText jtextComponent;
+		private JTextComponent jtextComponent;
 
 		PopUp()
 		{
@@ -43,7 +44,7 @@ public class PopUp extends JPopupMenu
 			{
 				public void actionPerformed(ActionEvent event)
 				{
-					jtextComponent.umanager.undo();
+					((Input)jtextComponent).getUmanager().undo();
 				}
 			});
 
@@ -114,7 +115,7 @@ public class PopUp extends JPopupMenu
 			add(jmenuItem_selectAll);
 		}
 
-		void add(InputText jtextComponent)
+		void add(JTextComponent jtextComponent)
 		{
 			jtextComponent.addMouseListener(new MouseAdapter()
 			{
@@ -126,22 +127,22 @@ public class PopUp extends JPopupMenu
 					}
 				}
 			});
-
-			jtextComponent.umanager=new UndoManager();
+			Input inp=(Input) jtextComponent;
+			inp.setUmanager(new UndoManager());
 			jtextComponent.getDocument().addUndoableEditListener(new UndoableEditListener()
 			{
 				public void undoableEditHappened(UndoableEditEvent event)
 				{
-					jtextComponent.umanager.addEdit(event.getEdit());
+					inp.getUmanager().addEdit(event.getEdit());
 				}
 			});
 		}
 
 		private void processClick(MouseEvent event)
 		{
-			jtextComponent = (InputText)event.getSource();
+			jtextComponent = (JTextComponent)event.getSource();
 
-			boolean enableUndo = jtextComponent.umanager.canUndo();
+			boolean enableUndo = ((Input)jtextComponent).getUmanager().canUndo();
 			boolean enableCut = false;
 			boolean enableCopy = false;
 			boolean enablePaste = false;

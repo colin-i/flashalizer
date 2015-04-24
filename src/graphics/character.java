@@ -12,12 +12,13 @@ import graphics.frame.frame_item;
 import graphics.frame.item;
 
 import java.awt.BasicStroke;
-import java.awt.Button;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
@@ -67,10 +68,12 @@ import javax.swing.tree.TreePath;
 import workspace.Elements;
 import workspace.Elements.SpriteNew;
 import workspace.WorkSpace;
+import workspace.Elements.Button;
 import workspace.Elements.Font;
 import workspace.Elements.Text;
 import workspace.Elements.DBL;
 import workspace.InputText;
+import static graphics.Graphics.panel_button_add;
 import static workspace.Elements.default_fonts;
 import static actionswf.ActionSwf.FontFlagsBold;
 import static actionswf.ActionSwf.FontFlagsItalic;
@@ -79,7 +82,7 @@ public class character extends JPanel implements TreeSelectionListener{
 	private static final long serialVersionUID = 1L;
 	private JTree tree;
 	character(){
-		setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
+		setLayout(new BorderLayout());
 		Dimension d=new Dimension();d.width=200;
 		setPreferredSize(d);
 		setBorder(BorderFactory.createTitledBorder("Character"));
@@ -94,7 +97,7 @@ public class character extends JPanel implements TreeSelectionListener{
 		add(s);
 		((DefaultTreeModel)tree.getModel()).reload();
 		
-		add(new bar());
+		add(new bar(),BorderLayout.SOUTH);
 	}
 	private class type{
 		private String name;
@@ -294,19 +297,22 @@ public class character extends JPanel implements TreeSelectionListener{
 			}
 		}
 		private void add_button(char img,String tip,ActionListener aclst){
-			JButton b=new JButton(new ImageIcon("img/character/"+img+".gif"));
+			ImageIcon im=new ImageIcon("img/character/"+img+".gif");
+			JButton b=new JButton(im);
 			b.setToolTipText(tip);
 			b.addActionListener(aclst);
+			b.setPreferredSize(new Dimension(im.getIconWidth()+panel_button_add,im.getIconHeight()+panel_button_add));
 			add(b);
 		}
 		private bar(){
-			setLayout(new BoxLayout(this,BoxLayout.X_AXIS)); 
+			setLayout(new FlowLayout()); 
 			
 			//Create the pop up menu for add item
 			JPopupMenu popup=new JPopupMenu();
 			for(type t:Types){
 				Class<?>elementClass=null;
-				if(t.name.equals(font))elementClass=Font.class;
+				if(t.name.equals(button))elementClass=Button.class;
+				else if(t.name.equals(font))elementClass=Font.class;
 				else if(t.name.equals(text))elementClass=Text.class;
 				else if(t.name.equals(dbl))elementClass=DBL.class;
 				else if(t.name.equals(spritedone))elementClass=SpriteNew.class;
@@ -377,7 +383,7 @@ public class character extends JPanel implements TreeSelectionListener{
 					add_field(panel,"Width",chr.width,chr);
 					add_field(panel,"Height",chr.height,chr);
 				}
-				Button b=new Button("Place");
+				JButton b=new JButton("Place");
 				b.addActionListener(new ActionListener(){
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
@@ -640,7 +646,7 @@ public class character extends JPanel implements TreeSelectionListener{
 		} 
 	}
 	Color rgba2color(int color){
-		return new Color(color>>>(8+8+8),(color>>>(8+8))&0xff,(color>>>8)&0xff,color==0?0xff:color&0xff);
+		return new Color(color>>>(8+8+8),(color>>>(8+8))&0xff,(color>>>8)&0xff,color&0xff);
 	}
 	int color2rgba(Color c){
 		return (c.getRed()*0x100*0x100*0x100)|(c.getGreen()*0x100*0x100)|(c.getBlue()*0x100)|c.getAlpha();

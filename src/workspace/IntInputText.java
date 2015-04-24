@@ -8,7 +8,7 @@ public class IntInputText extends InputText implements FocusListener{
 	public IntInputText(int i){
 		super(i);verifier();
 	}
-	IntInputText(){super();verifier();}
+	IntInputText(){super(0);verifier();}
 	private void verifier(){
 		addFocusListener(this);//InputVerifier forgets to verify on tab or on OK click or maybe more
 	}

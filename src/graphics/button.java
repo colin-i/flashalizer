@@ -14,12 +14,11 @@ import javax.swing.JColorChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 
 import workspace.Elements.Button;
 import workspace.Elements.Button.ButtonData;
 import workspace.InputText;
-import workspace.WorkSpace;
+import workspace.AreaInputText;
 import static graphics.Graphics.characterData;
 
 class button {
@@ -62,12 +61,11 @@ class button {
 		characterData.add(panel);
 		
 		panel=cr.new_panel();panel.setBorder(BorderFactory.createTitledBorder("Action"));
-		JTextArea tx=new JTextArea(data.actions);tx.setRows(5);
+		AreaInputText tx=new AreaInputText(data.actions);tx.setRows(5);
 		tx.addFocusListener(new FocusListener(){
 			@Override public void focusGained(FocusEvent arg0){}
 			@Override public void focusLost(FocusEvent arg0){data.actions=tx.getText();}
 		});
-		WorkSpace.textPopup.add(tx);
 		JScrollPane sc=new JScrollPane(tx);panel.add(sc);
 		characterData.add(panel);
 	}

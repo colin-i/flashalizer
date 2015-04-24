@@ -188,7 +188,7 @@ public class Functions extends JTable{
 						else fill_arg.setBackground(Color.WHITE);
 					}
 				});
-				fill_type.setText(Integer.toString(test_val));
+				fill_type.setText(Integer.toString(test_val));//this is required here to apply the correct background color with the above listener
 				c.add(fill_type);fill_type.setToolTipText(tooltip_multiline(new String[]{"-1=no fill","0x00=solid fill","0x40=repeating bitmap fill, 0x41=clipped bitmap fill, 0x42=non-smoothed repeating bitmap, 0x43=non-smoothed clipped bitmap"}));
 				//
 				c.add(new Label("Arg"));

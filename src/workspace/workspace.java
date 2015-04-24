@@ -331,7 +331,7 @@ public class WorkSpace {
 		container.revalidate();
 	}
 	private prop workpath;
-	public static PopUp textPopup=new PopUp();
+	static PopUp textPopup=new PopUp();
 	public static Project project=new Project();
 	static JFrame frame;
 	private ImageIcon img;

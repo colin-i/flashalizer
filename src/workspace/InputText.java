@@ -6,9 +6,9 @@ import javax.swing.JTextField;
 import javax.swing.undo.UndoManager;
 
 
-public class InputText extends JTextField{
+public class InputText extends JTextField implements Input{
 	private static final long serialVersionUID = 1L;
-	UndoManager umanager;
+	private UndoManager umanager;
 	public InputText(String string) {
 		setS(string);
 	}
@@ -19,7 +19,6 @@ public class InputText extends JTextField{
 	private void setI(int string){
 		setS(Integer.toString(string));
 	}
-	InputText(){WorkSpace.textPopup.add(this);}
 	public void focus_Lost(){
 		String txt=getText();
 		try{
@@ -41,5 +40,13 @@ public class InputText extends JTextField{
 	}
 	InputText(int i){
 		setI(i);
+	}
+	@Override
+	public UndoManager getUmanager() {
+		return umanager;
+	}
+	@Override
+	public void setUmanager(UndoManager m) {
+		umanager=m;
 	}
 }

@@ -22,6 +22,9 @@ public class Elements {
 		public @HeightInt int height;
 		public ButtonData structure;
 		Button(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
+		public Button() throws IllegalArgumentException, IllegalAccessException{
+			this(new Object[]{100,50,new ButtonData(),untitled});
+		}
 		public static class ButtonData{
 			public int def_fill;
 			public int def_line_sz;
@@ -39,8 +42,8 @@ public class Elements {
 			public String actions;
 			ButtonData(Object[]v) throws IllegalArgumentException, IllegalAccessException{element.Element(v,this);}
 			ButtonData(){
-				/*def_fill=0;def_line_sz=0;def_line=0;ov_fill=0;ov_line_sz=0;ov_line=0;xcurve=0;ycurve=0;*/
-				text="";font_id="";/*font_height=0;font_vertical_offset=0;font_color=0;*/
+				def_fill=0xFF;/*def_line_sz=0;*/def_line=0xFF;ov_fill=0xFF;/*ov_line_sz=0;*/ov_line=0xFF;/*xcurve=0;ycurve=0;*/
+				text="";font_id="";/*font_height=0;font_vertical_offset=0;*/font_color=0xFF;
 				actions="";
 			}
 		}
@@ -79,7 +82,7 @@ public class Elements {
 			//this constructor on the first position, getDeclaredConstructors()[0]
 			EditText(Object[]v) throws IllegalArgumentException, IllegalAccessException{element.Element(v,this);}
 			EditText(){
-				font_id="";font_height=20;fontclassname="";/*rgba=0;maxlength=0;*/initialtext="";/*layout_align=0;layout_leftmargin=0;layout_rightmargin=0;layout_indent=0;layout_leading=0;*/
+				font_id="";font_height=20;fontclassname="";rgba=0xFF;/*maxlength=0;*/initialtext="";/*layout_align=0;layout_leftmargin=0;layout_rightmargin=0;layout_indent=0;layout_leading=0;*/
 			}
 		}
 	}

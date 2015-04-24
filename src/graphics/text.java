@@ -32,11 +32,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 
 import workspace.InputText;
 import workspace.IntInputText;
-import workspace.WorkSpace;
+import workspace.AreaInputText;
 import workspace.Elements.Text;
 
 class text{
@@ -48,7 +47,7 @@ class text{
 			
 			panel=new JPanel();panel.setLayout(new BorderLayout());
 			panel.add(new JLabel("Text"),BorderLayout.WEST);
-			JTextArea tx=new JTextArea(t.structure.initialtext);tx.setRows(5);
+			AreaInputText tx=new AreaInputText(t.structure.initialtext);tx.setRows(5);
 			tx.addFocusListener(new FocusListener(){
 				@Override
 				public void focusGained(FocusEvent arg0){}
@@ -60,7 +59,6 @@ class text{
 					flags_set(value,t,HasText);
 				}
 			});
-			WorkSpace.textPopup.add(tx);
 			JScrollPane sc=new JScrollPane(tx);panel.add(sc);
 			Graphics.characterData.add(panel);
 			

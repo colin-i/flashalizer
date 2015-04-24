@@ -1,7 +1,9 @@
 package graphics;
 
+import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Label;
 import java.awt.Panel;
 import java.awt.event.ActionEvent;
@@ -43,12 +45,13 @@ import static workspace.Project.spriteremove;
 import static workspace.Project.action;
 import static workspace.Project.actionsprite;
 import graphics.character.Character;
+import static graphics.Graphics.panel_button_add;
 import static graphics.character.getAField;
 
 public class frame extends JPanel implements TreeSelectionListener{
 	private static final long serialVersionUID = 1L;
 	frame(){
-		setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
+		setLayout(new BorderLayout());
 		Dimension d=new Dimension();d.width=200;
 		setPreferredSize(d);
 		setBorder(BorderFactory.createTitledBorder("Frame"));
@@ -64,19 +67,21 @@ public class frame extends JPanel implements TreeSelectionListener{
 		tree.addTreeSelectionListener(this);
 		JScrollPane s=new JScrollPane(tree);add(s);
 		
-		Panel pan=new bar();
-		add(pan);
+		JPanel pan=new bar();
+		add(pan,BorderLayout.SOUTH);
 	}
-	private class bar extends Panel{
+	private class bar extends JPanel{
 		private static final long serialVersionUID = 1L;
 		private void add_button(char img,String tip,ActionListener aclst){
-			JButton b=new JButton(new ImageIcon("img/frame/"+img+".gif"));
+			ImageIcon im=new ImageIcon("img/frame/"+img+".gif");
+			JButton b=new JButton(im);
 			b.setToolTipText(tip);
 			b.addActionListener(aclst);
+			b.setPreferredSize(new Dimension(im.getIconWidth()+panel_button_add,im.getIconHeight()+panel_button_add));
 			add(b);
 		}
 		private bar(){
-			setLayout(new BoxLayout(this,BoxLayout.X_AXIS));
+			setLayout(new FlowLayout());
 			add_button('f',"Add Frame",new ActionListener(){
 				@Override
 				public void actionPerformed(ActionEvent e) {
@@ -148,6 +153,20 @@ public class frame extends JPanel implements TreeSelectionListener{
 								display.draw();
 							}
 						}
+					}
+				}
+			});
+			add_button('e',"Expand All",new ActionListener(){
+				public void actionPerformed(ActionEvent e) {
+					for(int i=0;i<tree.getRowCount();i++){
+						tree.expandRow(i);
+					}
+				}
+			});
+			add_button('c',"Collapse All",new ActionListener(){
+				public void actionPerformed(ActionEvent e) {
+					for(int i=0;i<tree.getRowCount();i++){
+						tree.collapseRow(i);
 					}
 				}
 			});
@@ -381,9 +400,9 @@ public class frame extends JPanel implements TreeSelectionListener{
 				}
 			}
 		}
-		for(int d:removes)set_remove(d,frames);								 //cannot place and remove an item
-		int pos=frames.size();
-		frames.add(new frame_item(items.toArray(new item[items.size()]),as,pos));//in the same frame
+		for(int d:removes)set_remove(d,frames);										//cannot place and remove an item at the same frame
+		int pos=frames.size();														//
+		frames.add(new frame_item(items.toArray(new item[items.size()]),as,pos));	//
 	}
 	private void set_remove(int d,List<frame_item>frames){
 		for(frame_item f:frames){

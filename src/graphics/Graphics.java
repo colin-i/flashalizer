@@ -35,6 +35,7 @@ public class Graphics extends JSplitPane{
 	static frame frame;static character character;
 	static Container frameData;
 	static Container characterData;
+	static final int panel_button_add=6;
 	public Graphics(){
 		super(JSplitPane.VERTICAL_SPLIT);
 		
