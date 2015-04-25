@@ -29,6 +29,7 @@ import actionswf.ActionSwf;
 import actionswf.ActionSwf.privat;
 import static workspace.element.NamedId;
 import static actionswf.ActionSwf.HasText;
+import static actionswf.ActionSwf.repeating_bitmap_fill;
 
 public class Project{
 	private Path path;
@@ -70,8 +71,8 @@ public class Project{
 		elements.clear();
 		WorkSpace.frame.setTitle(path.getFileName().toString()+" - "+"Flashalizer");
 	}
-	boolean isShapeBitmap(int type){
-		return (0x40<=type&&type<=0x43);
+	public boolean isShapeBitmap(int type){
+		return (repeating_bitmap_fill<=type&&type<=0x43);
 	}
 	public String newInst="newInstance";
 	Object runtime_instance(Class<?>c,List<Object>values) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException{

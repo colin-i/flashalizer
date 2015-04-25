@@ -71,6 +71,7 @@ import workspace.WorkSpace;
 import workspace.Elements.Button;
 import workspace.Elements.Font;
 import workspace.Elements.Text;
+import workspace.Elements.Shape;
 import workspace.Elements.DBL;
 import workspace.InputText;
 import static graphics.Graphics.panel_button_add;
@@ -314,8 +315,9 @@ public class character extends JPanel implements TreeSelectionListener{
 				if(t.name.equals(button))elementClass=Button.class;
 				else if(t.name.equals(font))elementClass=Font.class;
 				else if(t.name.equals(text))elementClass=Text.class;
+				else if(t.name.equals(shape))elementClass=Shape.class;
 				else if(t.name.equals(dbl))elementClass=DBL.class;
-				else if(t.name.equals(spritedone))elementClass=SpriteNew.class;
+				else/* if(t.name.equals(spritedone))*/elementClass=SpriteNew.class;
 				if(elementClass!=null)popup.add(new JMenuItem(new elementAction(elementClass,t)));
 			}
 			add_button('a',"New Character",new ActionListener(){
@@ -487,7 +489,8 @@ public class character extends JPanel implements TreeSelectionListener{
 				Graphics.characterData.add(panel);
 				
 				if(elem instanceof Text)new text(chr);
-				else if(elem instanceof workspace.Elements.Button)new button(chr);
+				else if(elem instanceof Button)new button(chr);
+				else if(elem instanceof Shape)new shape(chr);
 			}else{
 				if(elem instanceof DBL){
 					DBL dbl=(DBL)elem;

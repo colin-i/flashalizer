@@ -141,7 +141,7 @@ public class Functions extends JTable{
 		for(int x=0;x<layo.getColumns();x++){
 			InputText it=(InputText)c_rec.getComponent(c_rec.getComponents().length-layo.getColumns()+x);
 			if(x==0)it.setToolTipText("Non-edge record=0; Edge record=1");
-			else if(x==1)it.setToolTipText(tooltip_multiline(new String[]{"If Non-edge; StateMoveTo=1|StateFillStyle1=4|StateLineStyle=8","If Edge; Straight edge=1, Curved edge=0"}));
+			else if(x==1)it.setToolTipText(tooltip_multiline(new String[]{"If Non-edge; StateMoveTo=1|StateFillStyle0=2|StateFillStyle1=4|StateLineStyle=8","If Edge; Straight edge=1, Curved edge=0"}));
 			else if(x==2)it.setToolTipText(tooltip_multiline(new String[]{"If Non-edge, If StateMoveTo, MoveDeltaX","If Edge, If Straight, DeltaX","If Edge, If Curved, ControlDeltaX"}));
 			else if(x==3)it.setToolTipText(tooltip_multiline(new String[]{"If Non-edge, If StateMoveTo, MoveDeltaY","If Edge, If Straight, DeltaY","If Edge, If Curved, ControlDeltaY"}));
 			else if(x==4)it.setToolTipText("If Edge, If Curved, AnchorDeltaX");

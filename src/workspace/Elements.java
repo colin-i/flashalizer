@@ -89,17 +89,28 @@ public class Elements {
 	public static class Shape extends element{
 		public @WidthInt int width;
 		public @HeightInt int height;
-		Object[]args;
+		public Object[]args;
 		Shape(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
-		static class ShapeWithStyle{
-			int fill;Object fill_arg;
-			int line_height;int line_color;
-			Object[]records;
-			ShapeWithStyle(int f,Object f_arg,int lh,int lc,Object[]r){
-				fill=f;fill_arg=f_arg;line_height=lh;line_color=lc;records=r;
+		public Shape() throws IllegalArgumentException, IllegalAccessException{
+			this(new Object[]{100,100,new ShapeWithStyle().toArray(),untitled});
+		}
+		public static class ShapeWithStyle{
+			public int fill;public Object fill_arg;
+			public int line_size;public int line_color=0xff;
+			public Object[]records;
+			public ShapeWithStyle(int f,Object f_arg,int lh,int lc,Object[]r){
+				fill=f;fill_arg=f_arg;line_size=lh;line_color=lc;records=r;
 			}
 			ShapeWithStyle(){
-				fill=FillStyleType_none;/*line_height=0*/;records=new Object[0];
+				fill=FillStyleType_none;/*line_size=0*/;records=new Object[0];/*line_color=0xff;*/
+			}
+			public ShapeWithStyle(Object[]args){
+				int i=0;
+				fill=(int) args[i++];if(fill!=FillStyleType_none)fill_arg=args[i++];
+				line_size=(int) args[i++];if(line_size!=0)line_color=(int) args[i++];
+				List<Object>rest=new ArrayList<Object>();
+				for(;i<args.length;i++)rest.add(args[i]);
+				records=rest.toArray();
 			}
 			static int end_of_values=-1;
 			private static boolean phase;
@@ -137,12 +148,12 @@ public class Elements {
 				if(x==false){x=true;return true;}
 				return false;
 			}
-			Object[]toArray(){
+			public Object[]toArray(){
 				List<Object>lst=new ArrayList<Object>();
 				lst.add(fill);
 				if(fill!=FillStyleType_none)lst.add(fill_arg);
-				lst.add(line_height);
-				if(line_height!=0)lst.add(line_color);
+				lst.add(line_size);
+				if(line_size!=0)lst.add(line_color);
 				for(int i=0;i<records.length;i++)lst.add(records[i]);
 				lst.add(end_of_values);
 				Object[]dest=new Object[lst.size()];

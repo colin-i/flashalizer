@@ -63,6 +63,8 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 	public static final int AutoSize=0x4000;//only when size goes outside the bounds
 	//#define HasFontClass=0x8000     SymbolClass
 	public static final int FillStyleType_none=-1;
+	public static final int solid_fill=0;
+	public static final int repeating_bitmap_fill=0x40;
 	class EditText extends Structure{
 		//"..Structure has unknown size, ensure all fields are public"
 		public int font_id;
