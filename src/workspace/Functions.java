@@ -260,7 +260,7 @@ public class Functions extends JTable{
 								if(in==false)break;
 							}
 						}
-						Object[]dest=new Object[intrs.size()];for(int i=0;i<dest.length;i++)dest[i]=intrs.get(i);
+						int[]dest=new int[intrs.size()];for(int i=0;i<dest.length;i++)dest[i]=intrs.get(i);
 						setValueAt(new Elements.Shape.ShapeWithStyle(ft,ft_arg,l_w,l_color,dest).toArray(),ed_r,ed_c);
 						dg.dispose();
 					}

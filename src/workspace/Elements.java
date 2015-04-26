@@ -14,6 +14,7 @@ import graphics.frame.DepthInt;
 import graphics.frame.XInt;
 import graphics.frame.YInt;
 import static actionswf.ActionSwf.FillStyleType_none;
+import static actionswf.ActionSwf.StateMoveTo;
 
 public class Elements {
 	private static final String untitled="Untitled";
@@ -97,29 +98,28 @@ public class Elements {
 		public static class ShapeWithStyle{
 			public int fill;public Object fill_arg;
 			public int line_size;public int line_color=0xff;
-			public Object[]records;
-			public ShapeWithStyle(int f,Object f_arg,int lh,int lc,Object[]r){
+			public int[]records;
+			public ShapeWithStyle(int f,Object f_arg,int lh,int lc,int[]r){
 				fill=f;fill_arg=f_arg;line_size=lh;line_color=lc;records=r;
 			}
 			ShapeWithStyle(){
-				fill=FillStyleType_none;/*line_size=0*/;records=new Object[0];/*line_color=0xff;*/
+				fill=FillStyleType_none;/*line_size=0*/;records=new int[0];/*line_color=0xff;*/
 			}
 			public ShapeWithStyle(Object[]args){
 				int i=0;
 				fill=(int) args[i++];if(fill!=FillStyleType_none)fill_arg=args[i++];
 				line_size=(int) args[i++];if(line_size!=0)line_color=(int) args[i++];
-				List<Object>rest=new ArrayList<Object>();
-				for(;i<args.length;i++)rest.add(args[i]);
-				records=rest.toArray();
+				records=new int[args.length-i];
+				for(int j=0;i<args.length;i++,j++)records[j]=(int)args[i];
 			}
-			static int end_of_values=-1;
+			public static int end_of_values=-1;
 			private static boolean phase;
 			private static boolean edge;
-			private static boolean flags;private static final int StateMoveTo=1;
+			private static boolean flags;
 			private static boolean straight;
 			private static boolean cx;private static boolean cy;private static boolean x;//private static boolean y;
-			static void phase_start(){phase=false;}
-			static boolean phase_get(int val){
+			public static void phase_start(){phase=false;}
+			public static boolean phase_get(int val){
 				if(phase==false){
 					phase=true;
 					if(val==0){edge=false;flags=false;}

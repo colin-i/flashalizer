@@ -65,6 +65,11 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 	public static final int FillStyleType_none=-1;
 	public static final int solid_fill=0;
 	public static final int repeating_bitmap_fill=0x40;
+	public static final int Non_edge_record=0;
+	public static final int StateMoveTo=1;
+	public static final int StateFillStyle0=2*StateMoveTo;
+	static final int StateFillStyle1=2*StateFillStyle0;
+	public static final int StateLineStyle=2*StateFillStyle1;
 	class EditText extends Structure{
 		//"..Structure has unknown size, ensure all fields are public"
 		public int font_id;
