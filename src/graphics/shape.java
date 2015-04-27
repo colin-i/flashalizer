@@ -1,23 +1,33 @@
 package graphics;
 
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.geom.QuadCurve2D;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 
 import workspace.InputText;
 import workspace.WorkSpace;
@@ -30,6 +40,7 @@ import static actionswf.ActionSwf.Non_edge_record;
 import static actionswf.ActionSwf.StateMoveTo;
 import static actionswf.ActionSwf.StateFillStyle0;
 import static actionswf.ActionSwf.StateLineStyle;
+import static actionswf.ActionSwf.Straight_edge;
 import static graphics.Graphics.characterData;
 import static workspace.Elements.Shape.ShapeWithStyle.phase_start;
 import static workspace.Elements.Shape.ShapeWithStyle.phase_get;
@@ -100,6 +111,10 @@ class shape {
 		panel.add(subpanel);
 		
 		characterData.add(panel);
+		
+		subpanel=cr.new_panel();JButton bt=new JButton("View");bt.addActionListener(edit);
+		subpanel.add(bt);
+		characterData.add(subpanel);
 	}
 	private class ShapeInputText extends InputText implements FocusListener{
 		private static final long serialVersionUID = 1L;
@@ -163,5 +178,83 @@ class shape {
 		int[]ar=new int[2+records_draws.length];
 		ar[0]=Non_edge_record;ar[1]=flags;for(int i=0,j=2;i<records_draws.length;i++,j++)ar[j]=records_draws[i];
 		return ar;
+	}
+	private Container container;
+	private ActionListener edit=new ActionListener(){
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			JDialog dg=new JDialog(SwingUtilities.getWindowAncestor((JButton)arg0.getSource()),"Shape",Dialog.ModalityType.DOCUMENT_MODAL);
+			container=dg.getContentPane();
+			container.setLayout(new BoxLayout(container,BoxLayout.Y_AXIS));
+			
+			JScrollPane s=new JScrollPane(new content());
+			container.add(s);
+			
+			JButton bt=new JButton("OK");
+			bt.addActionListener(new ActionListener(){
+				@Override
+				public void actionPerformed(ActionEvent arg0){
+					dg.dispose();
+				}}
+			);
+			container.add(bt);
+			
+			dg.pack();
+			dg.setVisible(true);
+		}
+	};
+	private class content extends JComponent{
+		private static final long serialVersionUID = 1L;
+		private content(){
+			Shape Shp=(Shape)chr.element;
+			setLayout(null);
+			setPreferredSize(new Dimension(Shp.width,Shp.height));
+		}
+		@Override
+		protected void paintComponent(java.awt.Graphics g) {
+			Shape Shp=(Shape)chr.element;
+			g.setColor(Color.WHITE);g.fillRect(0,0,Shp.width,Shp.height);
+			g.setColor(Color.BLACK);
+			List<Point>pnts=new ArrayList<Point>();
+			int x=0;int y=0;
+			for(int i=0;;){
+				if(records_draws.length==i)break;
+				int edge = 0;int x1 = 0;int y1 = 0;int x2 = 0;int y2 = 0;int type = 0;boolean new_path=true;
+				phase_start();int j=i;
+				do{
+					if(j==i)edge=records_draws[i];
+					else if((j+1)==i)type=records_draws[i];
+					else if((j+2)==i)x1=records_draws[i];
+					else if((j+3)==i)y1=records_draws[i];
+					else if((j+4)==i)x2=records_draws[i];
+					else if((j+5)==i)y2=records_draws[i];
+				}while(phase_get(records_draws[i++]));
+				if(edge==Non_edge_record){
+					x=x1;y=y1;new_path=true;
+				}else{
+					int xA=x+x1;int yA=y+y1;
+					if(new_path){
+						pnts.add(new Point(x,y));
+						new_path=false;
+					}
+					pnts.add(new Point(xA,yA));
+					if(type==Straight_edge){
+						g.drawLine(x,y,xA,yA);
+					}else{
+						int xB=xA+x2;int yB=yA+y2;
+						((Graphics2D)g).draw(new QuadCurve2D.Double(x,y,xA,yA,xB,yB));
+						pnts.add(new Point(xB,yB));
+					}
+				}
+			}
+			for(int i=0;i<pnts.size();i++){
+				int gap=5;Point p=pnts.get(i);
+				JButton button=new JButton();
+				int lat=2*gap;
+				button.setBounds(p.x-gap,p.y-gap,lat,lat);
+				button.setBackground(Color.BLUE);
+				add(button);
+			}
+		}
 	}
 }

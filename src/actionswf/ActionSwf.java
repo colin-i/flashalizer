@@ -70,6 +70,7 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 	public static final int StateFillStyle0=2*StateMoveTo;
 	static final int StateFillStyle1=2*StateFillStyle0;
 	public static final int StateLineStyle=2*StateFillStyle1;
+	public static final int Straight_edge=1;
 	class EditText extends Structure{
 		//"..Structure has unknown size, ensure all fields are public"
 		public int font_id;
