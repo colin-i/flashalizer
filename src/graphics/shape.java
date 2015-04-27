@@ -207,7 +207,6 @@ class shape {
 		private static final long serialVersionUID = 1L;
 		private content(){
 			Shape Shp=(Shape)chr.element;
-			setLayout(null);
 			setPreferredSize(new Dimension(Shp.width,Shp.height));
 		}
 		@Override
