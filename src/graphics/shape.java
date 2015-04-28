@@ -6,6 +6,7 @@ import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -37,10 +38,12 @@ import static actionswf.ActionSwf.FillStyleType_none;
 import static actionswf.ActionSwf.solid_fill;
 import static actionswf.ActionSwf.repeating_bitmap_fill;
 import static actionswf.ActionSwf.Non_edge_record;
+import static actionswf.ActionSwf.Edge_record;
 import static actionswf.ActionSwf.StateMoveTo;
 import static actionswf.ActionSwf.StateFillStyle0;
 import static actionswf.ActionSwf.StateLineStyle;
 import static actionswf.ActionSwf.Straight_edge;
+import static actionswf.ActionSwf.Curved_edge;
 import static graphics.Graphics.characterData;
 import static workspace.Elements.Shape.ShapeWithStyle.phase_start;
 import static workspace.Elements.Shape.ShapeWithStyle.phase_get;
@@ -187,38 +190,12 @@ class shape {
 			container=dg.getContentPane();
 			container.setLayout(new BoxLayout(container,BoxLayout.Y_AXIS));
 			
-			JScrollPane s=new JScrollPane(new content());
-			container.add(s);
-			
-			JButton bt=new JButton("OK");
-			bt.addActionListener(new ActionListener(){
-				@Override
-				public void actionPerformed(ActionEvent arg0){
-					dg.dispose();
-				}}
-			);
-			container.add(bt);
-			
-			dg.pack();
-			dg.setVisible(true);
-		}
-	};
-	private class content extends JComponent{
-		private static final long serialVersionUID = 1L;
-		private content(){
-			Shape Shp=(Shape)chr.element;
-			setPreferredSize(new Dimension(Shp.width,Shp.height));
-		}
-		@Override
-		protected void paintComponent(java.awt.Graphics g) {
-			Shape Shp=(Shape)chr.element;
-			g.setColor(Color.WHITE);g.fillRect(0,0,Shp.width,Shp.height);
-			g.setColor(Color.BLACK);
-			List<Point>pnts=new ArrayList<Point>();
-			int x=0;int y=0;
+			points=new ArrayList<point>();
+			List<dot>pnts=new ArrayList<dot>();
+			int x=0;int y=0;boolean new_path=true;
+			int edge = 0;int x1 = 0;int y1 = 0;int x2 = 0;int y2 = 0;int type = 0;
 			for(int i=0;;){
 				if(records_draws.length==i)break;
-				int edge = 0;int x1 = 0;int y1 = 0;int x2 = 0;int y2 = 0;int type = 0;boolean new_path=true;
 				phase_start();int j=i;
 				do{
 					if(j==i)edge=records_draws[i];
@@ -233,26 +210,125 @@ class shape {
 				}else{
 					int xA=x+x1;int yA=y+y1;
 					if(new_path){
-						pnts.add(new Point(x,y));
+						pnts.add(new dot(x,y,true,false,false));
 						new_path=false;
 					}
-					pnts.add(new Point(xA,yA));
-					if(type==Straight_edge){
-						g.drawLine(x,y,xA,yA);
-					}else{
+					dot variable_dot=new dot(xA,yA,false,false,false);
+					pnts.add(variable_dot);
+					if(type==Straight_edge){x=xA;y=yA;}
+					else{
+						variable_dot.isCurve=true;variable_dot.isControl=true;
 						int xB=xA+x2;int yB=yA+y2;
-						((Graphics2D)g).draw(new QuadCurve2D.Double(x,y,xA,yA,xB,yB));
-						pnts.add(new Point(xB,yB));
+						pnts.add(new dot(xB,yB,false,true,false));
+						x=xB;y=yB;
 					}
 				}
 			}
-			for(int i=0;i<pnts.size();i++){
-				int gap=5;Point p=pnts.get(i);
-				JButton button=new JButton();
+			for(int i=0;i<pnts.size();i++){//first lines and curves: draw; now buttons to points
+				dot p=pnts.get(i);
+				point button=new point(p.isNewPath,p.isCurve,p.isControl);
 				int lat=2*gap;
 				button.setBounds(p.x-gap,p.y-gap,lat,lat);
 				button.setBackground(Color.BLUE);
-				add(button);
+				points.add(button);
+			}
+			
+			JScrollPane s=new JScrollPane(new content());
+			container.add(s);
+			
+			JButton bt=new JButton("OK");
+			bt.addActionListener(new ActionListener(){
+				@Override
+				public void actionPerformed(ActionEvent arg0){
+					int current_x;int current_y;int x=0;int y=0;int x_dif_control=0;int y_dif_control=0;
+					List<Integer>records=new ArrayList<Integer>();
+					for(int i=0;i<points.size();i++){
+						point p=points.get(i);
+						Rectangle r=p.getBounds();
+						current_x=r.x+gap;current_y=r.y+gap;
+						if(p.isNewPath==true){
+							//moveTo
+							records.add(Non_edge_record);records.add(StateMoveTo);records.add(current_x);records.add(current_y);
+						}else{
+							int x_dif=current_x-x;int y_dif=current_y-y;
+							if(p.isCurve==false){
+								//straightLine
+								records.add(Edge_record);records.add(Straight_edge);
+								records.add(x_dif);records.add(y_dif);
+							}
+							else if(p.isControl==true){
+								x_dif_control=x_dif;y_dif_control=y_dif;
+							}
+							else{
+								//curve
+								records.add(Edge_record);records.add(Curved_edge);
+								records.add(x_dif_control);records.add(y_dif_control);
+								records.add(x_dif);records.add(y_dif);
+							}
+						}
+						x=current_x;y=current_y;
+					}
+					records_draws=new int[records.size()];for(int i=0;i<records_draws.length;i++)records_draws[i]=records.get(i);
+					dg.dispose();
+					update_args();
+				}}
+			);
+			container.add(bt);
+			
+			dg.pack();
+			dg.setVisible(true);
+		}
+	};
+	private static final int gap=5;
+	private class point extends JButton{
+		private static final long serialVersionUID = 1L;
+		private boolean isNewPath;
+		private boolean isCurve;
+		private boolean isControl;
+		private point(boolean a,boolean b,boolean c){
+			isNewPath=a;isCurve=b;isControl=c;
+		}
+	}
+	private List<point>points;
+	private class dot extends Point{
+		private static final long serialVersionUID = 1L;
+		private boolean isNewPath;private boolean isCurve;private boolean isControl;
+		private dot(int x,int y,boolean a,boolean b,boolean c){
+			super(x,y);isNewPath=a;isCurve=b;isControl=c;
+		}
+	}
+	private class content extends JComponent{
+		private static final long serialVersionUID = 1L;
+		private content(){
+			Shape Shp=(Shape)chr.element;
+			setPreferredSize(new Dimension(Shp.width,Shp.height));
+			for(int i=0;i<points.size();i++)add(points.get(i));
+		}
+		@Override
+		protected void paintComponent(java.awt.Graphics g) {
+			Shape Shp=(Shape)chr.element;
+			g.setColor(Color.WHITE);g.fillRect(0,0,Shp.width,Shp.height);
+			g.setColor(Color.BLACK);
+			for(int i=0;i<points.size();i++){
+				point p=points.get(i);
+				Rectangle r=p.getBounds();
+				boolean a=p.isNewPath==false&&p.isCurve==false;
+				boolean b=p.isCurve==true&&p.isControl==false;
+				if(a||b){
+					Rectangle prev_r=points.get(i-1).getBounds();
+					int prev_x=prev_r.x+gap;int prev_y=prev_r.y+gap;
+					int x=r.x+gap;int y=r.y+gap;
+					if(a){
+						//line
+						g.drawLine(prev_x,prev_y,x,y);
+					}
+					else{
+						//curve
+						Rectangle prev_prev_r=points.get(i-2).getBounds();
+						int prev_prev_x=prev_prev_r.x+gap;int prev_prev_y=prev_r.y+gap;
+						((Graphics2D)g).draw(new QuadCurve2D.Double(prev_prev_x,prev_prev_y,prev_x,prev_y,x,y));
+					}
+				}
 			}
 		}
 	}
