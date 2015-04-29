@@ -5,6 +5,7 @@ import graphics.Graphics;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -15,7 +16,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 
-import java.awt.Button;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -95,7 +95,7 @@ public class WorkSpace {
 				//
 				ct.add(new Label("Background Color"));
 				Color new_color=new Color(project.backgroundcolor_default);
-				Button new_color_b=new Button(null);
+				JButton new_color_b=new JButton();
 				new_color_b.setBackground(new_color);
 				JColorChooser colorChooser = new JColorChooser();
 				Dialog dialog =JColorChooser.createDialog(
@@ -120,7 +120,7 @@ public class WorkSpace {
 				//
 				ctnr.add(ct);
 				//x
-				Button btn=new Button("OK");
+				JButton btn=new JButton("OK");
 				btn.addActionListener(new ActionListener(){
 					public void actionPerformed(ActionEvent e) {
 						if(project.folder_set(workpath.get()+"/"+new_name.getText(),false)){
@@ -174,7 +174,7 @@ public class WorkSpace {
 				cnt1.setLayout(new GridLayout(0,2));
 				//workspace path
 				String choosertitle="Workspace Path";
-				Button workpath_browse=new Button(choosertitle);
+				JButton workpath_browse=new JButton(choosertitle);
 				workpath_browse.addActionListener(new ActionListener(){
 					public void actionPerformed(ActionEvent e) {
 						choose(choosertitle,new JFileChooser_run(){public void Run(JFileChooser c){
@@ -187,7 +187,7 @@ public class WorkSpace {
 				//add
 				cnt.add(cnt1);
 				//OK
-				Button bt=new Button("OK");
+				JButton bt=new JButton("OK");
 				bt.addActionListener(new ActionListener(){
 					public void actionPerformed(ActionEvent e) {
 						dl.setVisible(false);
@@ -296,7 +296,7 @@ public class WorkSpace {
 				cp1.add(l);
 				cp.add(cp1);
 				//2
-				Button b=new Button("OK");
+				JButton b=new JButton("OK");
 				b.addActionListener(new ActionListener(){
 					public void actionPerformed(ActionEvent e) {
 						d.setVisible(false);

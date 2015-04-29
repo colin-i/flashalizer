@@ -14,7 +14,6 @@ import graphics.frame.item;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -49,6 +48,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -260,7 +260,7 @@ public class character extends JPanel implements TreeSelectionListener{
 	private class renderer extends DefaultTreeCellRenderer{
 		private static final long serialVersionUID = 1L;
 		@Override
-		public Component getTreeCellRendererComponent(JTree tree,Object value,boolean sel,boolean expanded,boolean leaf,int row,boolean hasFocus) {
+		public JComponent getTreeCellRendererComponent(JTree tree,Object value,boolean sel,boolean expanded,boolean leaf,int row,boolean hasFocus) {
 			super.getTreeCellRendererComponent(tree,value,sel,expanded,leaf,row,hasFocus);
 			Character v=(Character)((DefaultMutableTreeNode)value).getUserObject();
 			if(v != null){//getting null for some data
@@ -322,7 +322,7 @@ public class character extends JPanel implements TreeSelectionListener{
 			}
 			add_button('a',"New Character",new ActionListener(){
 				public void actionPerformed(ActionEvent e) {
-					popup.show((Component) e.getSource(),0,(int)-popup.getPreferredSize().getHeight());
+					popup.show((JComponent) e.getSource(),0,(int)-popup.getPreferredSize().getHeight());
 				}
 			});
 			
@@ -409,7 +409,7 @@ public class character extends JPanel implements TreeSelectionListener{
 						if(chr.frames!=null){
 							if(p!=f_root){
 								if(loop_check(chr.frames,frms)){
-									Component c=(Component)arg0.getSource();
+									JComponent c=(JComponent)arg0.getSource();
 									Cursor initial_cursor=c.getCursor();
 									c.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(new ImageIcon("img/no.png").getImage(),new Point(),null));
 									ActionListener taskPerformer = new ActionListener() {
@@ -597,7 +597,7 @@ public class character extends JPanel implements TreeSelectionListener{
 		try{panel.add(new InputTextField(f,chr.element));}
 		catch (IllegalArgumentException | IllegalAccessException e) {e.printStackTrace();}
 	}
-	void add_one_field(JPanel panel,Component c){
+	void add_one_field(JPanel panel,JComponent c){
 		add_separator(panel);panel.add(c);
 	}
 	void add_separator(JPanel panel){panel.add(new JSeparator(SwingConstants.VERTICAL));}

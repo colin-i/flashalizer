@@ -1,7 +1,6 @@
 package graphics;
 
 import java.awt.Color;
-import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -11,6 +10,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -106,7 +106,7 @@ class button {
 		c=Graphics.character.rgba2color(rgba);
 		bt=new JButton();bt.setBackground(c);
 		chooser=new JColorChooser();chooser.setColor(c);
-		Dialog dialog =JColorChooser.createDialog(
+		JDialog dialog =JColorChooser.createDialog(
 			bt,"Pick a Color",
 			true,//modal
 			chooser,

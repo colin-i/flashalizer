@@ -5,7 +5,6 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Label;
-import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.annotation.ElementType;
@@ -470,7 +469,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 			if(disp.getComponent(component_pos)==Graphics.frameData)break;
 		}
 		disp.remove(Graphics.frameData);
-		Graphics.frameData=new Panel();
+		Graphics.frameData=new JPanel();
 		Graphics.frameData.setLayout(new BoxLayout(Graphics.frameData,BoxLayout.Y_AXIS));
 		
 		DefaultMutableTreeNode sel_node=(DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
@@ -531,7 +530,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 				
 				//also add x y
 				try {
-					Panel xy=new Panel();xy.setLayout(new BoxLayout(xy,BoxLayout.X_AXIS));
+					JPanel xy=new JPanel();xy.setLayout(new BoxLayout(xy,BoxLayout.X_AXIS));
 					xy.add(new Label("X"));
 					xy.add(Graphics.character.new InputTextField(getAField(item.class,X.class),it));
 					xy.add(new Label("Y"));

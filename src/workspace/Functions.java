@@ -1,15 +1,10 @@
 package workspace;
 
-import java.awt.Button;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Dialog;
 import java.awt.GridLayout;
 import java.awt.Label;
-import java.awt.MouseInfo;
-import java.awt.Point;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -20,10 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultListCellRenderer;
@@ -31,14 +23,11 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -48,6 +37,8 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 
 import static actionswf.ActionSwf.FillStyleType_none;
+
+import static util.util.message_popup;
 
 public class Functions extends JTable{
 	private static final long serialVersionUID = 1L;
@@ -91,7 +82,7 @@ public class Functions extends JTable{
 		void Run(Field f,InputText txt);
 	}
 	private void structure_dialog(String title,structure_dialog_run run){
-		JDialog dg=new JDialog(SwingUtilities.getWindowAncestor(this),title,Dialog.ModalityType.DOCUMENT_MODAL);
+		JDialog dg=new JDialog(SwingUtilities.getWindowAncestor(this),title,JDialog.ModalityType.DOCUMENT_MODAL);
 		Container ct=dg.getContentPane();
 		ct.setLayout(new BoxLayout(ct,BoxLayout.Y_AXIS));
 		Container c=new Container();c.setLayout(new GridLayout(0,2));
@@ -114,7 +105,7 @@ public class Functions extends JTable{
 		}
 
 		ct.add(c);
-		Button btn=new Button("OK");
+		JButton btn=new JButton("OK");
 		btn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				int j=0;
@@ -151,7 +142,7 @@ public class Functions extends JTable{
 	{
 		Shape_button.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				JDialog dg=new JDialog(SwingUtilities.getWindowAncestor(table),"ShapeWithStyle",Dialog.ModalityType.DOCUMENT_MODAL);
+				JDialog dg=new JDialog(SwingUtilities.getWindowAncestor(table),"ShapeWithStyle",JDialog.ModalityType.DOCUMENT_MODAL);
 				Container ct=dg.getContentPane();ct.setLayout(new BoxLayout(ct,BoxLayout.Y_AXIS));
 				Container c=new Container();c.setLayout(new GridLayout(0,4));
 				
@@ -220,7 +211,7 @@ public class Functions extends JTable{
 				}
 				ct.add(c_rec);
 				
-				Button rec=new Button("Add ShapeRecord");
+				JButton rec=new JButton("Add ShapeRecord");
 				rec.addActionListener(new ActionListener(){
 					public void actionPerformed(ActionEvent e){
 						GridLayout layo=(GridLayout)c_rec.getLayout();
@@ -230,7 +221,7 @@ public class Functions extends JTable{
 					}
 				});
 				ct.add(rec);
-				Button btn=new Button("OK");
+				JButton btn=new JButton("OK");
 				btn.addActionListener(new ActionListener(){
 					public void actionPerformed(ActionEvent e){
 						int ft=Long.decode(((IntInputText)c.getComponent(1)).getText()).intValue();
@@ -433,27 +424,7 @@ public class Functions extends JTable{
 	public TableCellEditor getCellEditor(int row, int column)
 	{
 		if(edit_block(row,column)){
-			Window topLevelWin = SwingUtilities.getWindowAncestor(this);
-			JWindow errorWindow = new JWindow(topLevelWin);
-			JPanel contentPane = (JPanel) errorWindow.getContentPane();
-			contentPane.setLayout(new BoxLayout(contentPane,BoxLayout.Y_AXIS));
-			//(String... message)//for(integer i=0;i<message.length;i++){
-			contentPane.add(new JLabel("Uneditable cell"));
-			//}
-			contentPane.setBackground(Color.WHITE);
-			contentPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-			errorWindow.pack();
-			
-			Point p=MouseInfo.getPointerInfo().getLocation();
-			errorWindow.setLocation(p.x,p.y-errorWindow.getHeight());
-			errorWindow.setVisible(true);
-			
-			Timer window_life=new Timer();
-			window_life.schedule(new TimerTask(){
-				public void run(){
-					errorWindow.dispose();
-				}
-			},1000);
+			message_popup("Uneditable cell",this);
 			return null;
 		}
 		return super.getCellEditor(row, column);

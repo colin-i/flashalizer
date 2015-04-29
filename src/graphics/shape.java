@@ -2,7 +2,6 @@ package graphics;
 
 import java.awt.Color;
 import java.awt.Container;
-import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -11,6 +10,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.QuadCurve2D;
 import java.util.List;
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ import static actionswf.ActionSwf.StateLineStyle;
 import static actionswf.ActionSwf.Straight_edge;
 import static actionswf.ActionSwf.Curved_edge;
 import static graphics.Graphics.characterData;
+import static util.util.message_popup;
 import static workspace.Elements.Shape.ShapeWithStyle.phase_start;
 import static workspace.Elements.Shape.ShapeWithStyle.phase_get;
 import static workspace.Elements.Shape.ShapeWithStyle.end_of_values;
@@ -137,7 +139,7 @@ class shape {
 		c=Graphics.character.rgba2color(rgba);
 		bt=new JButton();bt.setBackground(c);
 		chooser=new JColorChooser();chooser.setColor(c);
-		Dialog dialog =JColorChooser.createDialog(
+		JDialog dialog =JColorChooser.createDialog(
 			bt,"Pick a Color",
 			true,//modal
 			chooser,
@@ -183,57 +185,16 @@ class shape {
 		return ar;
 	}
 	private Container container;
+	private content desktop;
 	private ActionListener edit=new ActionListener(){
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-			JDialog dg=new JDialog(SwingUtilities.getWindowAncestor((JButton)arg0.getSource()),"Shape",Dialog.ModalityType.DOCUMENT_MODAL);
+			JDialog dg=new JDialog(SwingUtilities.getWindowAncestor((JButton)arg0.getSource()),"Shape",JDialog.ModalityType.DOCUMENT_MODAL);
 			container=dg.getContentPane();
 			container.setLayout(new BoxLayout(container,BoxLayout.Y_AXIS));
 			
-			points=new ArrayList<point>();
-			List<dot>pnts=new ArrayList<dot>();
-			int x=0;int y=0;boolean new_path=true;
-			int edge = 0;int x1 = 0;int y1 = 0;int x2 = 0;int y2 = 0;int type = 0;
-			for(int i=0;;){
-				if(records_draws.length==i)break;
-				phase_start();int j=i;
-				do{
-					if(j==i)edge=records_draws[i];
-					else if((j+1)==i)type=records_draws[i];
-					else if((j+2)==i)x1=records_draws[i];
-					else if((j+3)==i)y1=records_draws[i];
-					else if((j+4)==i)x2=records_draws[i];
-					else if((j+5)==i)y2=records_draws[i];
-				}while(phase_get(records_draws[i++]));
-				if(edge==Non_edge_record){
-					x=x1;y=y1;new_path=true;
-				}else{
-					int xA=x+x1;int yA=y+y1;
-					if(new_path){
-						pnts.add(new dot(x,y,true,false,false));
-						new_path=false;
-					}
-					dot variable_dot=new dot(xA,yA,false,false,false);
-					pnts.add(variable_dot);
-					if(type==Straight_edge){x=xA;y=yA;}
-					else{
-						variable_dot.isCurve=true;variable_dot.isControl=true;
-						int xB=xA+x2;int yB=yA+y2;
-						pnts.add(new dot(xB,yB,false,true,false));
-						x=xB;y=yB;
-					}
-				}
-			}
-			for(int i=0;i<pnts.size();i++){//first lines and curves: draw; now buttons to points
-				dot p=pnts.get(i);
-				point button=new point(p.isNewPath,p.isCurve,p.isControl);
-				int lat=2*gap;
-				button.setBounds(p.x-gap,p.y-gap,lat,lat);
-				button.setBackground(Color.BLUE);
-				points.add(button);
-			}
-			
-			JScrollPane s=new JScrollPane(new content());
+			desktop=new content();
+			JScrollPane s=new JScrollPane(desktop);
 			container.add(s);
 			
 			JButton bt=new JButton("OK");
@@ -242,8 +203,8 @@ class shape {
 				public void actionPerformed(ActionEvent arg0){
 					int current_x;int current_y;int x=0;int y=0;int x_dif_control=0;int y_dif_control=0;
 					List<Integer>records=new ArrayList<Integer>();
-					for(int i=0;i<points.size();i++){
-						point p=points.get(i);
+					for(int i=0;i<desktop.getComponentCount();i++){
+						content.point p=(content.point)desktop.getComponent(i);
 						Rectangle r=p.getBounds();
 						current_x=r.x+gap;current_y=r.y+gap;
 						if(p.isNewPath==true){
@@ -280,42 +241,74 @@ class shape {
 		}
 	};
 	private static final int gap=5;
-	private class point extends JButton{
-		private static final long serialVersionUID = 1L;
-		private boolean isNewPath;
-		private boolean isCurve;
-		private boolean isControl;
-		private point(boolean a,boolean b,boolean c){
-			isNewPath=a;isCurve=b;isControl=c;
-		}
-	}
-	private List<point>points;
-	private class dot extends Point{
-		private static final long serialVersionUID = 1L;
-		private boolean isNewPath;private boolean isCurve;private boolean isControl;
-		private dot(int x,int y,boolean a,boolean b,boolean c){
-			super(x,y);isNewPath=a;isCurve=b;isControl=c;
-		}
-	}
-	private class content extends JComponent{
+	private class content extends JComponent implements MouseListener{
 		private static final long serialVersionUID = 1L;
 		private content(){
 			Shape Shp=(Shape)chr.element;
 			setPreferredSize(new Dimension(Shp.width,Shp.height));
-			for(int i=0;i<points.size();i++)add(points.get(i));
+			
+			List<dot>pnts=new ArrayList<dot>();
+			int x=0;int y=0;boolean new_path=true;
+			int edge = 0;int x1 = 0;int y1 = 0;int x2 = 0;int y2 = 0;int type = 0;
+			for(int i=0;;){
+				if(records_draws.length==i)break;
+				phase_start();int j=i;
+				do{
+					if(j==i)edge=records_draws[i];
+					else if((j+1)==i)type=records_draws[i];
+					else if((j+2)==i)x1=records_draws[i];
+					else if((j+3)==i)y1=records_draws[i];
+					else if((j+4)==i)x2=records_draws[i];
+					else if((j+5)==i)y2=records_draws[i];
+				}while(phase_get(records_draws[i++]));
+				if(edge==Non_edge_record){
+					x=x1;y=y1;new_path=true;
+				}else{
+					int xA=x+x1;int yA=y+y1;
+					if(new_path){
+						pnts.add(new dot(x,y,true,false,false));
+						new_path=false;
+					}
+					dot variable_dot=new dot(xA,yA,false,false,false);
+					pnts.add(variable_dot);
+					if(type==Straight_edge){x=xA;y=yA;}
+					else{
+						variable_dot.isCurve=true;variable_dot.isControl=true;
+						int xB=xA+x2;int yB=yA+y2;
+						pnts.add(new dot(xB,yB,false,true,false));
+						x=xB;y=yB;
+					}
+				}
+			}
+			for(int i=0;i<pnts.size();i++){//first lines and curves: draw; now buttons to points
+				dot p=pnts.get(i);
+				add_point(p);
+			}
+			
+			addMouseListener(this);
+		}
+		private void add_point(dot p){
+			add_point_ex(p,getComponentCount());
+		}
+		private void add_point_ex(dot p,int n){
+			point button=new point(p.isNewPath,p.isCurve,p.isControl);
+			int lat=2*gap;
+			button.setBounds(p.x-gap,p.y-gap,lat,lat);
+			button.setBackground(Color.BLUE);
+			add(button,n);
 		}
 		@Override
 		protected void paintComponent(java.awt.Graphics g) {
 			Shape Shp=(Shape)chr.element;
 			g.setColor(Color.WHITE);g.fillRect(0,0,Shp.width,Shp.height);
 			g.setColor(Color.BLACK);
-			for(int i=0;i<points.size();i++){
-				point p=points.get(i);
+			for(int i=0;i<getComponentCount();i++){
+				point p=(point)getComponent(i);
 				Rectangle r=p.getBounds();
 				boolean a=p.isNewPath==false&&p.isCurve==false;
 				boolean b=p.isCurve==true&&p.isControl==false;
 				if(a||b){
-					Rectangle prev_r=points.get(i-1).getBounds();
+					Rectangle prev_r=((point)getComponent(i-1)).getBounds();
 					int prev_x=prev_r.x+gap;int prev_y=prev_r.y+gap;
 					int x=r.x+gap;int y=r.y+gap;
 					if(a){
@@ -324,11 +317,99 @@ class shape {
 					}
 					else{
 						//curve
-						Rectangle prev_prev_r=points.get(i-2).getBounds();
-						int prev_prev_x=prev_prev_r.x+gap;int prev_prev_y=prev_r.y+gap;
+						Rectangle prev_prev_r=((point)getComponent(i-2)).getBounds();
+						int prev_prev_x=prev_prev_r.x+gap;int prev_prev_y=prev_prev_r.y+gap;
 						((Graphics2D)g).draw(new QuadCurve2D.Double(prev_prev_x,prev_prev_y,prev_x,prev_y,x,y));
 					}
 				}
+			}
+		}
+		private Point path_start;private boolean path_started;
+		@Override
+		public void mouseClicked(MouseEvent arg0){}
+		@Override
+		public void mouseEntered(MouseEvent arg0){}
+		@Override
+		public void mouseExited(MouseEvent arg0){}
+		@Override
+		public void mousePressed(MouseEvent arg0){
+			Point current_point=arg0.getPoint();
+			if(wantDrawCurve==false){
+				if(path_start==null){
+					path_start=current_point;
+					message_popup("Path start",this);
+				}
+				else{
+					if(path_started==false){
+						path_started=true;
+						//starting point
+						add_point(new dot(path_start.x,path_start.y,true,false,false));
+					}
+					//add point
+					add_point(new dot(current_point.x,current_point.y,false,false,false));
+				}
+			}else{
+				point[]pts=couple_resolve();
+				point control=pts[0];point anchor=pts[1];
+				if(control!=null)remove(control);
+				for(int i=0;i<getComponentCount();i++){
+					if(getComponent(i)==anchor){
+						add_point_ex(new dot(current_point.x,current_point.y,false,true,true),i);
+						anchor.isCurve=true;
+						break;
+					}
+				}
+			}
+			repaint();
+		}
+		@Override
+		public void mouseReleased(MouseEvent arg0){}
+		private class point extends JButton implements ActionListener{
+			private static final long serialVersionUID = 1L;
+			private boolean isNewPath;
+			private boolean isCurve;
+			private boolean isControl;
+			private point(boolean a,boolean b,boolean c){
+				isNewPath=a;isCurve=b;isControl=c;addActionListener(this);
+			}
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				wantDrawCurve=false;
+				if(isControl==false){
+					couple_index^=1;couple[couple_index]=this;
+					couple_resolve();
+					message_popup("#"+couple_get(couple_index),this);
+				}
+			}
+		}
+		private point[]couple={null,null};//index is more difficult(need to be updated)
+		private int couple_index;
+		private boolean wantDrawCurve;
+		private point[] couple_resolve(){
+			int a=couple_get(0);int b=couple_get(1);
+			int min=Math.min(a,b);int max=Math.max(a,b);
+			if(min!=max){
+				point control = null;
+				int test=min+1;
+				point test_p=(point)desktop.getComponent(test);
+				if(test_p.isControl==true){test=test+1;control=test_p;}
+				if(test==max){
+					wantDrawCurve=true;
+					return new point[]{control,(point)desktop.getComponent(max)};
+				}
+			}
+			return null;
+		}
+		private int couple_get(int i){
+			int a=0;if(couple[i]==null)return a;//can default to 0 if getting null
+			for(;a<desktop.getComponentCount();a++)if(desktop.getComponent(a)==couple[i])break;
+			return a;
+		}
+		private class dot extends Point{
+			private static final long serialVersionUID = 1L;
+			private boolean isNewPath;private boolean isCurve;private boolean isControl;
+			private dot(int x,int y,boolean a,boolean b,boolean c){
+				super(x,y);isNewPath=a;isCurve=b;isControl=c;
 			}
 		}
 	}

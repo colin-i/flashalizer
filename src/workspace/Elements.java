@@ -93,7 +93,7 @@ public class Elements {
 		public Object[]args;
 		Shape(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 		public Shape() throws IllegalArgumentException, IllegalAccessException{
-			this(new Object[]{100,100,new ShapeWithStyle().toArray(),untitled});
+			this(new Object[]{200,200,new ShapeWithStyle().toArray(),untitled});
 		}
 		public static class ShapeWithStyle{
 			public int fill;public Object fill_arg;

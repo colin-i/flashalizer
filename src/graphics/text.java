@@ -15,9 +15,7 @@ import static actionswf.ActionSwf.HasLayout;
 import static actionswf.ActionSwf.AutoSize;
 
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.Color;
-import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -26,8 +24,10 @@ import java.util.Enumeration;
 
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
@@ -91,10 +91,10 @@ class text{
 			panel.add(fH);
 			int color=t.structure.rgba;
 			Color c=cr.rgba2color(color);
-			Button new_color_b=new Button();
+			JButton new_color_b=new JButton();
 			new_color_b.setBackground(c);
 			JColorChooser colorChooser=new JColorChooser();colorChooser.setColor(c);
-			Dialog dialog =JColorChooser.createDialog(
+			JDialog dialog =JColorChooser.createDialog(
 				new_color_b,"Pick a Color",
 				true,//modal
 				colorChooser,
