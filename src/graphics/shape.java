@@ -185,7 +185,6 @@ class shape {
 		return ar;
 	}
 	private Container container;
-	private content desktop;
 	private ActionListener edit=new ActionListener(){
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
@@ -193,7 +192,7 @@ class shape {
 			container=dg.getContentPane();
 			container.setLayout(new BoxLayout(container,BoxLayout.Y_AXIS));
 			
-			desktop=new content();
+			content desktop=new content();
 			JScrollPane s=new JScrollPane(desktop);
 			container.add(s);
 			
@@ -391,18 +390,18 @@ class shape {
 			if(min!=max){
 				point control = null;
 				int test=min+1;
-				point test_p=(point)desktop.getComponent(test);
+				point test_p=(point)getComponent(test);
 				if(test_p.isControl==true){test=test+1;control=test_p;}
 				if(test==max){
 					wantDrawCurve=true;
-					return new point[]{control,(point)desktop.getComponent(max)};
+					return new point[]{control,(point)getComponent(max)};
 				}
 			}
 			return null;
 		}
 		private int couple_get(int i){
 			int a=0;if(couple[i]==null)return a;//can default to 0 if getting null
-			for(;a<desktop.getComponentCount();a++)if(desktop.getComponent(a)==couple[i])break;
+			for(;a<getComponentCount();a++)if(getComponent(a)==couple[i])break;
 			return a;
 		}
 		private class dot extends Point{
