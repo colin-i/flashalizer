@@ -1,8 +1,10 @@
 package graphics;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -21,7 +23,9 @@ import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -46,6 +50,7 @@ import static actionswf.ActionSwf.StateLineStyle;
 import static actionswf.ActionSwf.Straight_edge;
 import static actionswf.ActionSwf.Curved_edge;
 import static graphics.Graphics.characterData;
+import static graphics.Graphics.panel_button_add;
 import static util.util.message_popup;
 import static workspace.Elements.Shape.ShapeWithStyle.phase_start;
 import static workspace.Elements.Shape.ShapeWithStyle.phase_get;
@@ -184,7 +189,7 @@ class shape {
 		ar[0]=Non_edge_record;ar[1]=flags;for(int i=0,j=2;i<records_draws.length;i++,j++)ar[j]=records_draws[i];
 		return ar;
 	}
-	private Container container;
+	private Container container;private JCheckBox delete;private JPanel coordinates;
 	private ActionListener edit=new ActionListener(){
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
@@ -195,6 +200,23 @@ class shape {
 			content desktop=new content();
 			JScrollPane s=new JScrollPane(desktop);
 			container.add(s);
+			
+			coordinates=new JPanel();coordinates.setLayout(new BoxLayout(coordinates,BoxLayout.X_AXIS));
+			container.add(coordinates);
+			
+			buttons=new JPanel();buttons.setLayout(new FlowLayout());
+			add_button(false,'n',new ActionListener(){
+				@Override
+				public void actionPerformed(ActionEvent arg0){
+					desktop.path_start=null;desktop.path_started=false;
+					message_popup("Done",buttons);
+				}
+			},"Interrupt the current path");
+			delete=(JCheckBox)add_button(true,'d',new ActionListener(){
+				@Override
+				public void actionPerformed(ActionEvent arg0){}
+			},"Delete points");
+			container.add(buttons);
 			
 			JButton bt=new JButton("OK");
 			bt.addActionListener(new ActionListener(){
@@ -239,6 +261,22 @@ class shape {
 			dg.setVisible(true);
 		}
 	};
+	private JPanel buttons;
+	private AbstractButton add_button(boolean isCheckbox,char l,ActionListener acl,String tip){
+		AbstractButton b;String plus="";
+		if(isCheckbox==false)b=new JButton();
+		else{
+			b=new JCheckBox();plus="0";
+			b.setSelectedIcon(new ImageIcon("img/shape/"+l+"1.gif"));
+		}
+		ImageIcon im=new ImageIcon("img/shape/"+l+plus+".gif");
+		b.setIcon(im);
+		b.setToolTipText(tip);
+		b.addActionListener(acl);
+		b.setPreferredSize(new Dimension(im.getIconWidth()+panel_button_add,im.getIconHeight()+panel_button_add));
+		buttons.add(b);
+		return b;
+	}
 	private static final int gap=5;
 	private class content extends JComponent implements MouseListener{
 		private static final long serialVersionUID = 1L;
@@ -373,14 +411,78 @@ class shape {
 			}
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				if(isControl==false){
-					couple_index^=1;
-					if(couple[couple_index]!=null)couple[couple_index].setBackground(Color.BLUE);
-					couple[couple_index]=this;
-					message_popup("#"+couple_get(couple_index),this);
-					setBackground(Color.RED);
+				if(delete.isSelected()==false){
+					no_previous_coord();
+					set_coord(this);
+					if(isControl==false){
+						couple_index^=1;
+						if(couple[couple_index]!=null)couple[couple_index].setBackground(Color.BLUE);
+						couple[couple_index]=this;
+						message_popup("#"+couple_get(couple_index),this);
+						setBackground(Color.RED);
+					}
+				}else{
+					no_previous_coord();
+					Container main=getParent();
+					int i=pos_get(this);
+					if(isControl)control_out(i);//1 control delete
+					else{
+						point p;
+						//right
+						int right=i+1;
+						if(right<main.getComponentCount()){
+							p=(point)main.getComponent(right);
+							if(p.isControl)control_out(right);//2 right control delete
+						}
+						//left
+						if(isCurve)control_out(i-1);//3 left control delete
+						//this is not a curve and next will be path start
+						else if(isNewPath)((point)main.getComponent(right)).isNewPath=true;//4 new path delete
+						remove_point(this);
+						if(main.getComponentCount()==1)remove_point(main.getComponent(0));//5 no points
+					}
+					main.repaint();
 				}
 			}
+			private void no_previous_coord(){
+				coordinates.removeAll();
+				coord_draw();
+			}
+			private void set_coord(JButton p){
+				coordinates.add(new JLabel("X"));
+				coordinates.add(new coord(this,true));
+				coordinates.add(new JLabel("Y"));
+				coordinates.add(new coord(this,false));
+				coord_draw();
+			}
+			private void coord_draw(){coordinates.getParent().validate();}
+			private class coord extends InputText implements FocusListener{
+				private static final long serialVersionUID = 1L;
+				private point pt;private boolean isX;
+				private coord(point p,boolean b){
+					super((b?p.getX():p.getY())+gap);pt=p;isX=b;addFocusListener(this);
+				}
+				@Override
+				public void focusGained(FocusEvent arg0) {}
+				@Override
+				public void focusLost(FocusEvent arg0) {
+					super.focus_Lost();
+					int val=(Long.decode(getText())).intValue()-gap;
+					int x=pt.getX();int y=pt.getY();
+					if(isX)x=val;else y=val;
+					pt.setLocation(x,y);
+					pt.getParent().repaint();
+				}
+			}
+		}
+		private void remove_point(Component p){
+			if(couple[0]==p)couple[0]=null;
+			if(couple[1]==p)couple[1]=null;
+			remove(p);
+		}
+		private void control_out(int i){
+			((point)getComponent(i+1)).isCurve=false;
+			remove(getComponent(i));
 		}
 		private point[]couple={null,null};//index is more difficult(need to be updated)
 		private int couple_index;
@@ -400,8 +502,12 @@ class shape {
 			return null;
 		}
 		private int couple_get(int i){
-			int a=0;if(couple[i]==null)return a;//can default to 0 if getting null
-			for(;a<getComponentCount();a++)if(getComponent(a)==couple[i])break;
+			if(couple[i]==null)return 0;//can default to 0 if getting null
+			return pos_get(couple[i]);
+		}
+		private int pos_get(point p){
+			int a=0;
+			for(;a<getComponentCount();a++)if(getComponent(a)==p)break;
 			return a;
 		}
 		private class dot extends Point{
