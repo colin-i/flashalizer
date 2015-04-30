@@ -427,19 +427,34 @@ class shape {
 					int i=pos_get(this);
 					if(isControl)control_out(i);//1 control delete
 					else{
-						point p;
+						point end_verify = null;
 						//right
-						int right=i+1;
+						int right=i+1;int left=i-1;
 						if(right<main.getComponentCount()){
-							p=(point)main.getComponent(right);
+							point p=(point)main.getComponent(right);
 							if(p.isControl)control_out(right);//2 right control delete
 						}
 						//left
-						if(isCurve)control_out(i-1);//3 left control delete
-						//this is not a curve and next will be path start
-						else if(isNewPath)((point)main.getComponent(right)).isNewPath=true;//4 new path delete
+						if(isCurve)control_out(left--);//3 left control delete
+						//path start tests
+						if(isNewPath){
+							end_verify=(point)main.getComponent(right);//5 b
+							end_verify.isNewPath=true;//4 new path delete
+						}else if(((point)main.getComponent(left)).isNewPath)end_verify=(point)main.getComponent(left);//5 a
+						//remove
 						remove_point(this);
-						if(main.getComponentCount()==1)remove_point(main.getComponent(0));//5 no points
+						if(end_verify!=null){//5 no points
+							int end_pos=pos_get(end_verify)+1;
+							if(end_pos<main.getComponentCount()){
+								point end_test=(point)main.getComponent(end_pos);
+								if(end_test.isNewPath==false)end_verify=null;//6 there is a point at right
+							}
+							if(end_verify!=null){
+								remove_point(end_verify);
+								path_start=null;
+								path_started=false;
+							}
+						}
 					}
 					main.repaint();
 				}
