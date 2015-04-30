@@ -117,7 +117,7 @@ class shape {
 		
 		characterData.add(panel);
 		
-		subpanel=cr.new_panel();JButton bt=new JButton("View");bt.addActionListener(edit);
+		subpanel=cr.new_panel();JButton bt=new JButton("Edit");bt.addActionListener(edit);
 		subpanel.add(bt);
 		characterData.add(subpanel);
 	}
@@ -333,7 +333,8 @@ class shape {
 		@Override
 		public void mousePressed(MouseEvent arg0){
 			Point current_point=arg0.getPoint();
-			if(wantDrawCurve==false){
+			point[]pts=couple_resolve();
+			if(pts==null){
 				if(path_start==null){
 					path_start=current_point;
 					message_popup("Path start",this);
@@ -348,7 +349,6 @@ class shape {
 					add_point(new dot(current_point.x,current_point.y,false,false,false));
 				}
 			}else{
-				point[]pts=couple_resolve();
 				point control=pts[0];point anchor=pts[1];
 				if(control!=null)remove(control);
 				for(int i=0;i<getComponentCount();i++){
@@ -373,17 +373,17 @@ class shape {
 			}
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				wantDrawCurve=false;
 				if(isControl==false){
-					couple_index^=1;couple[couple_index]=this;
-					couple_resolve();
+					couple_index^=1;
+					if(couple[couple_index]!=null)couple[couple_index].setBackground(Color.BLUE);
+					couple[couple_index]=this;
 					message_popup("#"+couple_get(couple_index),this);
+					setBackground(Color.RED);
 				}
 			}
 		}
 		private point[]couple={null,null};//index is more difficult(need to be updated)
 		private int couple_index;
-		private boolean wantDrawCurve;
 		private point[] couple_resolve(){
 			int a=couple_get(0);int b=couple_get(1);
 			int min=Math.min(a,b);int max=Math.max(a,b);
@@ -393,8 +393,8 @@ class shape {
 				point test_p=(point)getComponent(test);
 				if(test_p.isControl==true){test=test+1;control=test_p;}
 				if(test==max){
-					wantDrawCurve=true;
-					return new point[]{control,(point)getComponent(max)};
+					point max_point=(point)getComponent(max);
+					if(max_point.isNewPath==false)return new point[]{control,max_point};
 				}
 			}
 			return null;
