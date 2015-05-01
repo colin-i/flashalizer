@@ -208,7 +208,7 @@ class shape {
 			add_button(false,'n',new ActionListener(){
 				@Override
 				public void actionPerformed(ActionEvent arg0){
-					desktop.path_start=null;desktop.path_started=false;
+					desktop.pathReset();desktop.selClear();
 					message_popup("Done",buttons);
 				}
 			},"Interrupt the current path");
@@ -362,6 +362,31 @@ class shape {
 			}
 		}
 		private Point path_start;private boolean path_started;
+		private void pathReset(){
+			path_start=null;path_started=false;
+		}
+		private static final int no_point=-1;
+		private int newPointPos(Point current_point){
+			if(couple[couple_index]!=null){
+				int i=pos_get(couple[couple_index])+1;
+				for(;i<getComponentCount();i++){
+					point p=(point) getComponent(i);
+					if(p.isNewPath)break;
+				}
+				return i;
+			}
+			if(path_start==null){
+				path_start=current_point;
+				message_popup("Path start",this);
+				return no_point;
+			}
+			if(path_started==false){
+				path_started=true;
+				//starting point
+				add_point(new dot(path_start.x,path_start.y,true,false,false));
+			}
+			return getComponentCount();
+		}
 		@Override
 		public void mouseClicked(MouseEvent arg0){}
 		@Override
@@ -373,19 +398,8 @@ class shape {
 			Point current_point=arg0.getPoint();
 			point[]pts=couple_resolve();
 			if(pts==null){
-				if(path_start==null){
-					path_start=current_point;
-					message_popup("Path start",this);
-				}
-				else{
-					if(path_started==false){
-						path_started=true;
-						//starting point
-						add_point(new dot(path_start.x,path_start.y,true,false,false));
-					}
-					//add point
-					add_point(new dot(current_point.x,current_point.y,false,false,false));
-				}
+				int pos=newPointPos(current_point);
+				if(pos!=no_point)add_point_ex(new dot(current_point.x,current_point.y,false,false,false),pos);
 			}else{
 				point control=pts[0];point anchor=pts[1];
 				if(control!=null)remove(control);
@@ -398,6 +412,12 @@ class shape {
 				}
 			}
 			repaint();
+		}
+		private void selClear(){
+			if(couple[couple_index]!=null){
+				couple[couple_index].setBackground(Color.BLUE);
+				couple[couple_index]=null;
+			}
 		}
 		@Override
 		public void mouseReleased(MouseEvent arg0){}
@@ -416,7 +436,7 @@ class shape {
 					set_coord(this);
 					if(isControl==false){
 						couple_index^=1;
-						if(couple[couple_index]!=null)couple[couple_index].setBackground(Color.BLUE);
+						selClear();
 						couple[couple_index]=this;
 						message_popup("#"+couple_get(couple_index),this);
 						setBackground(Color.RED);
@@ -451,8 +471,7 @@ class shape {
 							}
 							if(end_verify!=null){
 								remove_point(end_verify);
-								path_start=null;
-								path_started=false;
+								pathReset();
 							}
 						}
 					}
