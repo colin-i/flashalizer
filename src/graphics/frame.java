@@ -1,6 +1,7 @@
 package graphics;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -19,10 +20,13 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JTextArea;
 import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionEvent;
@@ -32,6 +36,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
+import workspace.AreaInputText;
 import workspace.WorkSpace;
 import static workspace.Project.showframe;
 import static workspace.Project.placement;
@@ -146,7 +151,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 								
 								set_frame_items(top,frms);
 								
-								walk(md,(DefaultMutableTreeNode)md.getRoot(),out_frame,-1);
+								walk(md,(DefaultMutableTreeNode)md.getRoot(),out_frame,walk_delete);
 								depths_set_sort(frms);
 								build_eshow(frms);
 								display.draw();
@@ -169,6 +174,34 @@ public class frame extends JPanel implements TreeSelectionListener{
 					}
 				}
 			});
+			add_button('a',"Action",new ActionListener(){
+				public void actionPerformed(ActionEvent e){
+					TreePath frame=selection_frame();
+					if(frame!=null){
+						frame_item f=(frame_item)((DefaultMutableTreeNode)frame.getLastPathComponent()).getUserObject();
+						JDialog dg=new JDialog(SwingUtilities.getWindowAncestor((Component)e.getSource()),"Action",JDialog.ModalityType.DOCUMENT_MODAL);
+						Container c=dg.getContentPane();
+						c.setLayout(new BoxLayout(c,BoxLayout.Y_AXIS));
+						JTextArea t=new AreaInputText(f.action);
+						int a=20;
+						t.setRows(a);t.setColumns(2*a);
+						JScrollPane s=new JScrollPane(t);
+						c.add(s);
+						JButton b=new JButton("OK");
+						b.addActionListener(new ActionListener(){
+							@Override public void actionPerformed(ActionEvent arg0) {
+								f.action=t.getText();
+								DefaultTreeModel md=(DefaultTreeModel)tree.getModel();
+								walk(md,(DefaultMutableTreeNode)md.getRoot(),f,walk_frame_update);
+								dg.dispose();
+							}}
+						);
+						c.add(b);
+						dg.pack();
+						dg.setVisible(true);
+					}
+				}
+			});
 		}
 	}
 	void delete_item(frame_item[]frms,int row,item it){
@@ -178,7 +211,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 		frms[row].elements=its.toArray(new item[its.size()]);
 		
 		DefaultTreeModel md=(DefaultTreeModel) tree.getModel();
-		walk(md,(DefaultMutableTreeNode)md.getRoot(),it,-1);
+		walk(md,(DefaultMutableTreeNode)md.getRoot(),it,walk_delete);
 		depths_set_sort(frms);
 		build_eshow(frms);
 	}
@@ -444,14 +477,20 @@ public class frame extends JPanel implements TreeSelectionListener{
 		}
 		return 0;
 	}
+	private static final int walk_delete=-1;
+	private static final int walk_frame_update=-2;
 	private boolean walk(DefaultTreeModel model,DefaultMutableTreeNode boss,Object tree_entry,int pos_new){
 		int  cc=model.getChildCount(boss);
 		for( int i=0; i < cc; i++){
 			DefaultMutableTreeNode child=(DefaultMutableTreeNode)model.getChild(boss,i);
 			Object obj=child.getUserObject();
 			if(obj==tree_entry){
-				model.removeNodeFromParent(child);
-				if(pos_new!=-1)model.insertNodeInto(child,boss,pos_new);
+				if(pos_new!=walk_frame_update){
+					model.removeNodeFromParent(child);
+					if(pos_new!=walk_delete)model.insertNodeInto(child,boss,pos_new);
+				}else{
+					model.nodeChanged(child);
+				}
 				return false;//return,will be a loop if there is a same sub-child,at these frames the item is only once here at depths
 			}
 			if(!model.isLeaf(child))if(walk(model,child,tree_entry,pos_new)==false)return true;

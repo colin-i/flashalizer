@@ -4,15 +4,20 @@ import graphics.frame.frame_item;
 import graphics.frame.item;
 
 import java.awt.Container;
+import java.awt.Window;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.prefs.Preferences;
 
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 
@@ -36,8 +41,18 @@ public class Graphics extends JSplitPane{
 	static Container frameData;
 	static Container characterData;
 	static final int panel_button_add=6;
+	private Preferences prefs=Preferences.userRoot().node(this.getClass().getName());
+	private static final String divider="divider";
 	public Graphics(){
 		super(JSplitPane.VERTICAL_SPLIT);
+		setOneTouchExpandable(true);
+		
+		JPanel pane=new JPanel();pane.setLayout(new BoxLayout(pane,BoxLayout.Y_AXIS));
+		frameData=new Container();
+		pane.add(frameData);
+		characterData=new Container();
+		pane.add(new JScrollPane(characterData));
+		setBottomComponent(pane);
 		
 		JPanel p=new JPanel();p.setLayout(new BoxLayout(p,BoxLayout.X_AXIS));
 		frame=new frame();
@@ -46,14 +61,22 @@ public class Graphics extends JSplitPane{
 		character=new character();p.add(character);//using frame.add_sprite(x)
 		frame.init();//using character.characters
 		WorkSpace.container.add(this);
-		add(p);
+		setTopComponent(p);
 		
-		JPanel pane=new JPanel();pane.setLayout(new BoxLayout(pane,BoxLayout.Y_AXIS));
-		frameData=new Container();
-		pane.add(frameData);
-		characterData=new Container();
-		pane.add(new JScrollPane(characterData));
-		add(pane);
+		Window w=SwingUtilities.getWindowAncestor(this);
+		w.pack();
+		// This works because we pack the window
+		double prop=prefs.getDouble(divider,-1);
+		if(prop==-1)prop=0.9;
+		setDividerLocation(prop);
+		addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, new PropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent pce) {
+				Double d=new Double((int)pce.getNewValue());
+				double prop=d/(double)getHeight();
+				prefs.putDouble(divider,prop);
+			}
+		});
 	}
 	public static void update() throws IllegalArgumentException, IllegalAccessException{
 		List<Object>elems=new ArrayList<Object>();
