@@ -486,8 +486,12 @@ public class frame extends JPanel implements TreeSelectionListener{
 			Object obj=child.getUserObject();
 			if(obj==tree_entry){
 				if(pos_new!=walk_frame_update){
+					TreePath[]backup=tree.getSelectionPaths();//
 					model.removeNodeFromParent(child);
-					if(pos_new!=walk_delete)model.insertNodeInto(child,boss,pos_new);
+					if(pos_new!=walk_delete){
+						model.insertNodeInto(child,boss,pos_new);
+						tree.setSelectionPaths(backup);//the node isn't selected again
+					}
 				}else{
 					model.nodeChanged(child);
 				}
@@ -502,19 +506,22 @@ public class frame extends JPanel implements TreeSelectionListener{
 		value_changed();
 	}
 	void value_changed(){
-		Container disp=Graphics.frameData.getParent();
+		Container fr_data=Graphics.frameData;
+		Container disp=fr_data.getParent();
 		int component_pos=0;
 		for(;component_pos<disp.getComponentCount();component_pos++){
-			if(disp.getComponent(component_pos)==Graphics.frameData)break;
+			if(disp.getComponent(component_pos)==fr_data)break;
 		}
-		disp.remove(Graphics.frameData);
-		Graphics.frameData=new JPanel();
-		Graphics.frameData.setLayout(new BoxLayout(Graphics.frameData,BoxLayout.Y_AXIS));
+		disp.remove(fr_data);
+		JPanel pan=new JPanel();
+		pan.setLayout(new BoxLayout(pan,BoxLayout.Y_AXIS));
 		
 		DefaultMutableTreeNode sel_node=(DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
 		if(sel_node!=null){//there is lost of selection at depth when removing and inserting||||||and place new object at character
 			Object obj=sel_node.getUserObject();
 			if(obj instanceof item){
+				pan.setBorder(BorderFactory.createTitledBorder(obj.toString()));
+				
 				item it=(item)obj;
 				TreePath frame_path=tree.getSelectionPath().getParentPath();
 				TreeNode frame=(TreeNode)frame_path.getLastPathComponent();
@@ -562,10 +569,10 @@ public class frame extends JPanel implements TreeSelectionListener{
 				
 				JScrollPane remv=new JScrollPane(rem);
 				remv.setBorder(BorderFactory.createTitledBorder("RemoveTag"));
-				Graphics.frameData.add(remv);
+				pan.add(remv);
 				JScrollPane dpth=new JScrollPane(dpt);
 				dpth.setBorder(BorderFactory.createTitledBorder("Depth"));
-				Graphics.frameData.add(dpth);
+				pan.add(dpth);
 				
 				//also add x y
 				try {
@@ -574,13 +581,14 @@ public class frame extends JPanel implements TreeSelectionListener{
 					xy.add(Graphics.character.new InputTextField(getAField(item.class,X.class),it));
 					xy.add(new Label("Y"));
 					xy.add(Graphics.character.new InputTextField(getAField(item.class,Y.class),it));
-					Graphics.frameData.add(xy);
+					pan.add(xy);
 				}catch (IllegalArgumentException | IllegalAccessException e) {e.printStackTrace();}
 			}
 		}
 		
+		Graphics.frameData=new JScrollPane(pan);
 		disp.add(Graphics.frameData,component_pos);
-		Graphics.frameData.revalidate();
+		Graphics.frameData.getParent().revalidate();
 		
 		display.draw();
 	}

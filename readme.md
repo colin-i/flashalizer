@@ -1,7 +1,7 @@
 
 -donate https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=BQL9C44C4ZCGJ
 
-![alt tag](http://oa.netau.net/image.02.05.2015.png)
+![alt tag](http://oa.netau.net/image.03.05.2015.png)
 
 -clone the project with: git clone https://github.com/colin-i/flashalizer.git<br>-download Java Native Access jar file at https://github.com/twall/jna to "build" folder<br>-download Javassist jar file at https://github.com/jboss-javassist/javassist/releases to same "build" folder<br>-run: ant compile run ; clean with: ant clean
 
