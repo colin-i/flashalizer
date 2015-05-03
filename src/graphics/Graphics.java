@@ -66,15 +66,13 @@ public class Graphics extends JSplitPane{
 		Window w=SwingUtilities.getWindowAncestor(this);
 		w.pack();
 		// This works because we pack the window
-		double prop=prefs.getDouble(divider,-1);
-		if(prop==-1)prop=0.9;
-		setDividerLocation(prop);
+		double prop=prefs.getInt(divider,-1);
+		if(prop==-1)prop=40;
+		setDividerLocation((int)Math.max(getHeight()-prop,getMinimumDividerLocation()));
 		addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, new PropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent pce) {
-				Double d=new Double((int)pce.getNewValue());
-				double prop=d/(double)getHeight();
-				prefs.putDouble(divider,prop);
+				prefs.putInt(divider,getHeight()-(int)pce.getNewValue());
 			}
 		});
 	}
