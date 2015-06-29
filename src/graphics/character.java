@@ -14,6 +14,7 @@ import graphics.frame.item;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -65,6 +66,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
+import dbitsl.DBitsL;
 import workspace.Elements;
 import workspace.Elements.SpriteNew;
 import workspace.WorkSpace;
@@ -504,6 +506,13 @@ public class character extends JPanel implements TreeSelectionListener{
 							dbl.imagepath=pth.getText();
 						}});
 					panel.add(pth);
+					JButton b=new JButton("View");
+					b.addActionListener(new ActionListener(){
+						@Override
+						public void actionPerformed(ActionEvent arg0) {
+							new DBitsL(dbl.imagepath,(Component) arg0.getSource());
+						}});
+					panel.add(b);
 					Graphics.characterData.add(panel);
 				}else/* if(element instance of Font)*/{
 					Font fnt=(Font)elem;
