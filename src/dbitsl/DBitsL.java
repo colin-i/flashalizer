@@ -3,6 +3,7 @@ package dbitsl;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -18,8 +19,14 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSlider;
+import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class DBitsL {
 	private BufferedImage img;
@@ -42,9 +49,16 @@ public class DBitsL {
 					JDialog dg=new JDialog(SwingUtilities.getWindowAncestor(c),"DBL",JDialog.ModalityType.DOCUMENT_MODAL);
 					Container container=dg.getContentPane();
 					container.setLayout(new BoxLayout(container,BoxLayout.Y_AXIS));
-					content desktop=new content(img);
-					JScrollPane s=new JScrollPane(desktop);
-					container.add(s);
+					//
+					JPanel p=new JPanel();p.setLayout(new BoxLayout(p,BoxLayout.X_AXIS));
+					p.add(new JLabel("Zoom"));
+					p.add(new slider());
+					container.add(p);
+					//
+					drawArea=new content(img);
+					scrollArea=new JScrollPane(drawArea);
+					container.add(scrollArea);
+					//
 					JButton save=new JButton("Save");
 					save.addActionListener(new ActionListener(){
 						@Override
@@ -65,6 +79,7 @@ public class DBitsL {
 			}
 		} catch (IOException | InterruptedException e){e.printStackTrace();}
 	}
+	private JComponent drawArea;private JScrollPane scrollArea;
 	private class content extends JComponent{
 		private static final long serialVersionUID = 1L;
 		private BufferedImage img;
@@ -74,8 +89,33 @@ public class DBitsL {
 		}
 		@Override
 		protected void paintComponent(java.awt.Graphics g){
-			g.drawImage(img,0,0,null);
+			g.drawImage(img,0,0,img.getWidth()*zoom_level,img.getHeight()*zoom_level,null);//img.getScaledInstance,AffineTransform
 			g.dispose();
+		}
+	}
+	private int zoom_level=1;
+	private class slider extends JSlider implements ChangeListener{
+		private static final long serialVersionUID = 1L;
+		private static final int min=1;private static final int max=16;
+		private slider(){
+			super(min,max,1);
+			setMajorTickSpacing(1);//This method will also set up a label table
+			setPaintTicks(true);//By default, this property is false
+			setPaintLabels(true);//By default, this property is false
+			addChangeListener(this);
+			int n=max-min;Dimension dim=new Dimension();dim.width=20*n;dim.height=50;setPreferredSize(dim);
+		}
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			if(!getValueIsAdjusting()){
+				JViewport v=scrollArea.getViewport();
+				Point p=v.getViewPosition();
+				int orig_x=p.x/zoom_level;int orig_y=p.y/zoom_level;
+				zoom_level=getValue();
+				drawArea.setPreferredSize(new Dimension(img.getWidth()*zoom_level,img.getHeight()*zoom_level));
+				v.setViewPosition(new Point(orig_x*zoom_level,orig_y*zoom_level));
+				drawArea.revalidate();
+			}
 		}
 	}
 }
