@@ -27,7 +27,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -56,6 +55,9 @@ import static workspace.Elements.Shape.ShapeWithStyle.phase_start;
 import static workspace.Elements.Shape.ShapeWithStyle.phase_get;
 import static workspace.Elements.Shape.ShapeWithStyle.end_of_values;
 import graphics.character.Character;
+import util.util.PanelEx;
+import util.util.ButtonEx;
+import util.util.ComponentEx;
 
 class shape {
 	private Character chr;
@@ -189,7 +191,7 @@ class shape {
 		ar[0]=Non_edge_record;ar[1]=flags;for(int i=0,j=2;i<records_draws.length;i++,j++)ar[j]=records_draws[i];
 		return ar;
 	}
-	private Container container;private JCheckBox delete;private JPanel coordinates;
+	private Container container;private JCheckBox delete;private PanelEx coordinates;
 	private ActionListener edit=new ActionListener(){
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
@@ -201,7 +203,7 @@ class shape {
 			JScrollPane s=new JScrollPane(desktop);
 			container.add(s);
 			
-			coordinates=new JPanel();coordinates.setLayout(new BoxLayout(coordinates,BoxLayout.X_AXIS));
+			coordinates=new PanelEx();coordinates.setLayout(new BoxLayout(coordinates,BoxLayout.X_AXIS));
 			container.add(coordinates);
 			
 			buttons=new JPanel();buttons.setLayout(new FlowLayout());
@@ -278,7 +280,7 @@ class shape {
 		return b;
 	}
 	private static final int gap=5;
-	private class content extends JComponent implements MouseListener{
+	private class content extends ComponentEx implements MouseListener{
 		private static final long serialVersionUID = 1L;
 		private content(){
 			Shape Shp=(Shape)chr.element;
@@ -411,7 +413,6 @@ class shape {
 					}
 				}
 			}
-			repaint();
 		}
 		private void selClear(){
 			if(couple[couple_index]!=null){
@@ -421,7 +422,7 @@ class shape {
 		}
 		@Override
 		public void mouseReleased(MouseEvent arg0){}
-		private class point extends JButton implements ActionListener{
+		private class point extends ButtonEx implements ActionListener{
 			private static final long serialVersionUID = 1L;
 			private boolean isNewPath;
 			private boolean isCurve;
@@ -475,21 +476,17 @@ class shape {
 							}
 						}
 					}
-					main.repaint();
 				}
 			}
 			private void no_previous_coord(){
 				coordinates.removeAll();
-				coord_draw();
 			}
 			private void set_coord(JButton p){
 				coordinates.add(new JLabel("X"));
 				coordinates.add(new coord(this,true));
 				coordinates.add(new JLabel("Y"));
 				coordinates.add(new coord(this,false));
-				coord_draw();
 			}
-			private void coord_draw(){coordinates.getParent().validate();}
 			private class coord extends InputText implements FocusListener{
 				private static final long serialVersionUID = 1L;
 				private point pt;private boolean isX;
@@ -505,7 +502,6 @@ class shape {
 					int x=pt.getX();int y=pt.getY();
 					if(isX)x=val;else y=val;
 					pt.setLocation(x,y);
-					pt.getParent().repaint();
 				}
 			}
 		}

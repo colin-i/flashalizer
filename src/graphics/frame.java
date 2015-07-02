@@ -5,7 +5,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.annotation.ElementType;
@@ -21,20 +20,18 @@ import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTextArea;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 
 import workspace.AreaInputText;
 import workspace.WorkSpace;
@@ -51,8 +48,11 @@ import static workspace.Project.actionsprite;
 import graphics.character.Character;
 import static graphics.Graphics.panel_button_add;
 import static graphics.character.getAField;
+import util.util.TreeSelListener;
+import util.util.ChListener;
+import util.util.AcListener;
 
-public class frame extends JPanel implements TreeSelectionListener{
+public class frame extends JPanel{
 	private static final long serialVersionUID = 1L;
 	frame(){
 		setLayout(new BorderLayout());
@@ -68,7 +68,10 @@ public class frame extends JPanel implements TreeSelectionListener{
 		noding(top,frames);
 		tree=new JTree(top);
 		tree.setRootVisible(false);
-		tree.addTreeSelectionListener(this);
+		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+		tree.addTreeSelectionListener(new TreeSelListener(display.component,new Runnable(){
+			@Override
+			public void run(){value_changed();}}));
 		JScrollPane s=new JScrollPane(tree);add(s);
 		
 		JPanel pan=new bar();
@@ -103,13 +106,12 @@ public class frame extends JPanel implements TreeSelectionListener{
 					Graphics.character.step(md,(DefaultMutableTreeNode) md.getRoot(),frms,-1,f_i);
 					
 					build_eshow(frms);
-					display.draw();
 					value_changed();
 				}
 			});
-			add_button('d',"Delete",new ActionListener(){
+			add_button('d',"Delete",new AcListener(display.component,new Runnable(){
 				@Override
-				public void actionPerformed(ActionEvent e) {
+				public void run(){
 					TreePath pt=tree.getSelectionPath();
 					if(pt!=null){
 						DefaultMutableTreeNode nd=(DefaultMutableTreeNode)pt.getLastPathComponent();
@@ -122,8 +124,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 								for(item it:f.elements){
 									if(it==nd_obj){
 										delete_item(frms,i,it);
-										display.draw();
-										value_changed();
+										//value_changed(); it is fired by tree listener
 										break;
 									}
 								}
@@ -154,12 +155,11 @@ public class frame extends JPanel implements TreeSelectionListener{
 								walk(md,(DefaultMutableTreeNode)md.getRoot(),out_frame,walk_delete);
 								depths_set_sort(frms);
 								build_eshow(frms);
-								display.draw();
 							}
 						}
 					}
 				}
-			});
+			}));
 			add_button('e',"Expand All",new ActionListener(){
 				public void actionPerformed(ActionEvent e) {
 					for(int i=0;i<tree.getRowCount();i++){
@@ -501,11 +501,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 		}
 		return true;
 	}
-	@Override
-	public void valueChanged(TreeSelectionEvent arg0) {
-		value_changed();
-	}
-	void value_changed(){
+	void value_changed(){//building the sliders
 		Container fr_data=Graphics.frameData;
 		Container disp=fr_data.getParent();
 		int component_pos=0;
@@ -577,9 +573,9 @@ public class frame extends JPanel implements TreeSelectionListener{
 				//also add x y
 				try {
 					JPanel xy=new JPanel();xy.setLayout(new BoxLayout(xy,BoxLayout.X_AXIS));
-					xy.add(new Label("X"));
+					xy.add(new JLabel("X"));
 					xy.add(Graphics.character.new InputTextField(getAField(item.class,X.class),it));
-					xy.add(new Label("Y"));
+					xy.add(new JLabel("Y"));
 					xy.add(Graphics.character.new InputTextField(getAField(item.class,Y.class),it));
 					pan.add(xy);
 				}catch (IllegalArgumentException | IllegalAccessException e) {e.printStackTrace();}
@@ -588,23 +584,30 @@ public class frame extends JPanel implements TreeSelectionListener{
 		
 		Graphics.frameData=new JScrollPane(pan);
 		disp.add(Graphics.frameData,component_pos);
-		Graphics.frameData.getParent().revalidate();
-		
-		display.draw();
 	}
 	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)private @interface X{}
 	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)private @interface Y{}
 	private interface slider_run{
 		void Run(slider s);
 	}
-	private class slider extends JSlider implements ChangeListener{
+	private class slider extends JSlider{
 		private static final long serialVersionUID = 1L;
 		slider(int min,int max,int sel,DefaultMutableTreeNode p){
 			super(min,max,sel);parent=p;sel_pos=sel;max_pos=max;
 			setMajorTickSpacing(1);//This method will also set up a label table
 			setPaintTicks(true);//By default, this property is false
 			setPaintLabels(true);//By default, this property is false
-			addChangeListener(this);
+			slid=this;addChangeListener(new ChListener(display.component,new Runnable(){
+				@Override
+				public void run() {
+					if(!getValueIsAdjusting()){
+						value=getValue();
+						frames=get_frame_items(parent);
+						run.Run(slid);
+						build_eshow(frames);
+					}
+				}
+			}));
 			int n=max-min;Dimension dim=new Dimension();dim.width=20*n;dim.height=50;setPreferredSize(dim);
 		}
 		private DefaultMutableTreeNode parent;
@@ -612,16 +615,7 @@ public class frame extends JPanel implements TreeSelectionListener{
 		private frame_item[]frames;
 		private slider_run run;
 		private int sel_pos;private int max_pos;
-		@Override
-		public void stateChanged(ChangeEvent e) {
-			if(!getValueIsAdjusting()){
-				value=getValue();
-				frames=get_frame_items(parent);
-				run.Run(this);
-				build_eshow(frames);
-				display.draw();//used at depth and after build elements show
-			}
-		}
+		private slider slid;
 	}
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)

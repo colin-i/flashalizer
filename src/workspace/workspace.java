@@ -31,6 +31,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.prefs.Preferences;
 
+import util.util.PanelEx;
 
 public class WorkSpace {
 	private Preferences prefs=Preferences.userRoot().node(this.getClass().getName());
@@ -328,7 +329,6 @@ public class WorkSpace {
 		container.remove(getPerspective());
 		addPerspective();
 		//the new table is not visible "in the next second" without re validate
-		container.revalidate();
 	}
 	private prop workpath;
 	static PopUp textPopup=new PopUp();
@@ -357,7 +357,9 @@ public class WorkSpace {
 			project.folder_set_base(workpath.get(),true,true);//work path sets path
 			project.newproj(project.width_default,project.height_default,project.backgroundcolor_default,project.fps_default);//frame,use path
 		}
-		container=frame.getContentPane();
+		
+		container=new PanelEx();container.setLayout(new BoxLayout(container,BoxLayout.Y_AXIS));
+		frame.setContentPane(container);
 		addPerspective();//frame,use path,container
 		
 		//Set up the exit.

@@ -15,7 +15,6 @@ import java.util.prefs.Preferences;
 
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -34,6 +33,7 @@ import workspace.Elements.SpriteShowFrame;
 import workspace.Elements.ShowFrame;
 import workspace.Elements.SpriteRemove;
 import workspace.Elements.Remove;
+import util.util.PanelEx;
 
 public class Graphics extends JSplitPane{
 	private static final long serialVersionUID = 1L;
@@ -47,12 +47,12 @@ public class Graphics extends JSplitPane{
 		super(JSplitPane.VERTICAL_SPLIT);
 		setOneTouchExpandable(true);
 		
-		JPanel pane=new JPanel();pane.setLayout(new BoxLayout(pane,BoxLayout.Y_AXIS));
+		JPanel pane=new PanelEx();pane.setLayout(new BoxLayout(pane,BoxLayout.Y_AXIS));
+		setBottomComponent(pane);
 		frameData=new Container();
 		pane.add(frameData);
 		characterData=new Container();
-		pane.add(new JScrollPane(characterData));
-		setBottomComponent(pane);
+		pane.add(characterData);
 		
 		JPanel p=new JPanel();p.setLayout(new BoxLayout(p,BoxLayout.X_AXIS));
 		frame=new frame();

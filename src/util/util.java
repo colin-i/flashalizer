@@ -1,19 +1,31 @@
 package util;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.DefaultTableModel;
 
 public class util {
 	public static void message_popup(String text,JComponent c){
@@ -39,4 +51,97 @@ public class util {
 			}
 		},1000);
 	}
+	//function+drawer
+	public static class TableEx extends JTable{
+		private static final long serialVersionUID = 1L;
+		public void setValueAtEx(Object aValue, int row, int column){
+			super.setValueAt(aValue,row,column);
+			DefaultTableModel m=(DefaultTableModel)getModel();
+			m.fireTableCellUpdated(row,column);
+		}
+	}
+	public static class PanelEx extends JPanel{
+		private static final long serialVersionUID = 1L;
+		public void removeAll(){
+			super.removeAll();
+			getParent().validate();
+		}
+		public Component add(Component comp){
+			super.add(comp);
+			getParent().validate();
+			return comp;
+		}
+		public Component add(Component comp,int index){
+			super.add(comp,index);
+			revalidate();
+			return comp;
+		}
+	}
+	public static class ButtonEx extends JButton{
+		private static final long serialVersionUID = 1L;
+		public void setLocation(int x,int y){
+			super.setLocation(x,y);
+			getParent().repaint();
+		}
+	}
+	public static class ComponentEx extends JComponent{
+		private static final long serialVersionUID = 1L;
+		public Component add(Component comp,int index){
+			super.add(comp,index);
+			repaint();
+			return comp;
+		}
+		public void remove(Component comp){
+			super.remove(comp);
+			repaint();
+		}
+	}
+	//
+	public static class TreeSelListener implements TreeSelectionListener{
+		public TreeSelListener(Component destDraw,Runnable run){
+			d=destDraw;r=run;
+		}
+		private Runnable r;private Component d;
+		@Override
+		public void valueChanged(TreeSelectionEvent e){
+			r.run();
+			d.repaint();
+		}
+	}
+	public static class ChListener implements ChangeListener{
+		public ChListener(Component destDraw,Runnable run){
+			d=destDraw;r=run;
+		}
+		private Runnable r;private Component d;
+		@Override
+		public void stateChanged(ChangeEvent arg0) {
+			r.run();
+			d.revalidate();
+		}
+	}
+	public static class AcListener implements ActionListener{
+		public AcListener(Component destDraw,Runnable run){
+			d=destDraw;r=run;
+		}
+		private Runnable r;private Component d;
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			r.run();
+			d.repaint();
+		}
+	}
+	public static class FocListener implements FocusListener{
+		@Override
+		public void focusGained(FocusEvent e) {}
+		@Override
+		public void focusLost(FocusEvent e) {
+			r.run();
+			d.repaint();
+		}
+		public FocListener(Component destDraw,Runnable run){
+			d=destDraw;r=run;
+		}
+		private Runnable r;private Component d;
+	}
+	//
 }

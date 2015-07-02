@@ -40,7 +40,7 @@ import static actionswf.ActionSwf.FillStyleType_none;
 
 import static util.util.message_popup;
 
-public class Functions extends JTable{
+public class Functions extends util.util.TableEx{
 	private static final long serialVersionUID = 1L;
 	static Functions table;static Component container;
 	private JButton ButtonData_button=new JButton(ButtonData);
@@ -367,26 +367,27 @@ public class Functions extends JTable{
 						public void run(){
 							//still avoiding the bug
 							if(thisRow==getSelectedRow()){
-								for(int i=1;i<getColumnCount();i++)setValueAt(null,thisRow,i);
 								for(function f:f_list){
 									if(f.name.equals(((ToolTipWrapper)event.getItem()).value)){
-										for(int i=0;i<f.number_of_args;i++){
+										int i=0;
+										for(;i<f.number_of_args;i++){
 											String t=f.args_types.get(i);Object a;
 											if(t.equals("int"))a=0;
 											else if(t.equals("String"))a="";
 											else if(t.equals(ButtonData))a=new Elements.Button.ButtonData();
 											else if(t.equals(EditText))a=new Elements.Text.EditText();
 											else/*if(t.equals("Object[]"))*/a=new Elements.Shape.ShapeWithStyle().toArray();
-											setValueAt(a,thisRow,i+1);
+											setValueAtEx(a,thisRow,i+1);
 										}
-										if(hasReturn(f))setValueAt("",thisRow,getColumnCount()-1);
+										for(;i<-1+getColumnCount()-1;i++)setValueAtEx(null,thisRow,i+1);
+										Object named=null;
+										if(hasReturn(f))named="";
+										setValueAtEx(named,thisRow,getColumnCount()-1);
+										int modelEnd_pos=getRowCount()-modelEnd_sum;
+										if(modelEnd_pos-1==getSelectedRow())model.insertRow(modelEnd_pos,new Object[getColumnCount()]);
 										break;
 									}
 								}
-								
-								int modelEnd_pos=getRowCount()-modelEnd_sum;
-								if(modelEnd_pos-1==getSelectedRow())model.insertRow(modelEnd_pos,new Object[getColumnCount()]);
-								else repaint();
 							}
 						}
 					});

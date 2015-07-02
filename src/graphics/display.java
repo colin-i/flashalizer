@@ -100,12 +100,9 @@ class display extends JScrollPane{
 			}
 		}
 	}
-	private static JComponent component;
+	static JComponent component;
 	display(){
 		component=new content();
 		setViewportView(component);
-	}
-	static void draw() {
-		component.repaint();
 	}
 }

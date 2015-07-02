@@ -25,8 +25,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+
+import util.util.ChListener;
 
 public class DBitsL {
 	private BufferedImage img;
@@ -49,13 +49,13 @@ public class DBitsL {
 					JDialog dg=new JDialog(SwingUtilities.getWindowAncestor(c),"DBL",JDialog.ModalityType.DOCUMENT_MODAL);
 					Container container=dg.getContentPane();
 					container.setLayout(new BoxLayout(container,BoxLayout.Y_AXIS));
+					drawArea=new content(img);
 					//
 					JPanel p=new JPanel();p.setLayout(new BoxLayout(p,BoxLayout.X_AXIS));
 					p.add(new JLabel("Zoom"));
 					p.add(new slider());
 					container.add(p);
 					//
-					drawArea=new content(img);
 					scrollArea=new JScrollPane(drawArea);
 					container.add(scrollArea);
 					//
@@ -94,7 +94,7 @@ public class DBitsL {
 		}
 	}
 	private int zoom_level=1;
-	private class slider extends JSlider implements ChangeListener{
+	private class slider extends JSlider{
 		private static final long serialVersionUID = 1L;
 		private static final int min=1;private static final int max=16;
 		private slider(){
@@ -102,20 +102,20 @@ public class DBitsL {
 			setMajorTickSpacing(1);//This method will also set up a label table
 			setPaintTicks(true);//By default, this property is false
 			setPaintLabels(true);//By default, this property is false
-			addChangeListener(this);
+			addChangeListener(new ChListener(drawArea,new Runnable(){
+				@Override
+				public void run() {
+					if(!getValueIsAdjusting()){
+						JViewport v=scrollArea.getViewport();
+						Point p=v.getViewPosition();
+						int orig_x=p.x/zoom_level;int orig_y=p.y/zoom_level;
+						zoom_level=getValue();
+						drawArea.setPreferredSize(new Dimension(img.getWidth()*zoom_level,img.getHeight()*zoom_level));
+						v.setViewPosition(new Point(orig_x*zoom_level,orig_y*zoom_level));
+					}
+				}
+			}));
 			int n=max-min;Dimension dim=new Dimension();dim.width=20*n;dim.height=50;setPreferredSize(dim);
-		}
-		@Override
-		public void stateChanged(ChangeEvent e) {
-			if(!getValueIsAdjusting()){
-				JViewport v=scrollArea.getViewport();
-				Point p=v.getViewPosition();
-				int orig_x=p.x/zoom_level;int orig_y=p.y/zoom_level;
-				zoom_level=getValue();
-				drawArea.setPreferredSize(new Dimension(img.getWidth()*zoom_level,img.getHeight()*zoom_level));
-				v.setViewPosition(new Point(orig_x*zoom_level,orig_y*zoom_level));
-				drawArea.revalidate();
-			}
 		}
 	}
 }

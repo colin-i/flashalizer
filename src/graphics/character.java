@@ -80,6 +80,8 @@ import static graphics.Graphics.panel_button_add;
 import static workspace.Elements.default_fonts;
 import static actionswf.ActionSwf.FontFlagsBold;
 import static actionswf.ActionSwf.FontFlagsItalic;
+import util.util.AcListener;
+import util.util.FocListener;
 
 public class character extends JPanel implements TreeSelectionListener{
 	private static final long serialVersionUID = 1L;
@@ -328,8 +330,8 @@ public class character extends JPanel implements TreeSelectionListener{
 				}
 			});
 			
-			add_button('d',"Delete",new ActionListener(){
-				public void actionPerformed(ActionEvent e) {
+			add_button('d',"Delete",new AcListener(display.component,new Runnable(){
+				public void run(){
 					TreePath pt=tree.getSelectionPath();
 					if(pt!=null){
 						DefaultTreeModel md=(DefaultTreeModel) tree.getModel();
@@ -339,13 +341,12 @@ public class character extends JPanel implements TreeSelectionListener{
 						if(chr.isPlaceable){
 							DefaultTreeModel model=(DefaultTreeModel) frame.tree.getModel();
 							step(model,(DefaultMutableTreeNode)model.getRoot(),chr);
-							display.draw();
 							Graphics.frame.value_changed();
 						}
-						value_changed();
+						//value_changed(); at delete it is fired by tree listener
 					}
 				}
-			});
+			}));
 		}
 		private void step(DefaultTreeModel model,DefaultMutableTreeNode main,Character out){
 			for(int i=0;i<model.getChildCount(main);i++){
@@ -367,7 +368,14 @@ public class character extends JPanel implements TreeSelectionListener{
 		} 
 	}
 	private void value_changed(){
-		Container currentCharacterData=Graphics.characterData;
+		Container ch_data=Graphics.characterData;
+		Container disp=ch_data.getParent();
+		int component_pos=0;
+		for(;component_pos<disp.getComponentCount();component_pos++){
+			if(disp.getComponent(component_pos)==ch_data)break;
+		}
+		disp.remove(ch_data);
+		
 		Graphics.characterData=new JPanel();
 		Graphics.characterData.setLayout(new BoxLayout(Graphics.characterData,BoxLayout.Y_AXIS));
 		DefaultMutableTreeNode node=(DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
@@ -388,9 +396,9 @@ public class character extends JPanel implements TreeSelectionListener{
 					add_field(panel,"Height",chr.height,chr);
 				}
 				JButton b=new JButton("Place");
-				b.addActionListener(new ActionListener(){
+				b.addActionListener(new AcListener(display.component,new Runnable(){
 					@Override
-					public void actionPerformed(ActionEvent arg0) {
+					public void run(){
 						JTree t=frame.tree;
 						DefaultTreeModel model;
 						model=(DefaultTreeModel)t.getModel();
@@ -411,12 +419,11 @@ public class character extends JPanel implements TreeSelectionListener{
 						if(chr.frames!=null){
 							if(p!=f_root){
 								if(loop_check(chr.frames,frms)){
-									JComponent c=(JComponent)arg0.getSource();
-									Cursor initial_cursor=c.getCursor();
-									c.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(new ImageIcon("img/no.png").getImage(),new Point(),null));
+									Cursor initial_cursor=b.getCursor();
+									b.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(new ImageIcon("img/no.png").getImage(),new Point(),null));
 									ActionListener taskPerformer = new ActionListener() {
 										public void actionPerformed(ActionEvent evt) {
-											c.setCursor(initial_cursor);
+											b.setCursor(initial_cursor);
 										}
 									};
 									new javax.swing.Timer(1000,taskPerformer).start();
@@ -485,8 +492,7 @@ public class character extends JPanel implements TreeSelectionListener{
 						//frame, frame options and display
 						step(model,(DefaultMutableTreeNode)model.getRoot(),frms,pos,it);
 						fr.value_changed();
-						display.draw();
-					}});
+					}}));
 				add_one_field(panel,b);
 				Graphics.characterData.add(panel);
 				
@@ -539,12 +545,8 @@ public class character extends JPanel implements TreeSelectionListener{
 			}
 		}
 		
-		Container c=currentCharacterData.getParent().getParent();
-		Container parent=c.getParent();
-		parent.remove(c);
-		JScrollPane s=new JScrollPane(Graphics.characterData);
-		parent.add(s);
-		parent.revalidate();
+		Graphics.characterData=new JScrollPane(Graphics.characterData);
+		disp.add(Graphics.characterData,component_pos);
 	}
 	private void add_flag_font(JPanel panel,Font f,String nm,int flag){
 		JCheckBox chk=new JCheckBox(nm);
@@ -610,33 +612,31 @@ public class character extends JPanel implements TreeSelectionListener{
 		add_separator(panel);panel.add(c);
 	}
 	void add_separator(JPanel panel){panel.add(new JSeparator(SwingConstants.VERTICAL));}
-	class InputTextField extends InputText implements FocusListener{
+	class InputTextField extends InputText{
 		private static final long serialVersionUID = 1L;
 		Field field;Object element;
+		private InputText inp;
 		InputTextField(Field f,Object el) throws IllegalArgumentException, IllegalAccessException{
-			super(f.get(el));field=f;element=el;addFocusListener(this);
-		}
-		@Override
-		public void focusGained(FocusEvent arg0) {}
-		@Override
-		public void focusLost(FocusEvent arg0) {
-			try {
-				if(field.get(element) instanceof Integer){
-					super.focus_Lost();
-					field.set(element,(Long.decode(getText())).intValue());
-					
-					display.draw();
-				}else/*String*/{
-					field.set(element,getText());
-					
-					DefaultTreeModel model;
-					model=(DefaultTreeModel)tree.getModel();
-					walk(model,model.getRoot(),false);
-					model=(DefaultTreeModel)frame.tree.getModel();
-					walk(model,model.getRoot(),true);
+			super(f.get(el));field=f;element=el;
+			inp=this;addFocusListener(new FocListener(display.component,new Runnable(){
+				@Override
+				public void run() {
+					try {
+						if(field.get(element) instanceof Integer){
+							inp.focus_Lost();
+							field.set(element,(Long.decode(getText())).intValue());
+						}else/*String*/{
+							field.set(element,getText());
+							DefaultTreeModel model;
+							model=(DefaultTreeModel)tree.getModel();
+							walk(model,model.getRoot(),false);
+							model=(DefaultTreeModel)frame.tree.getModel();
+							walk(model,model.getRoot(),true);
+						}
+					}
+					catch (IllegalArgumentException | IllegalAccessException e) {e.printStackTrace();}
 				}
-			}
-			catch (IllegalArgumentException | IllegalAccessException e) {e.printStackTrace();}
+			}));
 		}
 		private void walk(DefaultTreeModel model,Object o,boolean isItem){
 			int  cc;
