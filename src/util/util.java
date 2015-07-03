@@ -9,6 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -143,5 +145,17 @@ public class util {
 		}
 		private Runnable r;private Component d;
 	}
+	public static class MsMotListener implements MouseMotionListener{
+		public MsMotListener(Component destDraw,MsEvRunnable msEvRunnable){
+			d=destDraw;r=msEvRunnable;
+		}
+		private MsEvRunnable r;private Component d;
+		@Override
+		public void mouseDragged(MouseEvent e){
+			r.run(e);d.repaint();
+		}
+		@Override
+		public void mouseMoved(MouseEvent e){}
+	}public interface MsEvRunnable{public void run(MouseEvent e);}
 	//
 }

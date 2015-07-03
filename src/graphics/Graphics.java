@@ -40,7 +40,7 @@ public class Graphics extends JSplitPane{
 	static frame frame;static character character;
 	static Container frameData;
 	static Container characterData;
-	static final int panel_button_add=6;
+	public static final int panel_button_add=6;
 	private Preferences prefs=Preferences.userRoot().node(this.getClass().getName());
 	private static final String divider="divider";
 	public Graphics(){

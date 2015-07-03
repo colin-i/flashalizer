@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +28,8 @@ import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
 
 import util.util.ChListener;
+import util.util.MsMotListener;
+import util.util.MsEvRunnable;
 
 public class DBitsL {
 	private BufferedImage img;
@@ -56,8 +59,11 @@ public class DBitsL {
 					p.add(new slider());
 					container.add(p);
 					//
+					JPanel pan=new JPanel();pan.setLayout(new BoxLayout(pan,BoxLayout.X_AXIS));
+					pan.add(new Tools());
 					scrollArea=new JScrollPane(drawArea);
-					container.add(scrollArea);
+					pan.add(scrollArea);
+					container.add(pan);
 					//
 					JButton save=new JButton("Save");
 					save.addActionListener(new ActionListener(){
@@ -86,6 +92,12 @@ public class DBitsL {
 		private content(BufferedImage img){
 			setPreferredSize(new Dimension(img.getWidth(),img.getHeight()));
 			this.img=img;
+			addMouseMotionListener(new MsMotListener(this,new MsEvRunnable(){
+				@Override
+				public void run(MouseEvent e) {
+					img.setRGB(e.getX()/zoom_level,e.getY()/zoom_level,Tools.pencil);
+				}
+			}));
 		}
 		@Override
 		protected void paintComponent(java.awt.Graphics g){
