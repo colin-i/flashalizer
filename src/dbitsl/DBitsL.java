@@ -60,7 +60,7 @@ public class DBitsL {
 					container.add(p);
 					//
 					JPanel pan=new JPanel();pan.setLayout(new BoxLayout(pan,BoxLayout.X_AXIS));
-					pan.add(new Tools());
+					pan.add(new Tools(drawArea));
 					scrollArea=new JScrollPane(drawArea);
 					pan.add(scrollArea);
 					container.add(pan);
