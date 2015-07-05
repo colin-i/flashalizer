@@ -95,7 +95,7 @@ public class DBitsL {
 			addMouseMotionListener(new MsMotListener(this,new MsEvRunnable(){
 				@Override
 				public void run(MouseEvent e) {
-					img.setRGB(e.getX()/zoom_level,e.getY()/zoom_level,Tools.pencil);
+					img.setRGB(e.getX()/zoom_level,e.getY()/zoom_level,Tools.color.getRGB());
 				}
 			}));
 		}

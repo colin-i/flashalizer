@@ -30,7 +30,7 @@ import javax.swing.JColorChooser;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 
 import workspace.InputText;
@@ -143,7 +143,7 @@ class text{
 			panel=cr.new_panel();
 			cr.add_one_field(panel,new JLabel("Align"));
 			ButtonGroup group = new ButtonGroup();
-			JRadioButtonMenuItem radio;
+			JRadioButton radio;
 			ActionListener al=new ActionListener(){
 				@Override
 				public void actionPerformed(ActionEvent e){
@@ -159,10 +159,10 @@ class text{
 					}
 				}
 			};
-			radio=new JRadioButtonMenuItem("Left");radio.addActionListener(al);group.add(radio);panel.add(radio);
-			radio=new JRadioButtonMenuItem("Right");radio.addActionListener(al);group.add(radio);panel.add(radio);
-			radio=new JRadioButtonMenuItem("Center");radio.addActionListener(al);group.add(radio);panel.add(radio);
-			radio=new JRadioButtonMenuItem("Justify");radio.addActionListener(al);group.add(radio);panel.add(radio);
+			radio=new JRadioButton("Left");radio.addActionListener(al);group.add(radio);panel.add(radio);
+			radio=new JRadioButton("Right");radio.addActionListener(al);group.add(radio);panel.add(radio);
+			radio=new JRadioButton("Center");radio.addActionListener(al);group.add(radio);panel.add(radio);
+			radio=new JRadioButton("Justify");radio.addActionListener(al);group.add(radio);panel.add(radio);
 			cr.add_separator(panel);panel.add(new JLabel("Margin"));
 			new TextLayoutIntInputText(
 				t.structure.layout_leftmargin,t,
