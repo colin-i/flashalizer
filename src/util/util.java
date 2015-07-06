@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -118,7 +119,7 @@ public class util {
 		@Override
 		public void stateChanged(ChangeEvent arg0) {
 			r.run();
-			d.revalidate();
+			d.repaint();
 		}
 	}
 	public static class AcListener implements ActionListener{
@@ -145,17 +146,36 @@ public class util {
 		}
 		private Runnable r;private Component d;
 	}
+	public interface MsEvBRunnable{public boolean run(MouseEvent e);}
 	public static class MsMotListener implements MouseMotionListener{
-		public MsMotListener(Component destDraw,MsEvRunnable msEvRunnable){
+		public MsMotListener(Component destDraw,MsEvBRunnable msEvRunnable){
 			d=destDraw;r=msEvRunnable;
 		}
-		private MsEvRunnable r;private Component d;
+		private MsEvBRunnable r;private Component d;
 		@Override
 		public void mouseDragged(MouseEvent e){
 			r.run(e);d.repaint();
 		}
 		@Override
 		public void mouseMoved(MouseEvent e){}
-	}public interface MsEvRunnable{public void run(MouseEvent e);}
+	}
+	public static class MsListener implements MouseListener{
+		public MsListener(Component destDraw,MsEvBRunnable msEvRunnable){
+			d=destDraw;r=msEvRunnable;
+		}
+		private MsEvBRunnable r;private Component d;
+		@Override
+		public void mouseClicked(MouseEvent e) {}
+		@Override
+		public void mouseEntered(MouseEvent e) {}
+		@Override
+		public void mouseExited(MouseEvent e) {}
+		@Override
+		public void mousePressed(MouseEvent e) {
+			if(r.run(e))d.repaint();
+		}
+		@Override
+		public void mouseReleased(MouseEvent e) {}
+	}
 	//
 }

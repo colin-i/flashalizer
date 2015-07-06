@@ -29,7 +29,8 @@ import javax.swing.SwingUtilities;
 
 import util.util.ChListener;
 import util.util.MsMotListener;
-import util.util.MsEvRunnable;
+import util.util.MsListener;
+import util.util.MsEvBRunnable;
 
 public class DBitsL {
 	private BufferedImage img;
@@ -85,17 +86,23 @@ public class DBitsL {
 			}
 		} catch (IOException | InterruptedException e){e.printStackTrace();}
 	}
-	private JComponent drawArea;private JScrollPane scrollArea;
-	private class content extends JComponent{
+	private content drawArea;private JScrollPane scrollArea;
+	static class content extends JComponent{
 		private static final long serialVersionUID = 1L;
-		private BufferedImage img;
+		BufferedImage img;
 		private content(BufferedImage img){
 			setPreferredSize(new Dimension(img.getWidth(),img.getHeight()));
 			this.img=img;
-			addMouseMotionListener(new MsMotListener(this,new MsEvRunnable(){
+			addMouseMotionListener(new MsMotListener(this,new MsEvBRunnable(){
 				@Override
-				public void run(MouseEvent e) {
-					img.setRGB(e.getX()/zoom_level,e.getY()/zoom_level,Tools.color.getRGB());
+				public boolean run(MouseEvent e) {
+					return Tools.drag(e);
+				}
+			}));
+			addMouseListener(new MsListener(this,new MsEvBRunnable(){
+				@Override
+				public boolean run(MouseEvent e) {
+					return Tools.hit(e);
 				}
 			}));
 		}
@@ -105,7 +112,7 @@ public class DBitsL {
 			g.dispose();
 		}
 	}
-	private int zoom_level=1;
+	static int zoom_level=1;
 	private class slider extends JSlider{
 		private static final long serialVersionUID = 1L;
 		private static final int min=1;private static final int max=16;
