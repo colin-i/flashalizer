@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -22,9 +23,13 @@ import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JSeparator;
+import javax.swing.JWindow;
+import javax.swing.SwingUtilities;
 
 import dbitsl.DBitsL.content;
 import util.util.MsEvBRunnable;
@@ -35,9 +40,9 @@ class Tools extends JPanel{
 	private static final long serialVersionUID = 1L;
 	private Color color=new Color(0);private JButton clrBtn;
 	private int side_w;private int side_h;
-	private content draw;
+	private static content draw;
 	
-	Tools(content draw){this.draw=draw;
+	Tools(content draw){Tools.draw=draw;
 		setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
 		char first_b='p';
 		ImageIcon first_im=image(first_b);
@@ -116,13 +121,46 @@ class Tools extends JPanel{
 				return true;
 			}
 		},null);
+		add(new JSeparator());
+		ImageIcon im=image('e');
+		BufferedImage img=new BufferedImage(side_w,side_h,BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = img.createGraphics();g.drawImage(im.getImage(),panel_button_add/2,panel_button_add/2,null);g.dispose();
+		easeB=new JCheckBox(new ImageIcon(img));easeB.setToolTipText("Mouse Coordinates");
+		img=new BufferedImage(side_w,side_h,BufferedImage.TYPE_INT_ARGB);
+		g = img.createGraphics();
+		g.setColor(Color.GREEN);g.fillRect(0,0,side_w,side_h);
+		g.drawImage(im.getImage(),panel_button_add/2,panel_button_add/2,null);
+		g.dispose();
+		easeB.setSelectedIcon(new ImageIcon(img));
+		add(easeB);
 	}
-	private Point origPoint(MouseEvent e){
+	private static JCheckBox easeB;private static JWindow easeCoords;
+	static void ease(MouseEvent e){
+		if(easeB.isSelected()==false)return;
+		Point p=origPoint(e);if(p==null){
+			easeOff();
+			return;
+		}
+		easeOff();
+		easeOn();
+		String t=p.x+","+p.y;
+		util.util.popup(t,easeCoords);
+	}
+	private static void easeOn(){
+		Window topLevelWin = SwingUtilities.getWindowAncestor(easeB);
+		easeCoords = new JWindow(topLevelWin);
+		easeCoords.setVisible(true);
+	}
+	static void easeOff(){
+		if(easeCoords==null)return;
+		easeCoords.dispose();easeCoords=null;
+	}
+	private static Point origPoint(MouseEvent e){
 		BufferedImage img=draw.img;
 		int x=e.getX()/DBitsL.zoom_level;
-		if(img.getWidth()<=x)return null;
+		if(x<0||img.getWidth()<=x)return null;
 		int y=e.getY()/DBitsL.zoom_level;
-		if(img.getHeight()<=y)return null;
+		if(y<0||img.getHeight()<=y)return null;
 		return new Point(x,y);
 	}
 	private void set_bgrColor(){

@@ -1,5 +1,6 @@
 package dbitsl;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -60,8 +61,8 @@ public class DBitsL {
 					p.add(new slider());
 					container.add(p);
 					//
-					JPanel pan=new JPanel();pan.setLayout(new BoxLayout(pan,BoxLayout.X_AXIS));
-					pan.add(new Tools(drawArea));
+					JPanel pan=new JPanel();pan.setLayout(new BorderLayout());
+					pan.add(new Tools(drawArea),BorderLayout.WEST);
 					scrollArea=new JScrollPane(drawArea);
 					pan.add(scrollArea);
 					container.add(pan);
@@ -93,13 +94,13 @@ public class DBitsL {
 		private content(BufferedImage img){
 			setPreferredSize(new Dimension(img.getWidth(),img.getHeight()));
 			this.img=img;
-			addMouseMotionListener(new MsMotListener(this,new MsEvBRunnable(){
+			addMouseMotionListener(new imgMsMotListener(this,new MsEvBRunnable(){
 				@Override
 				public boolean run(MouseEvent e) {
 					return Tools.drag(e);
 				}
 			}));
-			addMouseListener(new MsListener(this,new MsEvBRunnable(){
+			addMouseListener(new imgMsListener(this,new MsEvBRunnable(){
 				@Override
 				public boolean run(MouseEvent e) {
 					return Tools.hit(e);
@@ -111,6 +112,20 @@ public class DBitsL {
 			g.drawImage(img,0,0,img.getWidth()*zoom_level,img.getHeight()*zoom_level,null);//img.getScaledInstance,AffineTransform
 			g.dispose();
 		}
+	}
+	private static class imgMsMotListener extends MsMotListener{
+		private imgMsMotListener(Component destDraw, MsEvBRunnable msEvRunnable){super(destDraw, msEvRunnable);}
+		@Override
+		public void mouseDragged(MouseEvent e){
+			Tools.ease(e);
+			super.mouseDragged(e);
+		}
+		@Override
+		public void mouseMoved(MouseEvent e){Tools.ease(e);}
+	}
+	private static class imgMsListener extends MsListener{
+		private imgMsListener(Component destDraw, MsEvBRunnable msEvRunnable){super(destDraw, msEvRunnable);}
+		@Override public void mouseExited(MouseEvent e){Tools.easeOff();}
 	}
 	static int zoom_level=1;
 	private class slider extends JSlider{
