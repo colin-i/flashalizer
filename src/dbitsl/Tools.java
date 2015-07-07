@@ -85,7 +85,7 @@ class Tools extends JPanel{
 				int fill_color=color.getRGB();
 				if(target_color==fill_color)return false;
 				int w=img.getWidth();int h=img.getHeight();
-				boolean b[][]=new boolean[w][h];
+				boolean b[][]=new boolean[h][w];
 				List<Point>points=new ArrayList<Point>();
 				points.add(new Point(x,y));
 				while(0<points.size()){
