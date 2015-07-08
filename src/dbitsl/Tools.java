@@ -33,6 +33,7 @@ import javax.swing.SwingUtilities;
 
 import dbitsl.DBitsL.content;
 import util.util.MsEvBRunnable;
+import util.util.AcListener;
 
 import static graphics.Graphics.panel_button_add;
 
@@ -132,8 +133,15 @@ class Tools extends JPanel{
 		g.drawImage(im.getImage(),panel_button_add/2,panel_button_add/2,null);
 		g.dispose();
 		easeB.setSelectedIcon(new ImageIcon(img));
+		easeB.addActionListener(new AcListener(draw,new Runnable(){
+			@Override
+			public void run() {
+				easeGridCreate();
+			}
+		}));
 		add(easeB);
 	}
+	//
 	private static JCheckBox easeB;private static JWindow easeCoords;
 	static void ease(MouseEvent e){
 		if(easeB.isSelected()==false)return;
@@ -155,6 +163,42 @@ class Tools extends JPanel{
 		if(easeCoords==null)return;
 		easeCoords.dispose();easeCoords=null;
 	}
+	private static BufferedImage easeGrid;
+	static void easeGridCreate(){
+		if(easeB.isSelected()==false)return;
+		int z=DBitsL.zoom_level;
+		BufferedImage img=draw.img;
+		int wd=img.getWidth();int hg=img.getHeight();
+		int w=wd*z;int h=hg*z;
+		int[]pixels=new int[h*w*4];
+		easeGridX=1;
+		for(int col=0;col<wd;col++){
+			int c=(col*z+z-1)*4;
+			for(int r=0;r<h;r++){
+				int v=easeGridPx();int x=r*w*4+c;
+				pixels[x]=v;pixels[x+1]=v;//R G
+				pixels[x+2]=v;pixels[x+3]=128;//B A
+			}
+		}
+		for(int row=0;row<hg;row++){
+			int r=((row+1)*z-1)*w*4;
+			for(int c=0;c<w;c++){
+				int v=easeGridPx();int x=r+c*4;
+				pixels[x]=v;pixels[x+1]=v;pixels[x+2]=v;pixels[x+3]=128;
+			}
+		}
+		easeGrid=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
+		easeGrid.getRaster().setPixels(0,0,w,h,pixels);
+	}
+	private static int[]easeGridC={128,128+128/2};private static int easeGridX;
+	private static int easeGridPx(){
+		return easeGridC[easeGridX^=1];
+	}
+	static void easeGridDraw(java.awt.Graphics g){
+		if(easeB.isSelected()==false)return;
+		g.drawImage(easeGrid,0,0,null);g.dispose();
+	}
+	//
 	private static Point origPoint(MouseEvent e){
 		BufferedImage img=draw.img;
 		int x=e.getX()/DBitsL.zoom_level;

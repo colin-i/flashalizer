@@ -54,6 +54,7 @@ public class DBitsL {
 					JDialog dg=new JDialog(SwingUtilities.getWindowAncestor(c),"DBL",JDialog.ModalityType.DOCUMENT_MODAL);
 					Container container=dg.getContentPane();
 					container.setLayout(new BoxLayout(container,BoxLayout.Y_AXIS));
+					zoom_level=1;
 					drawArea=new content(img);
 					//
 					JPanel p=new JPanel();p.setLayout(new BoxLayout(p,BoxLayout.X_AXIS));
@@ -110,6 +111,7 @@ public class DBitsL {
 		@Override
 		protected void paintComponent(java.awt.Graphics g){
 			g.drawImage(img,0,0,img.getWidth()*zoom_level,img.getHeight()*zoom_level,null);//img.getScaledInstance,AffineTransform
+			Tools.easeGridDraw(g);
 			g.dispose();
 		}
 	}
@@ -127,7 +129,7 @@ public class DBitsL {
 		private imgMsListener(Component destDraw, MsEvBRunnable msEvRunnable){super(destDraw, msEvRunnable);}
 		@Override public void mouseExited(MouseEvent e){Tools.easeOff();}
 	}
-	static int zoom_level=1;
+	static int zoom_level;
 	private class slider extends JSlider{
 		private static final long serialVersionUID = 1L;
 		private static final int min=1;private static final int max=16;
@@ -144,6 +146,7 @@ public class DBitsL {
 						Point p=v.getViewPosition();
 						int orig_x=p.x/zoom_level;int orig_y=p.y/zoom_level;
 						zoom_level=getValue();
+						Tools.easeGridCreate();
 						drawArea.setPreferredSize(new Dimension(img.getWidth()*zoom_level,img.getHeight()*zoom_level));
 						v.setViewPosition(new Point(orig_x*zoom_level,orig_y*zoom_level));
 					}

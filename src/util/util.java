@@ -117,7 +117,8 @@ public class util {
 		@Override
 		public void stateChanged(ChangeEvent arg0) {
 			r.run();
-			d.repaint();
+			d.revalidate();//for dbl scrolls
+			d.repaint();//for dbl repaint when image is small(no scrolls)
 		}
 	}
 	public static class AcListener implements ActionListener{
