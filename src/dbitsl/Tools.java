@@ -1,11 +1,15 @@
 package dbitsl;
 
+import java.awt.AWTException;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -13,6 +17,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -25,9 +30,11 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JSeparator;
+import javax.swing.JScrollPane;
 import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 
@@ -39,18 +46,18 @@ import static graphics.Graphics.panel_button_add;
 
 class Tools extends JPanel{
 	private static final long serialVersionUID = 1L;
-	private Color color=new Color(0);private JButton clrBtn;
+	private Color color;private JButton clrBtn;
 	private int side_w;private int side_h;
-	private static content draw;
+	private static content draw;private JPanel panel;
 	
-	Tools(content draw){Tools.draw=draw;
+	Tools(content draw){Tools.draw=draw;panel=this;
 		setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
 		char first_b='p';
 		ImageIcon first_im=image(first_b);
 		side_w=first_im.getIconWidth()+panel_button_add;side_h=first_im.getIconHeight()+panel_button_add;
 		//
 		clrBtn=new JButton();clrBtn.setPreferredSize(new Dimension(side_w,side_h));
-		set_bgrColor();
+		set_bgrColor(new Color(0));
 		clrBtn.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -61,8 +68,7 @@ class Tools extends JPanel{
 					colorChooser,
 					new ActionListener(){
 						 public void actionPerformed(ActionEvent e){
-							 color=colorChooser.getColor();
-							 set_bgrColor();
+							 set_bgrColor(colorChooser.getColor());
 						 }
 					},null
 				);
@@ -70,6 +76,19 @@ class Tools extends JPanel{
 			}
 		});
 		add(clrBtn);
+		//eye dropper
+		JButton eyeDrp=new JButton(image('d'));eyeDrp.setToolTipText("Screen Eyedropper");eyeDrp.setPreferredSize(new Dimension(side_w,side_h));
+		eyeDrp.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				JFrame frame=new eyedropper(eyeDrp);
+				frame.pack();
+				frame.setVisible(true);
+			}
+		});
+		add(eyeDrp);
+		//
+		add(new separator());
 		//
 		group=new ButtonGroup();
 		MsEvBRunnable run=new MsEvBRunnable(){
@@ -122,11 +141,13 @@ class Tools extends JPanel{
 				return true;
 			}
 		},null);
-		add(new JSeparator());
+		//
+		add(new separator());
+		//
 		ImageIcon im=image('e');
 		BufferedImage img=new BufferedImage(side_w,side_h,BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = img.createGraphics();g.drawImage(im.getImage(),panel_button_add/2,panel_button_add/2,null);g.dispose();
-		easeB=new JCheckBox(new ImageIcon(img));easeB.setToolTipText("Mouse Coordinates");
+		easeB=new JCheckBox(new ImageIcon(img));easeB.setToolTipText("Mouse Coordinates and Gridlines");
 		img=new BufferedImage(side_w,side_h,BufferedImage.TYPE_INT_ARGB);
 		g = img.createGraphics();
 		g.setColor(Color.GREEN);g.fillRect(0,0,side_w,side_h);
@@ -140,6 +161,19 @@ class Tools extends JPanel{
 			}
 		}));
 		add(easeB);
+	}
+	private class separator extends JComponent{
+		private static final long serialVersionUID = 1L;
+		private int x=5;private int y=1;
+		private separator(){
+			setPreferredSize(new Dimension((int)getPreferredSize().getWidth(),x+y+x));
+		}
+		@Override protected void paintComponent(java.awt.Graphics g){
+			java.awt.Graphics2D g2=(Graphics2D) g;
+			g2.setColor(new Color(0));
+			g2.setStroke(new BasicStroke(1));
+			g2.drawLine(0,x,(int) panel.getPreferredSize().getWidth(),x);
+		}
 	}
 	//
 	private static JCheckBox easeB;private static JWindow easeCoords;
@@ -207,7 +241,8 @@ class Tools extends JPanel{
 		if(y<0||img.getHeight()<=y)return null;
 		return new Point(x,y);
 	}
-	private void set_bgrColor(){
+	private void set_bgrColor(Color c){
+		color=c;
 		BufferedImage bi=new BufferedImage(side_w,side_h,BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = bi.createGraphics();
 		g.setColor(color);
@@ -275,5 +310,43 @@ class Tools extends JPanel{
 			}
 		}
 		return false;
+	}
+	//
+	private class eyedropper extends JFrame{
+		private static final long serialVersionUID = 1L;
+		private eyedropper(JButton b){
+			setTitle("Eyedropper");
+			JPanel image_panel = new panel((ImageIcon)b.getIcon());
+			setExtendedState(JFrame.MAXIMIZED_BOTH);
+			getContentPane().add(new JScrollPane(image_panel));
+		}
+		private class panel extends JPanel implements MouseListener{
+			private static final long serialVersionUID = 1L;
+			private Image background_image;
+			private panel(ImageIcon im){
+				try {
+					Dimension screen_size=Toolkit.getDefaultToolkit().getScreenSize();// get the screen dimensions
+					Robot robot = new Robot();
+					Rectangle rect = new Rectangle(0,0,(int)screen_size.getWidth(),(int)screen_size.getHeight());
+					background_image=robot.createScreenCapture(rect);// make the screenshot before showing the frame
+					setPreferredSize(screen_size);
+					addMouseListener(this);
+					setCursor(Toolkit.getDefaultToolkit().createCustomCursor(im.getImage(),new Point(),null));
+				} catch (AWTException e) {e.printStackTrace();}
+			}
+			public void paintComponent(java.awt.Graphics g) {
+				g.drawImage(background_image,0,0,null);
+			}
+			@Override public void mouseClicked(MouseEvent arg0) {}
+			@Override public void mouseEntered(MouseEvent arg0) {}
+			@Override public void mouseExited(MouseEvent arg0) {}
+			@Override
+			public void mousePressed(MouseEvent arg0) {
+				BufferedImage bufer=(BufferedImage)background_image;
+				set_bgrColor(new Color(bufer.getRGB(arg0.getX(),arg0.getY())));
+				dispose();
+			}
+			@Override public void mouseReleased(MouseEvent arg0) {}
+		}
 	}
 }
