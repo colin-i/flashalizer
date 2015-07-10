@@ -93,8 +93,8 @@ public class DBitsL {
 		private static final long serialVersionUID = 1L;
 		BufferedImage img;
 		private content(BufferedImage img){
-			setPreferredSize(new Dimension(img.getWidth(),img.getHeight()));
 			this.img=img;
+			setPreferredSize(new Dimension(img.getWidth(),img.getHeight()));
 			addMouseMotionListener(new imgMsMotListener(this,new MsEvBRunnable(){
 				@Override
 				public boolean run(MouseEvent e) {
@@ -110,7 +110,9 @@ public class DBitsL {
 		}
 		@Override
 		protected void paintComponent(java.awt.Graphics g){
-			g.drawImage(img,0,0,img.getWidth()*zoom_level,img.getHeight()*zoom_level,null);//img.getScaledInstance,AffineTransform
+			int w=img.getWidth()*zoom_level;
+			int h=img.getHeight()*zoom_level;
+			g.drawImage(img,0,0,w,h,null);//img.getScaledInstance,AffineTransform
 			Tools.easeGridDraw(g);
 			g.dispose();
 		}
@@ -152,7 +154,6 @@ public class DBitsL {
 					}
 				}
 			}));
-			int n=max-min;Dimension dim=new Dimension();dim.width=20*n;dim.height=50;setPreferredSize(dim);
 		}
 	}
 }

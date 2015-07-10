@@ -129,6 +129,7 @@ public class util {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			r.run();
+			d.revalidate();//dbl, talked already about this
 			d.repaint();
 		}
 	}

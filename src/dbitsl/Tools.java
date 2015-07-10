@@ -12,6 +12,9 @@ import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -19,6 +22,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -161,6 +165,37 @@ class Tools extends JPanel{
 			}
 		}));
 		add(easeB);
+		//
+		JButton copy=new JButton(image('c'));copy.setPreferredSize(new Dimension(side_w,side_h));copy.setToolTipText("Copy");
+		copy.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new clipImage(draw.img),null);
+			}
+		});
+		add(copy);
+		JButton paste=new JButton(image('s'));paste.setPreferredSize(new Dimension(side_w,side_h));paste.setToolTipText("Paste");
+		paste.addActionListener(new AcListener(draw,new Runnable(){
+			@Override
+			public void run() {
+				Transferable transferable=Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
+				if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.imageFlavor)){
+					try {
+						BufferedImage in=(BufferedImage)transferable.getTransferData(DataFlavor.imageFlavor);
+						BufferedImage current=draw.img;
+						int new_w=Math.max(current.getWidth(),in.getWidth());
+						int new_h=Math.max(current.getHeight(),in.getHeight());
+						BufferedImage new_img=new BufferedImage(new_w,new_h,BufferedImage.TYPE_INT_ARGB);
+						java.awt.Graphics g=new_img.getGraphics();
+						g.drawImage(current,0,0,null);
+						g.drawImage(in,0,0,null);
+						draw.img=new_img;
+						draw.setPreferredSize(new Dimension(new_w,new_h));
+					} catch (UnsupportedFlavorException | IOException e) {e.printStackTrace();}
+				}
+			}
+		}));
+		add(paste);
 	}
 	private class separator extends JComponent{
 		private static final long serialVersionUID = 1L;
@@ -347,6 +382,28 @@ class Tools extends JPanel{
 				dispose();
 			}
 			@Override public void mouseReleased(MouseEvent arg0) {}
+		}
+	}
+	// This class is used to hold an image while on the clipboard.
+	private class clipImage implements Transferable{
+		private Image image;
+		private clipImage(Image image){
+			this.image = image;
+		}
+		@Override
+		public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+			if (!DataFlavor.imageFlavor.equals(flavor)){
+				throw new UnsupportedFlavorException(flavor);
+			}
+			return image;
+		}
+		@Override
+		public DataFlavor[] getTransferDataFlavors() {
+			return new DataFlavor[] { DataFlavor.imageFlavor };
+		}
+		@Override
+		public boolean isDataFlavorSupported(DataFlavor arg0) {
+			return DataFlavor.imageFlavor.equals(arg0);
 		}
 	}
 }
