@@ -34,10 +34,11 @@ import util.util.MsListener;
 import util.util.MsEvBRunnable;
 
 public class DBitsL {
-	private BufferedImage img;
+	//private static BufferedImage img;
 	public DBitsL(String src,Component c){
 		try {
 			if(src.length()>0){
+				BufferedImage img = null;
 				File src_file=new File(src);
 				String n=ManagementFactory.getRuntimeMXBean().getName();
 				String dest="tmp/"+n.split("@")[0]+".png";Path destPat=Paths.get(dest);
@@ -73,7 +74,7 @@ public class DBitsL {
 						@Override
 						public void actionPerformed(ActionEvent arg0) {
 							try {
-								ImageIO.write(img,"png",new File(dest));
+								ImageIO.write(drawArea.img,"png",new File(dest));
 								Runtime runtime = Runtime.getRuntime();
 								Process shellProcess = runtime.exec("png2dbl.exe "+dest+" \""+src+"\"");
 								shellProcess.waitFor();
@@ -88,7 +89,7 @@ public class DBitsL {
 			}
 		} catch (IOException | InterruptedException e){e.printStackTrace();}
 	}
-	private content drawArea;private JScrollPane scrollArea;
+	private static content drawArea;private static JScrollPane scrollArea;
 	static class content extends JComponent{
 		private static final long serialVersionUID = 1L;
 		BufferedImage img;
@@ -114,7 +115,7 @@ public class DBitsL {
 			int h=img.getHeight()*zoom_level;
 			g.drawImage(img,0,0,w,h,null);//img.getScaledInstance,AffineTransform
 			Tools.easeGridDraw(g);
-			g.dispose();
+			Tools.selectionMarkerDraw(g);
 		}
 	}
 	private static class imgMsMotListener extends MsMotListener{
@@ -130,6 +131,11 @@ public class DBitsL {
 	private static class imgMsListener extends MsListener{
 		private imgMsListener(Component destDraw, MsEvBRunnable msEvRunnable){super(destDraw, msEvRunnable);}
 		@Override public void mouseExited(MouseEvent e){Tools.easeOff();}
+	}
+	static void sizedZoom(){
+		BufferedImage img=drawArea.img;
+		drawArea.setPreferredSize(new Dimension(img.getWidth()*zoom_level,img.getHeight()*zoom_level));
+		Tools.easeGridCreate();
 	}
 	static int zoom_level;
 	private class slider extends JSlider{
@@ -148,12 +154,14 @@ public class DBitsL {
 						Point p=v.getViewPosition();
 						int orig_x=p.x/zoom_level;int orig_y=p.y/zoom_level;
 						zoom_level=getValue();
-						Tools.easeGridCreate();
-						drawArea.setPreferredSize(new Dimension(img.getWidth()*zoom_level,img.getHeight()*zoom_level));
+						sizedZoom();
 						v.setViewPosition(new Point(orig_x*zoom_level,orig_y*zoom_level));
 					}
 				}
 			}));
 		}
+	}
+	static Point getViewPosition(){
+		return scrollArea.getViewport().getViewPosition();
 	}
 }

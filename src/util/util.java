@@ -146,7 +146,9 @@ public class util {
 		}
 		private Runnable r;private Component d;
 	}
-	public interface MsEvBRunnable{public boolean run(MouseEvent e);}
+	public interface MsEvBRunnable extends MsEvRunnable{public boolean run(MouseEvent e);}
+	public interface MsEvVRunnable extends MsEvRunnable{public void run(MouseEvent e);}
+	public interface MsEvRunnable{}
 	public static class MsMotListener implements MouseMotionListener{
 		public MsMotListener(Component destDraw,MsEvBRunnable msEvRunnable){
 			d=destDraw;r=msEvRunnable;
@@ -154,7 +156,7 @@ public class util {
 		private MsEvBRunnable r;private Component d;
 		@Override
 		public void mouseDragged(MouseEvent e){
-			r.run(e);d.repaint();
+			if(r.run(e))d.repaint();
 		}
 		@Override
 		public void mouseMoved(MouseEvent e){}

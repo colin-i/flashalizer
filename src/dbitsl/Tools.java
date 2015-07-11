@@ -10,6 +10,7 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Robot;
+import java.awt.Stroke;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.datatransfer.DataFlavor;
@@ -44,6 +45,8 @@ import javax.swing.SwingUtilities;
 
 import dbitsl.DBitsL.content;
 import util.util.MsEvBRunnable;
+import util.util.MsEvVRunnable;
+import util.util.MsEvRunnable;
 import util.util.AcListener;
 
 import static graphics.Graphics.panel_button_add;
@@ -145,6 +148,15 @@ class Tools extends JPanel{
 				return true;
 			}
 		},null);
+		selection=add_rBt('g',"Selection",
+			new MsEvVRunnable(){@Override public void run(MouseEvent e){selection_begin=origPointTranslation(e);selection_end=null;}},
+			new MsEvVRunnable(){@Override public void run(MouseEvent e){selection_end=origPointTranslation(e);}}
+		);
+		selection.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				selection_begin=null;selection_end=null;
+			}});
 		//
 		add(new separator());
 		//
@@ -170,7 +182,9 @@ class Tools extends JPanel{
 		copy.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new clipImage(draw.img),null);
+				Rectangle sel;if((sel=getSelection())==null)return;
+				BufferedImage b=draw.img.getSubimage(sel.x,sel.y,sel.width,sel.height);
+				Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new clipImage(b),null);
 			}
 		});
 		add(copy);
@@ -183,14 +197,19 @@ class Tools extends JPanel{
 					try {
 						BufferedImage in=(BufferedImage)transferable.getTransferData(DataFlavor.imageFlavor);
 						BufferedImage current=draw.img;
-						int new_w=Math.max(current.getWidth(),in.getWidth());
-						int new_h=Math.max(current.getHeight(),in.getHeight());
+						selection_begin=origPointInterpretation(DBitsL.getViewPosition());
+						int in_x=selection_begin.x;int in_y=selection_begin.y;
+						int in_w=in.getWidth();int in_h=in.getHeight();
+						int in_r=in_x+in_w;int in_b=in_y+in_h;
+						int new_w=Math.max(current.getWidth(),in_r);
+						int new_h=Math.max(current.getHeight(),in_b);
 						BufferedImage new_img=new BufferedImage(new_w,new_h,BufferedImage.TYPE_INT_ARGB);
 						java.awt.Graphics g=new_img.getGraphics();
 						g.drawImage(current,0,0,null);
-						g.drawImage(in,0,0,null);
+						g.drawImage(in,in_x,in_y,null);
+						selection_end=new Point(in_r,in_b);
 						draw.img=new_img;
-						draw.setPreferredSize(new Dimension(new_w,new_h));
+						DBitsL.sizedZoom();
 					} catch (UnsupportedFlavorException | IOException e) {e.printStackTrace();}
 				}
 			}
@@ -265,16 +284,22 @@ class Tools extends JPanel{
 	}
 	static void easeGridDraw(java.awt.Graphics g){
 		if(easeB.isSelected()==false)return;
-		g.drawImage(easeGrid,0,0,null);g.dispose();
+		g.drawImage(easeGrid,0,0,null);
 	}
 	//
 	private static Point origPoint(MouseEvent e){
-		BufferedImage img=draw.img;
-		int x=e.getX()/DBitsL.zoom_level;
+		BufferedImage img=draw.img;Point p=origPointTranslation(e);
+		int x=p.x;
 		if(x<0||img.getWidth()<=x)return null;
-		int y=e.getY()/DBitsL.zoom_level;
+		int y=p.y;
 		if(y<0||img.getHeight()<=y)return null;
-		return new Point(x,y);
+		return p;
+	}
+	private static Point origPointTranslation(MouseEvent e){
+		return origPointInterpretation(e.getPoint());
+	}
+	private static Point origPointInterpretation(Point e){
+		return new Point(e.x/DBitsL.zoom_level,e.y/DBitsL.zoom_level);
 	}
 	private void set_bgrColor(Color c){
 		color=c;
@@ -288,23 +313,23 @@ class Tools extends JPanel{
 	private static ImageIcon image(char c){
 		return new ImageIcon("img/dbl/"+c+".png");
 	}
-	private JRadioButton add_rBt(char c,String tip,MsEvBRunnable hit,MsEvBRunnable drag){
-		radio r=new radio();r.setToolTipText(tip);
-		r.image=image(c);
+	private JRadioButton add_rBt(char c,String tip,MsEvRunnable hit,MsEvRunnable drag){
+		ImageIcon im=image(c);
+		radio r=new radio(radio_image(im,false));
+		r.setSelectedIcon(radio_image(im,true));
 		r.addItemListener(new ItemListener(){
 			@Override
 			public void itemStateChanged(ItemEvent arg0) {
-				set_image((radio)arg0.getSource(),arg0.getStateChange()==ItemEvent.SELECTED);
+				if(arg0.getStateChange()==ItemEvent.SELECTED)draw.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(im.getImage(),new Point(),null));
 			}
 		});
-		set_image(r,false);
-		add(r);
+		r.setToolTipText(tip);
 		group.add(r);
 		r.hit=hit;r.drag=drag;
+		add(r);
 		return r;
 	};
-	private void set_image(radio r,boolean sel){
-		ImageIcon im=r.image;
+	private ImageIcon radio_image(ImageIcon im,boolean sel){
 		BufferedImage bi=new BufferedImage(side_w,side_h,BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = bi.createGraphics();
 		g.drawImage(im.getImage(),panel_button_add/2,panel_button_add/2,null);
@@ -312,39 +337,36 @@ class Tools extends JPanel{
 			g.setColor(Color.BLUE);
 			g.setStroke(new BasicStroke(1));
 			g.drawRect(0,0,bi.getWidth()-1,bi.getHeight()-1);
-			//
-			draw.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(im.getImage(),new Point(),null));
 		}
 		g.dispose();
-		r.setIcon(new ImageIcon(bi));
+		return new ImageIcon(bi);
 	}
 	private static ButtonGroup group;
 	private class radio extends JRadioButton{
 		private static final long serialVersionUID = 1L;
-		private MsEvBRunnable hit;
-		private MsEvBRunnable drag;
-		private ImageIcon image;
+		private MsEvRunnable hit;
+		private MsEvRunnable drag;
+		private radio(ImageIcon i){super(i);}
 	}
 	static boolean hit(MouseEvent e){
 		for(Enumeration<AbstractButton> radios=group.getElements();radios.hasMoreElements();) {
 			radio r=(radio)radios.nextElement();
-			if(r.isSelected()){
-				if(r.hit==null)return false;
-				return r.hit.run(e);
-			}
+			if(r.isSelected())return bRun(r.hit,e);
 		}
 		return false;
 	}
 	static boolean drag(MouseEvent e){
 		for(Enumeration<AbstractButton> radios=group.getElements();radios.hasMoreElements();) {
 			radio r=(radio)radios.nextElement();
-			if(r.isSelected()){
-				if(r.drag==null)return false;
-				r.drag.run(e);
-				return true;
-			}
+			if(r.isSelected())return bRun(r.drag,e);
 		}
 		return false;
+	}
+	private static boolean bRun(MsEvRunnable r,MouseEvent e){
+		if(r==null)return false;
+		if(r instanceof MsEvBRunnable)return((MsEvBRunnable)r).run(e);
+		((MsEvVRunnable)r).run(e);
+		return true;
 	}
 	//
 	private class eyedropper extends JFrame{
@@ -405,5 +427,41 @@ class Tools extends JPanel{
 		public boolean isDataFlavorSupported(DataFlavor arg0) {
 			return DataFlavor.imageFlavor.equals(arg0);
 		}
+	}
+	//
+	private static Point selection_begin;private static Point selection_end;
+	private static AbstractButton selection;
+	private static Rectangle getSelection(){
+		//can convert to good points at the press and drag, or at draw and copy(good when reset image size and then ask for good points) 
+		if(selection.isSelected()==true){
+			Point b;Point e;
+			if((b=goodPoint(selection_begin))!=null&&(e=goodPoint(selection_end))!=null){
+				int left=Math.min(b.x,e.x);int top=Math.min(b.y,e.y);
+				int right=Math.max(b.x,e.x);int bottom=Math.max(b.y,e.y);
+				return new Rectangle(left,top,right-left,bottom-top);
+			}
+		}
+		return null;
+	}
+	private static Point goodPoint(Point p){
+		if(p!=null)return new Point(Math.min(draw.img.getWidth(),Math.max(p.x,0)),Math.min(draw.img.getHeight(),Math.max(p.y,0)));
+		return null;
+	}
+	static void selectionMarkerDraw(java.awt.Graphics g){
+		Rectangle sel;if((sel=getSelection())==null)return;
+		int z=DBitsL.zoom_level;
+		sel.x*=z;sel.y*=z;sel.width*=z;sel.height*=z;
+		//creates a copy of the Graphics instance
+        Graphics2D g2d = (Graphics2D) g.create();
+        //white
+        g2d.setColor(Color.WHITE);g2d.setStroke(new BasicStroke(1));
+        g2d.drawRect(sel.x,sel.y,sel.width,sel.height);
+        //black
+        g2d.setColor(Color.BLACK);
+        Stroke dashed = new BasicStroke(1,BasicStroke.CAP_BUTT,BasicStroke.JOIN_BEVEL,0,new float[]{10},0);
+        g2d.setStroke(dashed);
+        g2d.drawRect(sel.x,sel.y,sel.width,sel.height);
+        //gets rid of the copy
+        g2d.dispose();
 	}
 }
