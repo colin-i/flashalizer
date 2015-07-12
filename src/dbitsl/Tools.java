@@ -10,7 +10,6 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Robot;
-import java.awt.Stroke;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.datatransfer.DataFlavor;
@@ -453,13 +452,14 @@ class Tools extends JPanel{
 		sel.x*=z;sel.y*=z;sel.width*=z;sel.height*=z;
 		//creates a copy of the Graphics instance
         Graphics2D g2d = (Graphics2D) g.create();
-        //white
-        g2d.setColor(Color.WHITE);g2d.setStroke(new BasicStroke(1));
-        g2d.drawRect(sel.x,sel.y,sel.width,sel.height);
+        int phase=10;
         //black
         g2d.setColor(Color.BLACK);
-        Stroke dashed = new BasicStroke(1,BasicStroke.CAP_BUTT,BasicStroke.JOIN_BEVEL,0,new float[]{10},0);
-        g2d.setStroke(dashed);
+        g2d.setStroke(new BasicStroke(1,BasicStroke.CAP_BUTT,BasicStroke.JOIN_BEVEL,0,new float[]{phase},0));
+        g2d.drawRect(sel.x,sel.y,sel.width,sel.height);
+        //white
+        g2d.setColor(Color.WHITE);
+        g2d.setStroke(new BasicStroke(1,BasicStroke.CAP_BUTT,BasicStroke.JOIN_BEVEL,0,new float[]{phase},phase));
         g2d.drawRect(sel.x,sel.y,sel.width,sel.height);
         //gets rid of the copy
         g2d.dispose();
