@@ -153,10 +153,8 @@ class Tools extends JPanel{
 				Point p=origPointTranslation(e);
 				boolean a=selection_end==null;
 				if(a==false)a=selectionOutside(p);
-				if(a){selection_begin=p;selection_end=null;selection_motion=null;baseImg=null;return;}
-				selection_motion=p;
-				//
-				if(baseImg==null){
+				if(a){selection_begin=p;selection_end=null;selection_motion=null;return;}
+				if(selection_motion==null){
 					Rectangle sel=getSelection();
 					selImg=draw.img.getSubimage(sel.x,sel.y,sel.width,sel.height);
 					BufferedImage im=draw.img;
@@ -166,6 +164,7 @@ class Tools extends JPanel{
 					g.fill(sel);
 					g.dispose();
 				}
+				selection_motion=p;
 			}},
 			new MsEvVRunnable(){@Override public void run(MouseEvent e){
 				Point p=origPointTranslation(e);
