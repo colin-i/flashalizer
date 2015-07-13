@@ -1,6 +1,7 @@
 package dbitsl;
 
 import java.awt.AWTException;
+import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dialog;
@@ -148,8 +149,38 @@ class Tools extends JPanel{
 			}
 		},null);
 		selection=add_rBt('g',"Selection",
-			new MsEvVRunnable(){@Override public void run(MouseEvent e){selection_begin=origPointTranslation(e);selection_end=null;}},
-			new MsEvVRunnable(){@Override public void run(MouseEvent e){selection_end=origPointTranslation(e);}}
+			new MsEvVRunnable(){@Override public void run(MouseEvent e){
+				Point p=origPointTranslation(e);
+				boolean a=selection_end==null;
+				if(a==false)a=selectionOutside(p);
+				if(a){selection_begin=p;selection_end=null;selection_motion=null;baseImg=null;return;}
+				selection_motion=p;
+				//
+				if(baseImg==null){
+					Rectangle sel=getSelection();
+					selImg=draw.img.getSubimage(sel.x,sel.y,sel.width,sel.height);
+					BufferedImage im=draw.img;
+					baseImg=new BufferedImage(im.getColorModel(),im.copyData(null),im.getColorModel().isAlphaPremultiplied(),null);
+					Graphics2D g=(Graphics2D)baseImg.getGraphics();
+					g.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR));
+					g.fill(sel);
+					g.dispose();
+				}
+			}},
+			new MsEvVRunnable(){@Override public void run(MouseEvent e){
+				Point p=origPointTranslation(e);
+				if(selection_motion==null){selection_end=p;return;}
+				double dif_x=p.x-selection_motion.x;double dif_y=p.y-selection_motion.y;
+				Rectangle s=getSelection();int w=draw.img.getWidth();int h=draw.img.getHeight();
+				if(s.x+dif_x<0)dif_x=0-s.x;//left motion
+				else if(w<s.getMaxX()+dif_x)dif_x=w-s.getMaxX();//right motion
+				if(s.y+dif_y<0)dif_y=0-s.y;//up motion
+				else if(h<s.getMaxY()+dif_y)dif_y=h-s.getMaxY();//down motion
+				selMerge(s.x+(int)dif_x,s.y+(int)dif_y);
+				selection_begin.x+=dif_x;selection_begin.y+=dif_y;
+				selection_end.x+=dif_x;selection_end.y+=dif_y;
+				selection_motion=p;
+			}}
 		);
 		selection.addActionListener(new ActionListener(){
 			@Override
@@ -194,20 +225,25 @@ class Tools extends JPanel{
 				Transferable transferable=Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
 				if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.imageFlavor)){
 					try {
-						BufferedImage in=(BufferedImage)transferable.getTransferData(DataFlavor.imageFlavor);
+						//this is pasting an item, plus is selecting it
+						group.setSelected(selection.getModel(),true);
+						//prepare selection image and stuff
+						selImg=(BufferedImage)transferable.getTransferData(DataFlavor.imageFlavor);
 						BufferedImage current=draw.img;
 						selection_begin=origPointInterpretation(DBitsL.getViewPosition());
 						int in_x=selection_begin.x;int in_y=selection_begin.y;
-						int in_w=in.getWidth();int in_h=in.getHeight();
+						int in_w=selImg.getWidth();int in_h=selImg.getHeight();
 						int in_r=in_x+in_w;int in_b=in_y+in_h;
 						int new_w=Math.max(current.getWidth(),in_r);
 						int new_h=Math.max(current.getHeight(),in_b);
-						BufferedImage new_img=new BufferedImage(new_w,new_h,BufferedImage.TYPE_INT_ARGB);
-						java.awt.Graphics g=new_img.getGraphics();
-						g.drawImage(current,0,0,null);
-						g.drawImage(in,in_x,in_y,null);
 						selection_end=new Point(in_r,in_b);
-						draw.img=new_img;
+						//prepare base image and main image
+						baseImg=new BufferedImage(new_w,new_h,BufferedImage.TYPE_INT_ARGB);
+						java.awt.Graphics g=baseImg.getGraphics();
+						g.drawImage(current,0,0,null);
+						g.dispose();
+						selMerge(selection_begin.x,selection_begin.y);
+						//the grid can have another dimension
 						DBitsL.sizedZoom();
 					} catch (UnsupportedFlavorException | IOException e) {e.printStackTrace();}
 				}
@@ -463,5 +499,23 @@ class Tools extends JPanel{
         g2d.drawRect(sel.x,sel.y,sel.width,sel.height);
         //gets rid of the copy
         g2d.dispose();
+	}
+	private BufferedImage baseImg;private BufferedImage selImg;private Point selection_motion;
+	private void selMerge(int x,int y){
+		BufferedImage new_img=new BufferedImage(baseImg.getColorModel(),baseImg.copyData(null),baseImg.getColorModel().isAlphaPremultiplied(),null);
+		java.awt.Graphics g=new_img.getGraphics();
+		g.drawImage(selImg,x,y,null);
+		g.dispose();
+		draw.img=new_img;
+	}
+	private boolean selectionOutside(Point p){
+		Rectangle s=getSelection();
+		int x=p.x;
+		if(x<s.x)return true;
+		if(s.getMaxX()<=x)return true;
+		int y=p.y;
+		if(y<s.y)return true;
+		if(s.getMaxY()<=y)return true;
+		return false;
 	}
 }
