@@ -21,7 +21,6 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -51,6 +50,8 @@ import util.util.MsEvBRunnable;
 import util.util.MsEvVRunnable;
 import util.util.MsEvRunnable;
 import util.util.AcListener;
+import util.util.ItListener;
+import util.util.ItRunnable;
 
 import static graphics.Graphics.panel_button_add;
 
@@ -151,12 +152,16 @@ class Tools extends JPanel{
 				return true;
 			}
 		},null);
-		selection=add_rBt('g',"Selection",
+		selection=add_rBt_ex('g',"Selection",
 			new MsEvVRunnable(){@Override public void run(MouseEvent e){
 				Point p=origPointTranslation(e);
 				boolean a=selection_end==null;
 				if(a==false)a=selectionOutside(p);
-				if(a){selection_begin=p;selection_end=null;selection_motion=null;return;}
+				if(a){
+					selection_begin=p;selection_end=null;selection_motion=null;
+					selCursorMaskOut();
+					return;
+				}
 				if(selection_motion==null){
 					Rectangle sel=getSelection();
 					selImg=draw.img.getSubimage(sel.x,sel.y,sel.width,sel.height);
@@ -182,6 +187,11 @@ class Tools extends JPanel{
 				selection_begin.x+=dif_x;selection_begin.y+=dif_y;
 				selection_end.x+=dif_x;selection_end.y+=dif_y;
 				selection_motion=p;
+			}}
+			,new Runnable(){
+			@Override
+			public void run() {
+				selCursorMaskOut();
 			}}
 		);
 		selection.addActionListener(new ActionListener(){
@@ -352,22 +362,26 @@ class Tools extends JPanel{
 	private static ImageIcon image(char c){
 		return new ImageIcon("img/dbl/"+c+".png");
 	}
-	private JRadioButton add_rBt(char c,String tip,MsEvRunnable hit,MsEvRunnable drag){
+	private JRadioButton add_rBt_ex(char c,String tip,MsEvRunnable hit,MsEvRunnable drag,Runnable deselect){
 		ImageIcon im=image(c);
 		radio r=new radio(radio_image(im,false));
 		r.setSelectedIcon(radio_image(im,true));
-		r.addItemListener(new ItemListener(){
+		r.addItemListener(new ItListener(draw,new ItRunnable(){
 			@Override
-			public void itemStateChanged(ItemEvent arg0) {
+			public void run(ItemEvent arg0) {
 				if(arg0.getStateChange()==ItemEvent.SELECTED)draw.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(im.getImage(),new Point(),null));
+				else if(deselect!=null)deselect.run();
 			}
-		});
+		}));
 		r.setToolTipText(tip);
 		group.add(r);
 		r.hit=hit;r.drag=drag;
 		add(r);
 		return r;
 	};
+	private JRadioButton add_rBt(char c,String tip,MsEvRunnable hit,MsEvRunnable drag){
+		return add_rBt_ex(c,tip,hit,drag,null);
+	}
 	private ImageIcon radio_image(ImageIcon im,boolean sel){
 		BufferedImage bi=new BufferedImage(side_w,side_h,BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = bi.createGraphics();
@@ -487,10 +501,7 @@ class Tools extends JPanel{
 		return null;
 	}
 	static void selectionMarkerDraw(java.awt.Graphics g){
-		Rectangle sel;if((sel=getSelection())==null){
-			selectionCursor.setBounds(new Rectangle());
-			return;
-		}
+		Rectangle sel;if((sel=getSelection())==null)return;
 		int z=DBitsL.zoom_level;
 		sel.x*=z;sel.y*=z;sel.width*=z;sel.height*=z;
 		//creates a copy of the Graphics instance
@@ -546,4 +557,5 @@ class Tools extends JPanel{
 		}
 	}
 	private static selCursor selectionCursor;
+	private void selCursorMaskOut(){selectionCursor.setBounds(new Rectangle());}
 }

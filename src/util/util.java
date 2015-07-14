@@ -9,6 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -119,6 +121,18 @@ public class util {
 			r.run();
 			d.revalidate();//for dbl scrolls
 			d.repaint();//for dbl repaint when image is small(no scrolls)
+		}
+	}
+	public interface ItRunnable{public void run(ItemEvent e);}
+	public static class ItListener implements ItemListener{
+		public ItListener(Component destDraw,ItRunnable run){
+			d=destDraw;r=run;
+		}
+		private ItRunnable r;private Component d;
+		@Override
+		public void itemStateChanged(ItemEvent arg0) {
+			r.run(arg0);
+			d.repaint();
 		}
 	}
 	public static class AcListener implements ActionListener{
