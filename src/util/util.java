@@ -33,7 +33,7 @@ public class util {
 	public static void message_popup(String text,JComponent c){
 		Window topLevelWin = SwingUtilities.getWindowAncestor(c);
 		JWindow errorWindow = new JWindow(topLevelWin);
-		popup(text,errorWindow);
+		popup(text,errorWindow,0);
 		errorWindow.setVisible(true);
 		Timer window_life=new Timer();
 		window_life.schedule(new TimerTask(){
@@ -42,7 +42,7 @@ public class util {
 			}
 		},1000);
 	}
-	public static void popup(String text,JWindow errorWindow){
+	public static void popup(String text,JWindow errorWindow,int offset){
 		JPanel contentPane = (JPanel) errorWindow.getContentPane();
 		int i=0;
 		contentPane.add(new JLabel(text),i);
@@ -50,7 +50,7 @@ public class util {
 		contentPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
 		errorWindow.pack();
 		Point p=MouseInfo.getPointerInfo().getLocation();
-		errorWindow.setLocation(p.x,p.y-errorWindow.getHeight());
+		errorWindow.setLocation(p.x,p.y-errorWindow.getHeight()-offset);
 	}
 	//function+drawer
 	public static class TableEx extends JTable{

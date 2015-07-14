@@ -4,6 +4,8 @@ import java.awt.AWTException;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -20,6 +22,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
@@ -249,6 +252,8 @@ class Tools extends JPanel{
 			}
 		}));
 		add(paste);
+		//
+		draw.add(selectionCursor=new selCursor());
 	}
 	private class separator extends JComponent{
 		private static final long serialVersionUID = 1L;
@@ -274,7 +279,7 @@ class Tools extends JPanel{
 		easeOff();
 		easeOn();
 		String t=p.x+","+p.y;
-		util.util.popup(t,easeCoords);
+		util.util.popup(t,easeCoords,10);
 	}
 	private static void easeOn(){
 		Window topLevelWin = SwingUtilities.getWindowAncestor(easeB);
@@ -482,7 +487,10 @@ class Tools extends JPanel{
 		return null;
 	}
 	static void selectionMarkerDraw(java.awt.Graphics g){
-		Rectangle sel;if((sel=getSelection())==null)return;
+		Rectangle sel;if((sel=getSelection())==null){
+			selectionCursor.setBounds(new Rectangle());
+			return;
+		}
 		int z=DBitsL.zoom_level;
 		sel.x*=z;sel.y*=z;sel.width*=z;sel.height*=z;
 		//creates a copy of the Graphics instance
@@ -498,6 +506,8 @@ class Tools extends JPanel{
         g2d.drawRect(sel.x,sel.y,sel.width,sel.height);
         //gets rid of the copy
         g2d.dispose();
+        //cursor
+        selectionCursor.setBounds(sel);
 	}
 	private BufferedImage baseImg;private BufferedImage selImg;private Point selection_motion;
 	private void selMerge(int x,int y){
@@ -517,4 +527,23 @@ class Tools extends JPanel{
 		if(s.getMaxY()<=y)return true;
 		return false;
 	}
+	//
+	private class selCursor extends JComponent{
+		private static final long serialVersionUID = 1L;
+		private selCursor(){
+			setCursor(new Cursor(Cursor.MOVE_CURSOR));
+			MouseAdapter ma=new MouseAdapter(){
+				@Override public void mousePressed(MouseEvent e){trans(e);}
+				@Override public void mouseDragged(MouseEvent e){trans(e);}
+				@Override public void mouseMoved(MouseEvent e){trans(e);}
+			};
+			addMouseListener(ma);addMouseMotionListener(ma);
+		}
+		private void trans(MouseEvent e){
+			Rectangle sel=getSelection();
+			Point p=e.getPoint();p.translate(sel.x*DBitsL.zoom_level,sel.y*DBitsL.zoom_level);
+			draw.dispatchEvent(new MouseEvent((Component)e.getSource(),e.getID(),e.getWhen(),e.getModifiers(),p.x,p.y,e.getClickCount(),e.isPopupTrigger()));
+		}
+	}
+	private static selCursor selectionCursor;
 }
