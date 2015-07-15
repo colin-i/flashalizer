@@ -1,6 +1,7 @@
 package dbitsl;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -108,11 +109,13 @@ public class DBitsL {
 					return Tools.hit(e);
 				}
 			}));
+			setBackground(Color.GREEN);
 		}
 		@Override
 		protected void paintComponent(java.awt.Graphics g){
 			int w=img.getWidth()*zoom_level;
 			int h=img.getHeight()*zoom_level;
+			g.setColor(new Color(255,255,255,128));g.fillRect(0,0,w,h);
 			g.drawImage(img,0,0,w,h,null);//img.getScaledInstance,AffineTransform
 			Tools.easeGridDraw(g);
 			Tools.selectionMarkerDraw(g);
