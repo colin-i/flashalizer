@@ -199,6 +199,25 @@ class Tools extends JPanel{
 			public void actionPerformed(ActionEvent arg0) {
 				selection_begin=null;selection_end=null;
 			}});
+		add_rBt_plus('l',"Line",new MsEvBRunnable(){
+			@Override
+			public boolean run(MouseEvent e) {
+				forms_begin=origPointTranslation(e);
+				BufferedImage im=draw.img;
+				baseImg=new BufferedImage(im.getColorModel(),im.copyData(null),im.getColorModel().isAlphaPremultiplied(),null);
+				return false;
+			}
+		},new MsEvVRunnable(){
+			@Override
+			public void run(MouseEvent e) {
+				Point forms_end=origPointTranslation(e);
+				BufferedImage new_img=new BufferedImage(baseImg.getColorModel(),baseImg.copyData(null),baseImg.getColorModel().isAlphaPremultiplied(),null);
+				java.awt.Graphics2D g=(Graphics2D) new_img.getGraphics();
+				g.setStroke(new BasicStroke(1));g.setColor(color);
+				g.drawLine(forms_begin.x,forms_begin.y,forms_end.x,forms_end.y);
+				g.dispose();
+				draw.img=new_img;
+			}},null,false);
 		//
 		add(new separator());
 		//
@@ -362,14 +381,16 @@ class Tools extends JPanel{
 	private static ImageIcon image(char c){
 		return new ImageIcon("img/dbl/"+c+".png");
 	}
-	private JRadioButton add_rBt_ex(char c,String tip,MsEvRunnable hit,MsEvRunnable drag,Runnable deselect){
+	private radio add_rBt_plus(char c,String tip,MsEvRunnable hit,MsEvRunnable drag,Runnable deselect,boolean bCursor){
 		ImageIcon im=image(c);
+		Cursor cursor;if(bCursor)cursor=Toolkit.getDefaultToolkit().createCustomCursor(im.getImage(),new Point(),null);
+		else cursor=Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
 		radio r=new radio(radio_image(im,false));
 		r.setSelectedIcon(radio_image(im,true));
 		r.addItemListener(new ItListener(draw,new ItRunnable(){
 			@Override
 			public void run(ItemEvent arg0) {
-				if(arg0.getStateChange()==ItemEvent.SELECTED)draw.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(im.getImage(),new Point(),null));
+				if(arg0.getStateChange()==ItemEvent.SELECTED)draw.setCursor(cursor);
 				else if(deselect!=null)deselect.run();
 			}
 		}));
@@ -378,6 +399,9 @@ class Tools extends JPanel{
 		r.hit=hit;r.drag=drag;
 		add(r);
 		return r;
+	}
+	private JRadioButton add_rBt_ex(char c,String tip,MsEvRunnable hit,MsEvRunnable drag,Runnable deselect){
+		return add_rBt_plus(c,tip,hit,drag,deselect,true);
 	};
 	private JRadioButton add_rBt(char c,String tip,MsEvRunnable hit,MsEvRunnable drag){
 		return add_rBt_ex(c,tip,hit,drag,null);
@@ -397,8 +421,7 @@ class Tools extends JPanel{
 	private static ButtonGroup group;
 	private class radio extends JRadioButton{
 		private static final long serialVersionUID = 1L;
-		private MsEvRunnable hit;
-		private MsEvRunnable drag;
+		private MsEvRunnable hit;private MsEvRunnable drag;
 		private radio(ImageIcon i){super(i);}
 	}
 	static boolean hit(MouseEvent e){
@@ -558,4 +581,6 @@ class Tools extends JPanel{
 	}
 	private static selCursor selectionCursor;
 	private void selCursorMaskOut(){selectionCursor.setBounds(new Rectangle());}
+	//
+	private Point forms_begin;
 }
