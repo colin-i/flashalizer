@@ -199,25 +199,17 @@ class Tools extends JPanel{
 			public void actionPerformed(ActionEvent arg0) {
 				selection_begin=null;selection_end=null;
 			}});
-		add_rBt_plus('l',"Line",new MsEvBRunnable(){
+		add_rBt_forms('l',"Line",new formsRunnable(){
 			@Override
-			public boolean run(MouseEvent e) {
-				forms_begin=origPointTranslation(e);
-				BufferedImage im=draw.img;
-				baseImg=new BufferedImage(im.getColorModel(),im.copyData(null),im.getColorModel().isAlphaPremultiplied(),null);
-				return false;
-			}
-		},new MsEvVRunnable(){
+			public void run(Point p,java.awt.Graphics g) {
+				g.drawLine(forms_begin.x,forms_begin.y,p.x,p.y);
+		}});
+		add_rBt_forms('r',"Rectangle",new formsRunnable(){
 			@Override
-			public void run(MouseEvent e) {
-				Point forms_end=origPointTranslation(e);
-				BufferedImage new_img=new BufferedImage(baseImg.getColorModel(),baseImg.copyData(null),baseImg.getColorModel().isAlphaPremultiplied(),null);
-				java.awt.Graphics2D g=(Graphics2D) new_img.getGraphics();
-				g.setStroke(new BasicStroke(1));g.setColor(color);
-				g.drawLine(forms_begin.x,forms_begin.y,forms_end.x,forms_end.y);
-				g.dispose();
-				draw.img=new_img;
-			}},null,false);
+			public void run(Point p,java.awt.Graphics g){
+				Rectangle r=computeRect(forms_begin,p);
+				g.drawRect(r.x,r.y,r.width,r.height);
+		}});
 		//
 		add(new separator());
 		//
@@ -512,12 +504,15 @@ class Tools extends JPanel{
 		if(selection.isSelected()==true){
 			Point b;Point e;
 			if((b=goodPoint(selection_begin))!=null&&(e=goodPoint(selection_end))!=null){
-				int left=Math.min(b.x,e.x);int top=Math.min(b.y,e.y);
-				int right=Math.max(b.x,e.x);int bottom=Math.max(b.y,e.y);
-				return new Rectangle(left,top,right-left,bottom-top);
+				return computeRect(b,e);
 			}
 		}
 		return null;
+	}
+	private static Rectangle computeRect(Point b,Point e){
+		int left=Math.min(b.x,e.x);int top=Math.min(b.y,e.y);
+		int right=Math.max(b.x,e.x);int bottom=Math.max(b.y,e.y);
+		return new Rectangle(left,top,right-left,bottom-top);
 	}
 	private static Point goodPoint(Point p){
 		if(p!=null)return new Point(Math.min(draw.img.getWidth(),Math.max(p.x,0)),Math.min(draw.img.getHeight(),Math.max(p.y,0)));
@@ -583,4 +578,29 @@ class Tools extends JPanel{
 	private void selCursorMaskOut(){selectionCursor.setBounds(new Rectangle());}
 	//
 	private Point forms_begin;
+	private interface formsRunnable{
+		void run(Point p,java.awt.Graphics g);
+	}
+	private void add_rBt_forms(char c,String tip,formsRunnable drag){
+		add_rBt_plus(c,tip,new MsEvBRunnable(){
+			@Override
+			public boolean run(MouseEvent e) {
+				forms_begin=origPoint(e);if(forms_begin==null)return false;
+				BufferedImage im=draw.img;
+				baseImg=new BufferedImage(im.getColorModel(),im.copyData(null),im.getColorModel().isAlphaPremultiplied(),null);
+				return false;
+			}
+		},new MsEvBRunnable(){
+			@Override
+			public boolean run(MouseEvent e) {
+				if(forms_begin==null)return false;
+				BufferedImage new_img=new BufferedImage(baseImg.getColorModel(),baseImg.copyData(null),baseImg.getColorModel().isAlphaPremultiplied(),null);
+				java.awt.Graphics2D g=(Graphics2D)new_img.getGraphics();
+				g.setStroke(new BasicStroke(1));g.setColor(color);
+				drag.run(origPointTranslation(e),g);
+				g.dispose();
+				draw.img=new_img;
+				return true;
+			}},null,false);
+	}
 }
