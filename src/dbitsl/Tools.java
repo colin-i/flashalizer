@@ -210,6 +210,19 @@ class Tools extends JPanel{
 				Rectangle r=computeRect(forms_begin,p);
 				g.drawRect(r.x,r.y,r.width,r.height);
 		}});
+		add_rBt_forms('o',"Circle",new formsRunnable(){
+			@Override
+			public void run(Point p,java.awt.Graphics g){
+				Rectangle r=computeRect(forms_begin,p);
+				if(r.width<r.height){//must cut from height
+					r.height=r.width;
+					if(p.y<forms_begin.y)r.y=forms_begin.y-r.width;
+				}else if(r.height<r.width){//must cut from width
+					r.width=r.height;
+					if(p.x<forms_begin.x)r.x=forms_begin.x-r.height;
+				}
+				g.drawOval(r.x,r.y,r.width,r.height);
+		}});
 		//
 		add(new separator());
 		//
