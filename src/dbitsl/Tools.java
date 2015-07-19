@@ -223,6 +223,12 @@ class Tools extends JPanel{
 				}
 				g.drawOval(r.x,r.y,r.width,r.height);
 		}});
+		add_rBt_forms('v',"Oval",new formsRunnable(){
+			@Override
+			public void run(Point p,java.awt.Graphics g){
+				Rectangle r=computeRect(forms_begin,p);
+				g.drawOval(r.x,r.y,r.width,r.height);
+		}});
 		//
 		add(new separator());
 		//
