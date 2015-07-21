@@ -25,7 +25,9 @@ import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.QuadCurve2D;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -286,7 +288,7 @@ class Tools extends JPanel{
 		}));
 		add(easeB);
 		//
-		JButton copy=new JButton(image('c'));copy.setPreferredSize(new Dimension(side_w,side_h));copy.setToolTipText("Copy");
+		JButton copy=pushButton('c',"Copy");
 		copy.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -296,7 +298,7 @@ class Tools extends JPanel{
 			}
 		});
 		add(copy);
-		JButton paste=new JButton(image('s'));paste.setPreferredSize(new Dimension(side_w,side_h));paste.setToolTipText("Paste");
+		JButton paste=pushButton('s',"Paste");
 		paste.addActionListener(new AcListener(draw,new Runnable(){
 			@Override
 			public void run() {
@@ -329,6 +331,43 @@ class Tools extends JPanel{
 		}));
 		add(paste);
 		//
+		JButton flipV=pushButton('1',"Flip X Center");
+		flipV.addActionListener(new AcListener(draw,new Runnable(){
+			@Override
+			public void run() {
+				Rectangle sel;if((sel=getSelection())==null)return;
+				BufferedImage image=draw.img.getSubimage(sel.x,sel.y,sel.width,sel.height);
+
+				AffineTransform tx = AffineTransform.getScaleInstance(1, -1);
+				tx.translate(0,-image.getHeight(null));
+				AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+				image = op.filter(image, null);
+				
+				Graphics2D g2=(Graphics2D)draw.img.getGraphics();
+				g2.drawImage(image,sel.x,sel.y,sel.width,sel.height,null);
+				g2.dispose();
+			}
+		}));
+		add(flipV);
+		JButton flipH=pushButton('2',"Flip Y Center");
+		flipH.addActionListener(new AcListener(draw,new Runnable(){
+			@Override
+			public void run() {
+				Rectangle sel;if((sel=getSelection())==null)return;
+				BufferedImage image=draw.img.getSubimage(sel.x,sel.y,sel.width,sel.height);
+
+				AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
+				tx.translate(-image.getWidth(null), 0);
+				AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+				image = op.filter(image, null);
+				
+				Graphics2D g2=(Graphics2D)draw.img.getGraphics();
+				g2.drawImage(image,sel.x,sel.y,sel.width,sel.height,null);
+				g2.dispose();
+			}
+		}));
+		add(flipH);
+		//
 		draw.add(selectionCursor=new selCursor());
 	}
 	private class separator extends JComponent{
@@ -343,6 +382,10 @@ class Tools extends JPanel{
 			g2.setStroke(new BasicStroke(1));
 			g2.drawLine(0,x,(int) panel.getPreferredSize().getWidth(),x);
 		}
+	}
+	//
+	private JButton pushButton(char c,String tip){
+		JButton b=new JButton(image(c));b.setPreferredSize(new Dimension(side_w,side_h));b.setToolTipText(tip);return b;
 	}
 	//
 	private static JCheckBox easeB;private static JWindow easeCoords;
