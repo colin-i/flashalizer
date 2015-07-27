@@ -47,6 +47,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 
@@ -64,15 +65,23 @@ class Tools extends JPanel{
 	private static final long serialVersionUID = 1L;
 	private Color color;private JButton clrBtn;
 	private int side_w;private int side_h;
-	private static content draw;private JPanel panel;
-	
-	Tools(content draw){Tools.draw=draw;panel=this;
-		setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
+	private static content draw;private JPanel panel1;private JPanel panel2;
+	@Override
+	public Component add(Component c){if(panel2==null)panel1.add(c);else panel2.add(c);return c;}
+	private void panel(){
+		JPanel p;if(panel2==null){panel1=new JPanel();p=panel1;}else{panel2=new JPanel();p=panel2;}
+		p.setLayout(new BoxLayout(p,BoxLayout.Y_AXIS));
+		add(p,this.getComponentCount());
+	}
+	Tools(content draw){Tools.draw=draw;
+		setLayout(new BoxLayout(this,BoxLayout.X_AXIS));
+		panel();
+		//
 		char first_b='p';
 		ImageIcon first_im=image(first_b);
 		side_w=first_im.getIconWidth()+panel_button_add;side_h=first_im.getIconHeight()+panel_button_add;
 		//
-		clrBtn=new JButton();clrBtn.setPreferredSize(new Dimension(side_w,side_h));
+		clrBtn=new JButton();clrBtn.setToolTipText("Color");clrBtn.setPreferredSize(new Dimension(side_w,side_h));
 		set_bgrColor(new Color(0));
 		clrBtn.addActionListener(new ActionListener(){
 			@Override
@@ -104,7 +113,95 @@ class Tools extends JPanel{
 		});
 		add(eyeDrp);
 		//
-		add(new separator());
+		ImageIcon im=image('e');
+		BufferedImage img=new BufferedImage(side_w,side_h,BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = img.createGraphics();g.drawImage(im.getImage(),panel_button_add/2,panel_button_add/2,null);g.dispose();
+		easeB=new JCheckBox(new ImageIcon(img));easeB.setToolTipText("Mouse Coordinates and Gridlines");
+		img=new BufferedImage(side_w,side_h,BufferedImage.TYPE_INT_ARGB);
+		g = img.createGraphics();
+		g.setColor(Color.GREEN);g.fillRect(0,0,side_w,side_h);
+		g.drawImage(im.getImage(),panel_button_add/2,panel_button_add/2,null);
+		g.dispose();
+		easeB.setSelectedIcon(new ImageIcon(img));
+		easeB.addActionListener(new AcListener(draw,new Runnable(){
+			@Override
+			public void run() {
+				easeGridCreate();
+			}
+		}));
+		add(easeB);
+		//
+		add(new JSeparator());
+		//
+		JButton copy=pushButton('c',"Copy");
+		copy.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				Rectangle sel;if((sel=getSelection())==null)return;
+				BufferedImage b=draw.img.getSubimage(sel.x,sel.y,sel.width,sel.height);
+				Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new clipImage(b),null);
+			}
+		});
+		add(copy);
+		JButton paste=pushButton('s',"Paste");
+		paste.addActionListener(new AcListener(draw,new Runnable(){
+			@Override
+			public void run() {
+				Transferable transferable=Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
+				if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.imageFlavor)){
+					try {
+						//this is pasting an item, plus is selecting it
+						group.setSelected(selection.getModel(),true);
+						//prepare selection image and stuff
+						selImg=(BufferedImage)transferable.getTransferData(DataFlavor.imageFlavor);
+						BufferedImage current=draw.img;
+						selection_begin=origPointInterpretation(DBitsL.getViewPosition());
+						int in_x=selection_begin.x;int in_y=selection_begin.y;
+						int in_w=selImg.getWidth();int in_h=selImg.getHeight();
+						int in_r=in_x+in_w;int in_b=in_y+in_h;
+						int new_w=Math.max(current.getWidth(),in_r);
+						int new_h=Math.max(current.getHeight(),in_b);
+						selection_end=new Point(in_r,in_b);
+						//prepare base image and main image
+						baseImg=new BufferedImage(new_w,new_h,BufferedImage.TYPE_INT_ARGB);
+						java.awt.Graphics g=baseImg.getGraphics();
+						g.drawImage(current,0,0,null);
+						g.dispose();
+						selMerge(selection_begin.x,selection_begin.y);
+						//the grid can have another dimension
+						DBitsL.sizedZoom();
+					} catch (UnsupportedFlavorException | IOException e) {e.printStackTrace();}
+				}
+			}
+		}));
+		add(paste);
+		//
+		JButton flipV=pushButton('1',"Flip X Center");
+		flipV.addActionListener(new AcListener(draw,new Runnable(){
+			@Override
+			public void run() {
+				Rectangle sel;if((sel=getSelection())==null)return;
+				BufferedImage image=draw.img.getSubimage(sel.x,sel.y,sel.width,sel.height);
+				AffineTransform tx = AffineTransform.getScaleInstance(1, -1);
+				tx.translate(0,-image.getHeight(null));
+				flip(tx,image,sel);
+			}
+		}));
+		add(flipV);
+		JButton flipH=pushButton('2',"Flip Y Center");
+		flipH.addActionListener(new AcListener(draw,new Runnable(){
+			@Override
+			public void run() {
+				Rectangle sel;if((sel=getSelection())==null)return;
+				BufferedImage image=draw.img.getSubimage(sel.x,sel.y,sel.width,sel.height);
+				AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
+				tx.translate(-image.getWidth(null), 0);
+				flip(tx,image,sel);
+			}
+		}));
+		add(flipH);
+		//
+		panel();
 		//
 		group=new ButtonGroup();
 		MsEvBRunnable run=new MsEvBRunnable(){
@@ -268,120 +365,7 @@ class Tools extends JPanel{
 				g.drawOval(r.x,r.y,r.width,r.height);
 		}});
 		//
-		add(new separator());
-		//
-		ImageIcon im=image('e');
-		BufferedImage img=new BufferedImage(side_w,side_h,BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g = img.createGraphics();g.drawImage(im.getImage(),panel_button_add/2,panel_button_add/2,null);g.dispose();
-		easeB=new JCheckBox(new ImageIcon(img));easeB.setToolTipText("Mouse Coordinates and Gridlines");
-		img=new BufferedImage(side_w,side_h,BufferedImage.TYPE_INT_ARGB);
-		g = img.createGraphics();
-		g.setColor(Color.GREEN);g.fillRect(0,0,side_w,side_h);
-		g.drawImage(im.getImage(),panel_button_add/2,panel_button_add/2,null);
-		g.dispose();
-		easeB.setSelectedIcon(new ImageIcon(img));
-		easeB.addActionListener(new AcListener(draw,new Runnable(){
-			@Override
-			public void run() {
-				easeGridCreate();
-			}
-		}));
-		add(easeB);
-		//
-		JButton copy=pushButton('c',"Copy");
-		copy.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				Rectangle sel;if((sel=getSelection())==null)return;
-				BufferedImage b=draw.img.getSubimage(sel.x,sel.y,sel.width,sel.height);
-				Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new clipImage(b),null);
-			}
-		});
-		add(copy);
-		JButton paste=pushButton('s',"Paste");
-		paste.addActionListener(new AcListener(draw,new Runnable(){
-			@Override
-			public void run() {
-				Transferable transferable=Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
-				if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.imageFlavor)){
-					try {
-						//this is pasting an item, plus is selecting it
-						group.setSelected(selection.getModel(),true);
-						//prepare selection image and stuff
-						selImg=(BufferedImage)transferable.getTransferData(DataFlavor.imageFlavor);
-						BufferedImage current=draw.img;
-						selection_begin=origPointInterpretation(DBitsL.getViewPosition());
-						int in_x=selection_begin.x;int in_y=selection_begin.y;
-						int in_w=selImg.getWidth();int in_h=selImg.getHeight();
-						int in_r=in_x+in_w;int in_b=in_y+in_h;
-						int new_w=Math.max(current.getWidth(),in_r);
-						int new_h=Math.max(current.getHeight(),in_b);
-						selection_end=new Point(in_r,in_b);
-						//prepare base image and main image
-						baseImg=new BufferedImage(new_w,new_h,BufferedImage.TYPE_INT_ARGB);
-						java.awt.Graphics g=baseImg.getGraphics();
-						g.drawImage(current,0,0,null);
-						g.dispose();
-						selMerge(selection_begin.x,selection_begin.y);
-						//the grid can have another dimension
-						DBitsL.sizedZoom();
-					} catch (UnsupportedFlavorException | IOException e) {e.printStackTrace();}
-				}
-			}
-		}));
-		add(paste);
-		//
-		JButton flipV=pushButton('1',"Flip X Center");
-		flipV.addActionListener(new AcListener(draw,new Runnable(){
-			@Override
-			public void run() {
-				Rectangle sel;if((sel=getSelection())==null)return;
-				BufferedImage image=draw.img.getSubimage(sel.x,sel.y,sel.width,sel.height);
-
-				AffineTransform tx = AffineTransform.getScaleInstance(1, -1);
-				tx.translate(0,-image.getHeight(null));
-				AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-				image = op.filter(image, null);
-				
-				Graphics2D g2=(Graphics2D)draw.img.getGraphics();
-				g2.drawImage(image,sel.x,sel.y,sel.width,sel.height,null);
-				g2.dispose();
-			}
-		}));
-		add(flipV);
-		JButton flipH=pushButton('2',"Flip Y Center");
-		flipH.addActionListener(new AcListener(draw,new Runnable(){
-			@Override
-			public void run() {
-				Rectangle sel;if((sel=getSelection())==null)return;
-				BufferedImage image=draw.img.getSubimage(sel.x,sel.y,sel.width,sel.height);
-
-				AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
-				tx.translate(-image.getWidth(null), 0);
-				AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-				image = op.filter(image, null);
-				
-				Graphics2D g2=(Graphics2D)draw.img.getGraphics();
-				g2.drawImage(image,sel.x,sel.y,sel.width,sel.height,null);
-				g2.dispose();
-			}
-		}));
-		add(flipH);
-		//
 		draw.add(selectionCursor=new selCursor());
-	}
-	private class separator extends JComponent{
-		private static final long serialVersionUID = 1L;
-		private int x=5;private int y=1;
-		private separator(){
-			setPreferredSize(new Dimension((int)getPreferredSize().getWidth(),x+y+x));
-		}
-		@Override protected void paintComponent(java.awt.Graphics g){
-			java.awt.Graphics2D g2=(Graphics2D) g;
-			g2.setColor(new Color(0));
-			g2.setStroke(new BasicStroke(1));
-			g2.drawLine(0,x,(int) panel.getPreferredSize().getWidth(),x);
-		}
 	}
 	//
 	private JButton pushButton(char c,String tip){
@@ -720,4 +704,13 @@ class Tools extends JPanel{
 		}});
 	}
 	//
+	private void flip(AffineTransform tx,BufferedImage image,Rectangle sel){
+		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+		image = op.filter(image, null);
+		
+		Graphics2D g2=(Graphics2D)draw.img.getGraphics();
+		g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC));
+		g2.drawImage(image,sel.x,sel.y,sel.width,sel.height,null);
+		g2.dispose();
+	}
 }
