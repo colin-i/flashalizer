@@ -159,6 +159,7 @@ public class DBitsL {
 						zoom_level=getValue();
 						sizedZoom();
 						v.setViewPosition(new Point(orig_x*zoom_level,orig_y*zoom_level));
+						Tools.formsSettersLocations();
 					}
 				}
 			}));

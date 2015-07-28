@@ -313,31 +313,27 @@ class Tools extends JPanel{
 		Runnable curveBack=new Runnable(){@Override public void run(){
 			if(curve.getSelectedIcon()==curveReset)curve.setSelectedIcon(curveIcon);}
 		};
-		curve=add_rBt_plus(crv,"Curve",new MsEvBRunnable(){
+		Runnable curveDesel=new Runnable(){@Override public void run(){
+			curveBack.run();
+			formsSettersOut();
+		}};
+		curve=add_rBt_forms_ex(crv,"Curve",new MsEvBRunnable(){
 			@Override
-			public boolean run(MouseEvent e) {
+			public boolean run(MouseEvent e){
 				Point p=origPoint(e);
-				if(forms_begin==null){
-					forms_begin=p;if(forms_begin==null)return false;
-					BufferedImage im=draw.img;
-					baseImg=new BufferedImage(im.getColorModel(),im.copyData(null),im.getColorModel().isAlphaPremultiplied(),null);
-					return false;
-				}
+				if(forms_begin==null)return formsDefaultPress(p);
 				curve.setSelectedIcon(curveReset);
 				return curveDraw(e);
 			}
-		},new MsEvBRunnable(){
+			},new MsEvBRunnable(){
 			@Override
 			public boolean run(MouseEvent e) {
 				if(curve.getSelectedIcon()==curveIcon)return formsDefaultDrag(e,lineDrag);
 				return curveDraw(e);
-			}}
-		,curveBack,false);
+			}},curveDesel
+		);
 		curveIcon=curve.getSelectedIcon();curveReset=radio_image(imageX(crv+Character.toString('2')),true);
-		curve.addActionListener(new ActionListener(){@Override public void actionPerformed(ActionEvent arg0){
-			forms_begin=null;
-			curveBack.run();
-		}});
+		curve.addActionListener(new ActionListener(){@Override public void actionPerformed(ActionEvent arg0){curveBack.run();}});
 		//
 		add_rBt_forms('r',"Rectangle",new formsRunnable(){
 			@Override
@@ -366,6 +362,7 @@ class Tools extends JPanel{
 		}});
 		//
 		draw.add(selectionCursor=new selCursor());
+		draw.add(formsB=new formsSetter(Color.BLUE));draw.add(formsE=new formsSetter(Color.RED));formsSettersOut();
 	}
 	//
 	private JButton pushButton(char c,String tip){
@@ -662,29 +659,43 @@ class Tools extends JPanel{
 	private static selCursor selectionCursor;
 	private void selCursorMaskOut(){selectionCursor.setBounds(new Rectangle());}
 	//
-	private Point forms_begin;
+	private static Point forms_begin;
 	private interface formsRunnable{
 		void run(Point p,java.awt.Graphics g);
 	}
 	private void add_rBt_forms(char c,String tip,formsRunnable drag){
-		add_rBt_plus(c,tip,new MsEvBRunnable(){
+		add_rBt_forms_ex(c,tip,new MsEvBRunnable(){
 			@Override
 			public boolean run(MouseEvent e) {
-				forms_begin=origPoint(e);if(forms_begin==null)return false;
-				BufferedImage im=draw.img;
-				baseImg=new BufferedImage(im.getColorModel(),im.copyData(null),im.getColorModel().isAlphaPremultiplied(),null);
-				return false;
+				return formsDefaultPress(origPoint(e));
 			}
 		},new MsEvBRunnable(){
 			@Override
 			public boolean run(MouseEvent e){
 				return formsDefaultDrag(e,drag);
 			}
-		},null,false);
+		},formsSettersOutRun);
+	}
+	private JRadioButton add_rBt_forms_ex(char c,String tip,MsEvBRunnable press,MsEvBRunnable drag,Runnable desel){
+		radio r=add_rBt_plus(c,tip,press,drag,desel,false);
+		r.addActionListener(formsReset);
+		return r;
+	}
+	private boolean formsDefaultPress(Point p){
+		forms_begin=p;if(forms_begin==null)return false;
+		BufferedImage im=draw.img;
+		baseImg=new BufferedImage(im.getColorModel(),im.copyData(null),im.getColorModel().isAlphaPremultiplied(),null);
+		formsSettersOut();
+		return false;
 	}
 	private boolean formsDefaultDrag(MouseEvent e,formsRunnable drag){
 		if(forms_begin==null)return false;
 		forms_end=origPointTranslation(e);
+		if(formsB.isVisible()==false){
+			formsB.setVisible(true);formsE.setVisible(true);
+			formsSettersLocation(formsB,forms_begin);
+		}
+		formsSettersLocation(formsE,forms_end);
 		return formsDraw(forms_end,drag);
 	}
 	private boolean formsDraw(Point p,formsRunnable run){
@@ -697,7 +708,7 @@ class Tools extends JPanel{
 		return true;
 	}
 	//
-	private JRadioButton curve;private Icon curveIcon;private Icon curveReset;private Point forms_end;
+	private JRadioButton curve;private Icon curveIcon;private Icon curveReset;private static Point forms_end;
 	private boolean curveDraw(MouseEvent e){
 		return formsDraw(origPointTranslation(e),new formsRunnable(){@Override public void run(Point p, Graphics g) {
 			((Graphics2D)g).draw(new QuadCurve2D.Double(forms_begin.x,forms_begin.y,p.x,p.y,forms_end.x,forms_end.y));
@@ -712,5 +723,32 @@ class Tools extends JPanel{
 		g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC));
 		g2.drawImage(image,sel.x,sel.y,sel.width,sel.height,null);
 		g2.dispose();
+	}
+	//
+	private static formsSetter formsB;private static formsSetter formsE;
+	private class formsSetter extends JButton{
+		private static final long serialVersionUID = 1L;
+		private formsSetter(Color c){
+			Dimension d=new Dimension();d.width=10;d.height=d.width;
+			setBounds(new Rectangle(d));//NO setPreferredSize(d)
+			setBackground(c);
+		}
+	}
+	private void formsSettersOut(){
+		formsB.setVisible(false);formsE.setVisible(false);
+	}
+	private Runnable formsSettersOutRun=new Runnable(){
+		@Override public void run(){formsSettersOut();}
+	};
+	private ActionListener formsReset=new ActionListener(){
+		@Override public void actionPerformed(ActionEvent e) {forms_begin=null;formsSettersOut();}
+	};
+	private static void formsSettersLocation(formsSetter s,Point p){
+		s.setLocation(new Point(p.x*DBitsL.zoom_level,p.y*DBitsL.zoom_level));
+	}
+	static void formsSettersLocations(){
+		if(formsB.isVisible()){
+			formsSettersLocation(formsB,forms_begin);formsSettersLocation(formsE,forms_end);
+		}
 	}
 }
