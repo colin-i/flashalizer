@@ -333,7 +333,9 @@ class Tools extends JPanel{
 			}},curveDesel
 		);
 		curveIcon=curve.getSelectedIcon();curveReset=radio_image(imageX(crv+Character.toString('2')),true);
-		curve.addActionListener(new ActionListener(){@Override public void actionPerformed(ActionEvent arg0){curveBack.run();}});
+		curve.addActionListener(new ActionListener(){@Override public void actionPerformed(ActionEvent arg0){
+			forms_begin=null;curveBack.run();}}
+		);
 		//
 		add_rBt_forms('r',"Rectangle",new formsRunnable(){
 			@Override
@@ -678,7 +680,7 @@ class Tools extends JPanel{
 	}
 	private JRadioButton add_rBt_forms_ex(char c,String tip,MsEvBRunnable press,MsEvBRunnable drag,Runnable desel){
 		radio r=add_rBt_plus(c,tip,press,drag,desel,false);
-		r.addActionListener(formsReset);
+		r.addActionListener(new ActionListener(){@Override public void actionPerformed(ActionEvent arg0){formsSettersOut();}});
 		return r;
 	}
 	private boolean formsDefaultPress(Point p){
@@ -739,9 +741,6 @@ class Tools extends JPanel{
 	}
 	private Runnable formsSettersOutRun=new Runnable(){
 		@Override public void run(){formsSettersOut();}
-	};
-	private ActionListener formsReset=new ActionListener(){
-		@Override public void actionPerformed(ActionEvent e) {forms_begin=null;formsSettersOut();}
 	};
 	private static void formsSettersLocation(formsSetter s,Point p){
 		s.setLocation(new Point(p.x*DBitsL.zoom_level,p.y*DBitsL.zoom_level));
