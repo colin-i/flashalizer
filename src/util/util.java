@@ -167,10 +167,15 @@ public class util {
 		public MsMotListener(Component destDraw,MsEvBRunnable msEvRunnable){
 			d=destDraw;r=msEvRunnable;
 		}
-		private MsEvBRunnable r;private Component d;
+		public MsMotListener(Component destDraw,MsEvVRunnable msEvRunnable){
+			d=destDraw;r=msEvRunnable;
+		}
+		private MsEvRunnable r;private Component d;
 		@Override
 		public void mouseDragged(MouseEvent e){
-			if(r.run(e))d.repaint();
+			if(r instanceof MsEvBRunnable){if(((MsEvBRunnable)r).run(e)==false)return;}
+			else ((MsEvVRunnable)r).run(e);
+			d.repaint();
 		}
 		@Override
 		public void mouseMoved(MouseEvent e){}

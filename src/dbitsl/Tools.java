@@ -55,6 +55,7 @@ import dbitsl.DBitsL.content;
 import util.util.MsEvBRunnable;
 import util.util.MsEvVRunnable;
 import util.util.MsEvRunnable;
+import util.util.MsMotListener;
 import util.util.AcListener;
 import util.util.ItListener;
 import util.util.ItRunnable;
@@ -364,7 +365,15 @@ class Tools extends JPanel{
 		}});
 		//
 		draw.add(selectionCursor=new selCursor());
-		draw.add(formsB=new formsSetter(Color.BLUE));draw.add(formsE=new formsSetter(Color.RED));formsSettersOut();
+		draw.add(formsB=new formsSetter(Color.BLUE,new formsPoint(){
+			@Override public void setPoint(Point p){forms_begin=p;}
+			@Override public Point getPoint(){return forms_begin;}})
+		);
+		draw.add(formsE=new formsSetter(Color.RED,new formsPoint(){
+			@Override public void setPoint(Point p){forms_end=p;}
+			@Override public Point getPoint(){return forms_end;}})
+		);
+		formsSettersOut();
 	}
 	//
 	private JButton pushButton(char c,String tip){
@@ -696,10 +705,12 @@ class Tools extends JPanel{
 		if(formsB.isVisible()==false){
 			formsB.setVisible(true);formsE.setVisible(true);
 			formsSettersLocation(formsB,forms_begin);
+			formsB.run=drag;formsE.run=drag;
 		}
 		formsSettersLocation(formsE,forms_end);
-		return formsDraw(forms_end,drag);
+		return formsDefaultDraw(drag);
 	}
+	private boolean formsDefaultDraw(formsRunnable drag){return formsDraw(forms_end,drag);};
 	private boolean formsDraw(Point p,formsRunnable run){
 		BufferedImage new_img=new BufferedImage(baseImg.getColorModel(),baseImg.copyData(null),baseImg.getColorModel().isAlphaPremultiplied(),null);
 		java.awt.Graphics2D g=(Graphics2D)new_img.getGraphics();
@@ -730,11 +741,25 @@ class Tools extends JPanel{
 	private static formsSetter formsB;private static formsSetter formsE;
 	private class formsSetter extends JButton{
 		private static final long serialVersionUID = 1L;
-		private formsSetter(Color c){
+		private formsSetter(Color c,formsPoint p){
 			Dimension d=new Dimension();d.width=10;d.height=d.width;
 			setBounds(new Rectangle(d));//NO setPreferredSize(d)
 			setBackground(c);
+			formsSetter thisSetter=this;
+			addMouseMotionListener(new MsMotListener(draw,new MsEvVRunnable(){
+				@Override
+				public void run(MouseEvent e){
+					Point p=origPointTranslation(e);
+					Point pnt=point.getPoint();
+					Point t=new Point(pnt.x+p.x,pnt.y+p.y);
+					point.setPoint(t);
+					formsSettersLocation(thisSetter,t);
+					formsDefaultDraw(run);
+				}})
+			);
+			point=p;
 		}
+		private formsPoint point;private formsRunnable run;
 	}
 	private void formsSettersOut(){
 		formsB.setVisible(false);formsE.setVisible(false);
@@ -750,4 +775,6 @@ class Tools extends JPanel{
 			formsSettersLocation(formsB,forms_begin);formsSettersLocation(formsE,forms_end);
 		}
 	}
+	//
+	private interface formsPoint{void setPoint(Point p);Point getPoint();}
 }
