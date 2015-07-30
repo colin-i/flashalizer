@@ -138,9 +138,8 @@ class Tools extends JPanel{
 		copy.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				Rectangle sel;if((sel=getSelection())==null)return;
-				BufferedImage b=draw.img.getSubimage(sel.x,sel.y,sel.width,sel.height);
-				Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new clipImage(b),null);
+				BufferedImage img;if((img=getSelImg())==null)return;
+				Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new clipImage(img),null);
 			}
 		});
 		add(copy);
@@ -153,39 +152,46 @@ class Tools extends JPanel{
 					try {
 						//this is pasting an item, plus is selecting it
 						group.setSelected(selection.getModel(),true);
-						//prepare selection image and stuff
-						selImg=(BufferedImage)transferable.getTransferData(DataFlavor.imageFlavor);
-						BufferedImage current=draw.img;
-						selection_begin=origPointInterpretation(DBitsL.getViewPosition());
-						int in_x=selection_begin.x;int in_y=selection_begin.y;
-						int in_w=selImg.getWidth();int in_h=selImg.getHeight();
-						int in_r=in_x+in_w;int in_b=in_y+in_h;
-						int new_w=Math.max(current.getWidth(),in_r);
-						int new_h=Math.max(current.getHeight(),in_b);
-						selection_end=new Point(in_r,in_b);
-						//prepare base image and main image
-						baseImg=new BufferedImage(new_w,new_h,BufferedImage.TYPE_INT_ARGB);
-						java.awt.Graphics g=baseImg.getGraphics();
-						g.drawImage(current,0,0,null);
-						g.dispose();
-						selMerge(selection_begin.x,selection_begin.y);
-						//the grid can have another dimension
-						DBitsL.sizedZoom();
+						img_on_img(origPointInterpretation(DBitsL.getViewPosition()),
+								(BufferedImage)transferable.getTransferData(DataFlavor.imageFlavor),draw.img);
 					} catch (UnsupportedFlavorException | IOException e) {e.printStackTrace();}
 				}
 			}
 		}));
 		add(paste);
 		//
+		JButton rotateR=pushButton('3',"Rotate Right 90");
+		rotateR.addActionListener(new AcListener(draw,new Runnable(){
+			@Override
+			public void run() {
+				BufferedImage img;if((img=getSelImg())==null)return;
+				AffineTransform at = new AffineTransform();
+	            //translate it to the center of the component
+	            at.translate(img.getHeight()/2,img.getWidth()/2);
+	            //do the actual rotation
+	            at.rotate(Math.toRadians(90));
+	            //translate the object, rotate around the center
+	            at.translate(-img.getWidth()/2,-img.getHeight()/2);
+	            //draw the image
+	            BufferedImage b=new BufferedImage(img.getHeight(),img.getWidth(),BufferedImage.TYPE_INT_ARGB);
+	            Graphics2D g2d=(Graphics2D)b.getGraphics();
+	            g2d.drawImage(img,at,null);g2d.dispose();
+	            //get current center
+	            Rectangle sel=getSelection();int c_x=sel.x+sel.width/2;int c_y=sel.y+sel.height/2;
+	            //pass normal x or 0 if x is negative,... 
+	            img_on_img(new Point(Math.max(c_x-(sel.height/2),0),Math.max(c_y-(sel.width/2),0)),b,baseImg);
+			}
+		}));
+		add(rotateR);
+		//
 		JButton flipV=pushButton('1',"Flip X Center");
 		flipV.addActionListener(new AcListener(draw,new Runnable(){
 			@Override
 			public void run() {
-				Rectangle sel;if((sel=getSelection())==null)return;
-				BufferedImage image=draw.img.getSubimage(sel.x,sel.y,sel.width,sel.height);
+				BufferedImage img;if((img=getSelImg())==null)return;
 				AffineTransform tx = AffineTransform.getScaleInstance(1, -1);
-				tx.translate(0,-image.getHeight(null));
-				flip(tx,image,sel);
+				tx.translate(0,-img.getHeight(null));
+				flip(tx);
 			}
 		}));
 		add(flipV);
@@ -193,11 +199,10 @@ class Tools extends JPanel{
 		flipH.addActionListener(new AcListener(draw,new Runnable(){
 			@Override
 			public void run() {
-				Rectangle sel;if((sel=getSelection())==null)return;
-				BufferedImage image=draw.img.getSubimage(sel.x,sel.y,sel.width,sel.height);
+				BufferedImage img;if((img=getSelImg())==null)return;
 				AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
-				tx.translate(-image.getWidth(null), 0);
-				flip(tx,image,sel);
+				tx.translate(-img.getWidth(null), 0);
+				flip(tx);
 			}
 		}));
 		add(flipH);
@@ -265,29 +270,20 @@ class Tools extends JPanel{
 					selCursorMaskOut();
 					return;
 				}
-				if(selection_motion==null){
-					Rectangle sel=getSelection();
-					selImg=draw.img.getSubimage(sel.x,sel.y,sel.width,sel.height);
-					BufferedImage im=draw.img;
-					baseImg=new BufferedImage(im.getColorModel(),im.copyData(null),im.getColorModel().isAlphaPremultiplied(),null);
-					Graphics2D g=(Graphics2D)baseImg.getGraphics();
-					g.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR));
-					g.fill(sel);
-					g.dispose();
-				}
+				if(selection_motion==null)setSelImg();
 				selection_motion=p;
 			}},
 			new MsEvVRunnable(){@Override public void run(MouseEvent e){
 				Point p=origPointTranslation(e);
 				if(selection_motion==null){selection_end=p;return;}
-				double dif_x=p.x-selection_motion.x;double dif_y=p.y-selection_motion.y;
+				int dif_x=p.x-selection_motion.x;int dif_y=p.y-selection_motion.y;
 				Rectangle s=getSelection();int w=draw.img.getWidth();int h=draw.img.getHeight();
 				if(s.x+dif_x<0)dif_x=0-s.x;//left motion
-				else if(w<s.getMaxX()+dif_x)dif_x=w-s.getMaxX();//right motion
+				else if(w<s.getMaxX()+dif_x)dif_x=(int)(w-s.getMaxX());//right motion
 				if(s.y+dif_y<0)dif_y=0-s.y;//up motion
-				else if(h<s.getMaxY()+dif_y)dif_y=h-s.getMaxY();//down motion
-				selMerge(s.x+(int)dif_x,s.y+(int)dif_y);
+				else if(h<s.getMaxY()+dif_y)dif_y=(int)(h-s.getMaxY());//down motion
 				selection_begin.x+=dif_x;selection_begin.y+=dif_y;
+				selMerge();
 				selection_end.x+=dif_x;selection_end.y+=dif_y;
 				selection_motion=p;
 			}}
@@ -297,11 +293,12 @@ class Tools extends JPanel{
 				selCursorMaskOut();
 			}}
 		);
-		selection.addActionListener(new ActionListener(){
+		selection.addActionListener(new AcListener(draw,new Runnable(){
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				selection_begin=null;selection_end=null;
-			}});
+			public void run() {
+				selection_begin=null;selection_end=null;selCursorMaskOut();
+			}})
+		);
 		formsRunnable lineDrag=new formsRunnable(){
 			@Override
 			public void run(Point p,java.awt.Graphics g) {
@@ -632,10 +629,10 @@ class Tools extends JPanel{
         selectionCursor.setBounds(sel);
 	}
 	private BufferedImage baseImg;private BufferedImage selImg;private Point selection_motion;
-	private void selMerge(int x,int y){
+	private void selMerge(){
 		BufferedImage new_img=new BufferedImage(baseImg.getColorModel(),baseImg.copyData(null),baseImg.getColorModel().isAlphaPremultiplied(),null);
 		java.awt.Graphics g=new_img.getGraphics();
-		g.drawImage(selImg,x,y,null);
+		g.drawImage(selImg,selection_begin.x,selection_begin.y,null);
 		g.dispose();
 		draw.img=new_img;
 	}
@@ -728,14 +725,10 @@ class Tools extends JPanel{
 		}});
 	}
 	//
-	private void flip(AffineTransform tx,BufferedImage image,Rectangle sel){
+	private void flip(AffineTransform tx){
 		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-		image = op.filter(image, null);
-		
-		Graphics2D g2=(Graphics2D)draw.img.getGraphics();
-		g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC));
-		g2.drawImage(image,sel.x,sel.y,sel.width,sel.height,null);
-		g2.dispose();
+		selImg=op.filter(selImg,null);
+		selMerge();
 	}
 	//
 	private static formsSetter formsB;private static formsSetter formsE;
@@ -777,4 +770,46 @@ class Tools extends JPanel{
 	}
 	//
 	private interface formsPoint{void setPoint(Point p);Point getPoint();}
+	//
+	private void img_on_img(Point p,BufferedImage in,BufferedImage current){
+		//prepare selection image
+		selImg=in;
+		selection_begin=p;
+		//stuff
+		int in_x=selection_begin.x;int in_y=selection_begin.y;
+		int in_w=selImg.getWidth();int in_h=selImg.getHeight();
+		int in_r=in_x+in_w;int in_b=in_y+in_h;
+		int new_w=Math.max(current.getWidth(),in_r);
+		int new_h=Math.max(current.getHeight(),in_b);
+		selection_end=new Point(in_r,in_b);
+		//prepare base image and main image
+		BufferedImage b=new BufferedImage(new_w,new_h,BufferedImage.TYPE_INT_ARGB);
+		java.awt.Graphics g=b.getGraphics();
+		g.drawImage(current,0,0,null);//is b=new...,not baseImg=...; at rotation current=baseImg
+		g.dispose();
+		baseImg=b;
+		selMerge();
+		//the grid can have another dimension
+		DBitsL.sizedZoom();
+	}
+	private BufferedImage getSelImg(){
+		if(selection.isSelected()==false)return null;
+		if(selection_begin==null)return null;
+		if(selection_end==null)return null;
+		if(selection_motion==null){
+			setSelImg();
+			selection_motion=new Point();//non-null, at rotate it matter to not reset the baseImg
+		}
+		return selImg;
+	}
+	private void setSelImg(){
+		Rectangle sel=getSelection();
+		selImg=draw.img.getSubimage(sel.x,sel.y,sel.width,sel.height);
+		BufferedImage im=draw.img;
+		baseImg=new BufferedImage(im.getColorModel(),im.copyData(null),im.getColorModel().isAlphaPremultiplied(),null);
+		Graphics2D g=(Graphics2D)baseImg.getGraphics();
+		g.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR));
+		g.fill(sel);
+		g.dispose();
+	}
 }
