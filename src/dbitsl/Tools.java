@@ -164,25 +164,18 @@ class Tools extends JPanel{
 		rotateR.addActionListener(new AcListener(draw,new Runnable(){
 			@Override
 			public void run() {
-				BufferedImage img;if((img=getSelImg())==null)return;
-				AffineTransform at = new AffineTransform();
-	            //translate it to the center of the component
-	            at.translate(img.getHeight()/2,img.getWidth()/2);
-	            //do the actual rotation
-	            at.rotate(Math.toRadians(90));
-	            //translate the object, rotate around the center
-	            at.translate(-img.getWidth()/2,-img.getHeight()/2);
-	            //draw the image
-	            BufferedImage b=new BufferedImage(img.getHeight(),img.getWidth(),BufferedImage.TYPE_INT_ARGB);
-	            Graphics2D g2d=(Graphics2D)b.getGraphics();
-	            g2d.drawImage(img,at,null);g2d.dispose();
-	            //get current center
-	            Rectangle sel=getSelection();int c_x=sel.x+sel.width/2;int c_y=sel.y+sel.height/2;
-	            //pass normal x or 0 if x is negative,... 
-	            img_on_img(new Point(Math.max(c_x-(sel.height/2),0),Math.max(c_y-(sel.width/2),0)),b,baseImg);
+				rotate(90);
 			}
 		}));
 		add(rotateR);
+		JButton rotateL=pushButton('4',"Rotate Left 90");
+		rotateL.addActionListener(new AcListener(draw,new Runnable(){
+			@Override
+			public void run() {
+				rotate(-90);
+			}
+		}));
+		add(rotateL);
 		//
 		JButton flipV=pushButton('1',"Flip X Center");
 		flipV.addActionListener(new AcListener(draw,new Runnable(){
@@ -380,7 +373,15 @@ class Tools extends JPanel{
 	private static JCheckBox easeB;private static JWindow easeCoords;
 	static void ease(MouseEvent e){
 		if(easeB.isSelected()==false)return;
-		Point p=origPoint(e);if(p==null){
+		//if not mouse on draw then translate from children to draw
+		Point p;
+		if(e.getSource()!=draw){
+			Point p1=((JComponent)e.getSource()).getLocation();
+			p=e.getPoint();
+			p.translate(p1.x,p1.y);
+		}else p=e.getPoint();
+		p=origPointEx(p);
+		if(p==null){
 			easeOff();
 			return;
 		}
@@ -435,7 +436,11 @@ class Tools extends JPanel{
 	}
 	//
 	private static Point origPoint(MouseEvent e){
-		BufferedImage img=draw.img;Point p=origPointTranslation(e);
+		return origPointEx(e.getPoint());
+	}
+	private static Point origPointEx(Point p){
+		p=origPointInterpretation(p);
+		BufferedImage img=draw.img;
 		int x=p.x;
 		if(x<0||img.getWidth()<=x)return null;
 		int y=p.y;
@@ -654,9 +659,9 @@ class Tools extends JPanel{
 			MouseAdapter ma=new MouseAdapter(){
 				@Override public void mousePressed(MouseEvent e){trans(e);}
 				@Override public void mouseDragged(MouseEvent e){trans(e);}
-				@Override public void mouseMoved(MouseEvent e){trans(e);}
 			};
 			addMouseListener(ma);addMouseMotionListener(ma);
+			addMouseListener(easeAdapter);addMouseMotionListener(easeAdapter);
 		}
 		private void trans(MouseEvent e){
 			Rectangle sel=getSelection();
@@ -750,6 +755,7 @@ class Tools extends JPanel{
 					formsDefaultDraw(run);
 				}})
 			);
+			addMouseListener(easeAdapter);addMouseMotionListener(easeAdapter);
 			point=p;
 		}
 		private formsPoint point;private formsRunnable run;
@@ -811,5 +817,35 @@ class Tools extends JPanel{
 		g.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR));
 		g.fill(sel);
 		g.dispose();
+	}
+	//
+	static MouseAdapter easeAdapter=new MouseAdapter(){
+		@Override public void mouseDragged(MouseEvent e){
+			ease(e);
+		}
+		@Override public void mouseMoved(MouseEvent e){
+			ease(e);
+		}
+		@Override public void mouseExited(MouseEvent e){
+			easeOff();
+		}
+	};
+	private void rotate(int d){
+		BufferedImage img;if((img=getSelImg())==null)return;
+		AffineTransform at = new AffineTransform();
+        //translate it to the center of the component
+        at.translate(img.getHeight()/2,img.getWidth()/2);
+        //do the actual rotation
+        at.rotate(Math.toRadians(d));
+        //translate the object, rotate around the center
+        at.translate(-img.getWidth()/2,-img.getHeight()/2);
+        //draw the image
+        BufferedImage b=new BufferedImage(img.getHeight(),img.getWidth(),BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d=(Graphics2D)b.getGraphics();
+        g2d.drawImage(img,at,null);g2d.dispose();
+        //get current center
+        Rectangle sel=getSelection();int c_x=sel.x+sel.width/2;int c_y=sel.y+sel.height/2;
+        //pass normal x or 0 if x is negative,... 
+        img_on_img(new Point(Math.max(c_x-(sel.height/2),0),Math.max(c_y-(sel.width/2),0)),b,baseImg);
 	}
 }

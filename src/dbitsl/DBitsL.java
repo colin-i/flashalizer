@@ -97,18 +97,19 @@ public class DBitsL {
 		private content(BufferedImage img){
 			this.img=img;
 			setPreferredSize(new Dimension(img.getWidth(),img.getHeight()));
-			addMouseMotionListener(new imgMsMotListener(this,new MsEvBRunnable(){
+			addMouseMotionListener(new MsMotListener(this,new MsEvBRunnable(){
 				@Override
 				public boolean run(MouseEvent e) {
 					return Tools.drag(e);
 				}
 			}));
-			addMouseListener(new imgMsListener(this,new MsEvBRunnable(){
+			addMouseListener(new MsListener(this,new MsEvBRunnable(){
 				@Override
 				public boolean run(MouseEvent e) {
 					return Tools.hit(e);
 				}
 			}));
+			addMouseMotionListener(Tools.easeAdapter);addMouseListener(Tools.easeAdapter);
 			setBackground(Color.GREEN);
 		}
 		@Override
@@ -120,20 +121,6 @@ public class DBitsL {
 			Tools.easeGridDraw(g);
 			Tools.selectionMarkerDraw(g);
 		}
-	}
-	private static class imgMsMotListener extends MsMotListener{
-		private imgMsMotListener(Component destDraw, MsEvBRunnable msEvRunnable){super(destDraw, msEvRunnable);}
-		@Override
-		public void mouseDragged(MouseEvent e){
-			Tools.ease(e);
-			super.mouseDragged(e);
-		}
-		@Override
-		public void mouseMoved(MouseEvent e){Tools.ease(e);}
-	}
-	private static class imgMsListener extends MsListener{
-		private imgMsListener(Component destDraw, MsEvBRunnable msEvRunnable){super(destDraw, msEvRunnable);}
-		@Override public void mouseExited(MouseEvent e){Tools.easeOff();}
 	}
 	static void sizedZoom(){
 		BufferedImage img=drawArea.img;
