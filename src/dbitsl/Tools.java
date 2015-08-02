@@ -159,6 +159,14 @@ class Tools extends JPanel{
 			}
 		}));
 		add(paste);
+		JButton delete=pushButton('t',"Delete");;
+		delete.addActionListener(new AcListener(draw,new Runnable(){
+			@Override
+			public void run() {
+				if(getSelImg()==null)return;
+				draw.img=baseImg;selectionClear();
+			}}));
+		add(delete);
 		//
 		JButton rotateR=pushButton('3',"Rotate Right 90");
 		rotateR.addActionListener(new AcListener(draw,new Runnable(){
@@ -287,10 +295,7 @@ class Tools extends JPanel{
 			}}
 		);
 		selection.addActionListener(new AcListener(draw,new Runnable(){
-			@Override
-			public void run() {
-				selection_begin=null;selection_end=null;selCursorMaskOut();
-			}})
+			@Override public void run() {selectionClear();}})
 		);
 		formsRunnable lineDrag=new formsRunnable(){
 			@Override
@@ -847,5 +852,9 @@ class Tools extends JPanel{
         Rectangle sel=getSelection();int c_x=sel.x+sel.width/2;int c_y=sel.y+sel.height/2;
         //pass normal x or 0 if x is negative,... 
         img_on_img(new Point(Math.max(c_x-(sel.height/2),0),Math.max(c_y-(sel.width/2),0)),b,baseImg);
+	}
+	//
+	private void selectionClear(){
+		selection_begin=null;selection_end=null;selCursorMaskOut();
 	}
 }
