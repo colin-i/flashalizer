@@ -134,6 +134,17 @@ class Tools extends JPanel{
 		//
 		add(new JSeparator());
 		//
+		JButton all=pushButton('a',"Select All");;
+		all.addActionListener(new AcListener(draw,new Runnable(){
+			@Override
+			public void run(){
+				group.setSelected(selection.getModel(),true);
+				selection_begin=new Point();
+				BufferedImage im=draw.img;
+				selection_end=new Point(im.getWidth(),im.getHeight());
+				selection_motion=null;//selection_motion is in conjunction with selImg
+			}}));
+		add(all);
 		JButton copy=pushButton('c',"Copy");
 		copy.addActionListener(new ActionListener(){
 			@Override
