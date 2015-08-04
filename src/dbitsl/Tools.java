@@ -370,16 +370,27 @@ class Tools extends JPanel{
 				g.drawOval(r.x,r.y,r.width,r.height);
 		}});
 		//
-		draw.add(selectionCursor=new selCursor());
-		draw.add(formsB=new formsSetter(Color.BLUE,new formsPoint(){
+		draw.add(formsB=new formsSetter(Color.BLUE,new graphPoint(){
 			@Override public void setPoint(Point p){forms_begin=p;}
 			@Override public Point getPoint(){return forms_begin;}})
 		);
-		draw.add(formsE=new formsSetter(Color.RED,new formsPoint(){
+		draw.add(formsE=new formsSetter(Color.RED,new graphPoint(){
 			@Override public void setPoint(Point p){forms_end=p;}
 			@Override public Point getPoint(){return forms_end;}})
 		);
 		formsSettersOut();
+		//
+		draw.add(selB=new selSetter(Color.BLUE,new graphPoint(){
+			@Override public void setPoint(Point p){selection_begin=p;}
+			@Override public Point getPoint(){return selection_begin;}})
+		);
+		draw.add(selE=new selSetter(Color.RED,new graphPoint(){
+			@Override public void setPoint(Point p){selection_end=p;}
+			@Override public Point getPoint(){return selection_end;}})
+		);
+		selSettersOut();
+		draw.add(selectionCursor=new selCursor());
+		
 	}
 	//
 	private JButton pushButton(char c,String tip){
@@ -631,6 +642,9 @@ class Tools extends JPanel{
 	}
 	static void selectionMarkerDraw(java.awt.Graphics g){
 		Rectangle sel;if((sel=getSelection())==null)return;
+		//
+		goodSelPoint(selection_begin,selB);goodSelPoint(selection_end,selE);
+		//
 		int z=DBitsL.zoom_level;
 		sel.x*=z;sel.y*=z;sel.width*=z;sel.height*=z;
 		//creates a copy of the Graphics instance
@@ -686,7 +700,9 @@ class Tools extends JPanel{
 		}
 	}
 	private static selCursor selectionCursor;
-	private void selCursorMaskOut(){selectionCursor.setBounds(new Rectangle());}
+	private void selCursorMaskOut(){
+		selectionCursor.setBounds(new Rectangle());selSettersOut();
+	}
 	//
 	private static Point forms_begin;
 	private interface formsRunnable{
@@ -722,10 +738,10 @@ class Tools extends JPanel{
 		forms_end=origPointTranslation(e);
 		if(formsB.isVisible()==false){
 			formsB.setVisible(true);formsE.setVisible(true);
-			formsSettersLocation(formsB,forms_begin);
+			settersLocation(formsB,forms_begin);
 			formsB.run=drag;formsE.run=drag;
 		}
-		formsSettersLocation(formsE,forms_end);
+		settersLocation(formsE,forms_end);
 		return formsDefaultDraw(drag);
 	}
 	private boolean formsDefaultDraw(formsRunnable drag){return formsDraw(forms_end,drag);};
@@ -753,28 +769,38 @@ class Tools extends JPanel{
 	}
 	//
 	private static formsSetter formsB;private static formsSetter formsE;
-	private class formsSetter extends JButton{
+	private class setter extends JButton{
 		private static final long serialVersionUID = 1L;
-		private formsSetter(Color c,formsPoint p){
+		graphPoint point;setter thisSetter;
+		private setter(Color c,graphPoint p){
 			Dimension d=new Dimension();d.width=10;d.height=d.width;
 			setBounds(new Rectangle(d));//NO setPreferredSize(d)
 			setBackground(c);
-			formsSetter thisSetter=this;
-			addMouseMotionListener(new MsMotListener(draw,new MsEvVRunnable(){
-				@Override
-				public void run(MouseEvent e){
-					Point p=origPointTranslation(e);
-					Point pnt=point.getPoint();
-					Point t=new Point(pnt.x+p.x,pnt.y+p.y);
-					point.setPoint(t);
-					formsSettersLocation(thisSetter,t);
-					formsDefaultDraw(run);
-				}})
-			);
+			thisSetter=this;
 			addMouseListener(easeAdapter);addMouseMotionListener(easeAdapter);
 			point=p;
 		}
-		private formsPoint point;private formsRunnable run;
+		void set(MouseEvent e){
+			Point p=origPointTranslation(e);
+			Point pnt=point.getPoint();
+			Point t=new Point(pnt.x+p.x,pnt.y+p.y);
+			point.setPoint(t);
+		}
+	}
+	private class formsSetter extends setter{
+		private static final long serialVersionUID = 1L;
+		private formsRunnable run;
+		private formsSetter(Color c,graphPoint p){
+			super(c,p);
+			addMouseMotionListener(new MsMotListener(draw,new MsEvVRunnable(){
+				@Override
+				public void run(MouseEvent e){
+					thisSetter.set(e);
+					settersLocation(thisSetter,p.getPoint());
+					formsDefaultDraw(run);
+				}})
+			);
+		}
 	}
 	private void formsSettersOut(){
 		formsB.setVisible(false);formsE.setVisible(false);
@@ -782,16 +808,16 @@ class Tools extends JPanel{
 	private Runnable formsSettersOutRun=new Runnable(){
 		@Override public void run(){formsSettersOut();}
 	};
-	private static void formsSettersLocation(formsSetter s,Point p){
-		s.setLocation(new Point(p.x*DBitsL.zoom_level,p.y*DBitsL.zoom_level));
+	private static void settersLocation(setter thisSetter,Point p){
+		thisSetter.setLocation(new Point(p.x*DBitsL.zoom_level,p.y*DBitsL.zoom_level));
 	}
 	static void formsSettersLocations(){
 		if(formsB.isVisible()){
-			formsSettersLocation(formsB,forms_begin);formsSettersLocation(formsE,forms_end);
+			settersLocation(formsB,forms_begin);settersLocation(formsE,forms_end);
 		}
 	}
 	//
-	private interface formsPoint{void setPoint(Point p);Point getPoint();}
+	private interface graphPoint{void setPoint(Point p);Point getPoint();}
 	//
 	private void img_on_img(Point p,BufferedImage in,BufferedImage current){
 		//prepare selection image
@@ -867,5 +893,27 @@ class Tools extends JPanel{
 	//
 	private void selectionClear(){
 		selection_begin=null;selection_end=null;selCursorMaskOut();
+	}
+	//
+	private static selSetter selB;private static selSetter selE;
+	private class selSetter extends setter{
+		private static final long serialVersionUID = 1L;
+		private selSetter(Color c,graphPoint p){
+			super(c,p);
+			addMouseMotionListener(new MsMotListener(draw,new MsEvVRunnable(){
+				@Override
+				public void run(MouseEvent e){
+					thisSetter.set(e);
+					selection_motion=null;//in conjunction with selImg
+				}})
+			);
+		}
+	}
+	private static void goodSelPoint(Point p,selSetter s){
+		s.setVisible(true);
+		settersLocation(s,goodPoint(p));
+	}
+	private void selSettersOut(){
+		selB.setVisible(false);selE.setVisible(false);
 	}
 }
