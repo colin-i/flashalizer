@@ -8,9 +8,11 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dialog;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Robot;
@@ -25,8 +27,11 @@ import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.font.FontRenderContext;
+import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.QuadCurve2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -48,8 +53,11 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JSlider;
 import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import dbitsl.DBitsL.content;
 import util.util.MsEvBRunnable;
@@ -80,9 +88,10 @@ class Tools extends JPanel{
 		//
 		char first_b='p';
 		ImageIcon first_im=image(first_b);
-		side_w=first_im.getIconWidth()+panel_button_add;side_h=first_im.getIconHeight()+panel_button_add;
+		int w=first_im.getIconWidth();int h=first_im.getIconHeight();
+		side_w=w+panel_button_add;side_h=h+panel_button_add;
 		//
-		clrBtn=new JButton();clrBtn.setToolTipText("Color");clrBtn.setPreferredSize(new Dimension(side_w,side_h));
+		clrBtn=pushBut("Color");
 		set_bgrColor(new Color(0));
 		clrBtn.addActionListener(new ActionListener(){
 			@Override
@@ -103,7 +112,7 @@ class Tools extends JPanel{
 		});
 		add(clrBtn);
 		//eye dropper
-		JButton eyeDrp=new JButton(image('d'));eyeDrp.setToolTipText("Screen Eyedropper");eyeDrp.setPreferredSize(new Dimension(side_w,side_h));
+		JButton eyeDrp=pushButton('d',"Screen Eyedropper");
 		eyeDrp.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -113,6 +122,16 @@ class Tools extends JPanel{
 			}
 		});
 		add(eyeDrp);
+		//
+		sizeButton=pushBut("Size Value");
+		sizeButton.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				new sizeComponent();
+			}
+		});
+		sizeBut(w,h);
+		add(sizeButton);
 		//
 		ImageIcon im=image('e');
 		BufferedImage img=new BufferedImage(side_w,side_h,BufferedImage.TYPE_INT_ARGB);
@@ -134,7 +153,7 @@ class Tools extends JPanel{
 		//
 		add(new JSeparator());
 		//
-		JButton all=pushButton('a',"Select All");;
+		JButton all=pushButton('a',"Select All");
 		all.addActionListener(new AcListener(draw,new Runnable(){
 			@Override
 			public void run(){
@@ -226,7 +245,10 @@ class Tools extends JPanel{
 			@Override
 			public boolean run(MouseEvent e) {
 				Point p=origPoint(e);if(p==null)return false;
-				draw.img.setRGB(p.x,p.y,color.getRGB());
+				Graphics2D g=(Graphics2D)draw.img.getGraphics();
+				color(g);
+				g.fillRect(p.x,p.y,size,size);
+				g.dispose();
 				return true;
 			}
 		};
@@ -394,7 +416,10 @@ class Tools extends JPanel{
 	}
 	//
 	private JButton pushButton(char c,String tip){
-		JButton b=new JButton(image(c));b.setPreferredSize(new Dimension(side_w,side_h));b.setToolTipText(tip);return b;
+		JButton b=pushBut(tip);b.setIcon(image(c));return b;
+	}
+	private JButton pushBut(String tip){
+		JButton b=new JButton();b.setPreferredSize(new Dimension(side_w,side_h));b.setToolTipText(tip);return b;
 	}
 	//
 	private static JCheckBox easeB;private static JWindow easeCoords;
@@ -747,12 +772,15 @@ class Tools extends JPanel{
 	private boolean formsDefaultDraw(formsRunnable drag){return formsDraw(forms_end,drag);};
 	private boolean formsDraw(Point p,formsRunnable run){
 		BufferedImage new_img=new BufferedImage(baseImg.getColorModel(),baseImg.copyData(null),baseImg.getColorModel().isAlphaPremultiplied(),null);
-		java.awt.Graphics2D g=(Graphics2D)new_img.getGraphics();
-		g.setStroke(new BasicStroke(1));g.setColor(color);
+		Graphics2D g=(Graphics2D)new_img.getGraphics();
+		g.setStroke(new BasicStroke(size));color(g);
 		run.run(p,g);
 		g.dispose();
 		draw.img=new_img;
 		return true;
+	}
+	private void color(Graphics2D g){
+		g.setColor(color);
 	}
 	//
 	private JRadioButton curve;private Icon curveIcon;private Icon curveReset;private static Point forms_end;
@@ -915,5 +943,50 @@ class Tools extends JPanel{
 	}
 	private void selSettersOut(){
 		selB.setVisible(false);selE.setVisible(false);
+	}
+	//
+	private Integer size=1;
+	private JButton sizeButton;
+	private class sizeComponent extends JSlider implements ChangeListener{
+		private static final long serialVersionUID = 1L;
+		private static final int sz=8;
+		private sizeComponent(){
+			super(1,sz,size);
+			setMajorTickSpacing(1);//This method will also set up a label table
+			setPaintTicks(true);//By default, this property is false
+			setPaintLabels(true);//By default, this property is false
+			addChangeListener(this);
+			//
+			win=new JWindow(SwingUtilities.getWindowAncestor(sizeButton));
+			JPanel contentPane=(JPanel)win.getContentPane();
+			contentPane.add(this);
+			Point p=MouseInfo.getPointerInfo().getLocation();
+			win.setLocation(p.x,p.y);
+			win.pack();
+			win.setVisible(true);
+		}
+		private JWindow win;
+		@Override
+		public void stateChanged(ChangeEvent arg0) {
+			if(!getValueIsAdjusting()){
+				size=getValue();
+				win.dispose();
+			}
+		}
+	}
+	private void sizeBut(int w,int h){
+		BufferedImage imge=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
+		Graphics2D gr=(Graphics2D) imge.getGraphics();
+		Font f=new Font("Courier New",Font.PLAIN,20);
+		gr.setFont(f);gr.setColor(Color.BLACK);
+		String s="S";
+		FontRenderContext frc=gr.getFontRenderContext();
+		TextLayout layout = new TextLayout(s,f,frc);
+		layout.draw(gr,0,0);
+		Rectangle2D bounds = layout.getBounds();
+		int nr=(int)((h-bounds.getHeight())/2);
+		gr.drawString(s,(int)((w-bounds.getWidth())/2),nr+(int)bounds.getHeight());
+		gr.dispose();
+		sizeButton.setIcon(new ImageIcon(imge));
 	}
 }
