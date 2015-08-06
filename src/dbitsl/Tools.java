@@ -24,6 +24,7 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -62,6 +63,8 @@ import javax.swing.event.ChangeListener;
 import dbitsl.DBitsL.content;
 import util.util.MsEvBRunnable;
 import util.util.MsEvVRunnable;
+import util.util.MsMoveListener;
+import util.util.MsOutListener;
 import util.util.MsEvRunnable;
 import util.util.MsMotListener;
 import util.util.AcListener;
@@ -247,12 +250,25 @@ class Tools extends JPanel{
 				Point p=origPoint(e);if(p==null)return false;
 				Graphics2D g=(Graphics2D)draw.img.getGraphics();
 				color(g);
+				g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC));
 				g.fillRect(p.x,p.y,size,size);
 				g.dispose();
 				return true;
 			}
 		};
-		add_rBt(first_b,"Pencil",run,run).setSelected(true);
+		//
+		JRadioButton pencil=add_rBt(first_b,"Pencil",run,run);
+		pencil.addItemListener(new ItemListener(){
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if(e.getStateChange()==ItemEvent.SELECTED){draw.addMouseMotionListener(pencilMove);draw.addMouseListener(pencilOut);}
+				else{draw.removeMouseMotionListener(pencilMove);draw.removeMouseListener(pencilOut);}
+			}
+		});
+		pencilMove=new MsMoveListener(draw,new MsEvVRunnable(){@Override public void run(MouseEvent e) {pencilLoc=origPoint(e);}});
+		pencilOut=new MsOutListener(draw,new MsEvVRunnable(){@Override public void run(MouseEvent e) {pencilLoc=null;}});
+		pencil.setSelected(true);
+		//
 		add_rBt('f',"Fill",new MsEvBRunnable(){
 			@Override
 			public boolean run(MouseEvent e) {
@@ -672,21 +688,23 @@ class Tools extends JPanel{
 		//
 		int z=DBitsL.zoom_level;
 		sel.x*=z;sel.y*=z;sel.width*=z;sel.height*=z;
-		//creates a copy of the Graphics instance
-        Graphics2D g2d = (Graphics2D) g.create();
-        int phase=10;
-        //black
-        g2d.setColor(Color.BLACK);
-        g2d.setStroke(new BasicStroke(1,BasicStroke.CAP_BUTT,BasicStroke.JOIN_BEVEL,0,new float[]{phase},0));
-        g2d.drawRect(sel.x,sel.y,sel.width,sel.height);
-        //white
-        g2d.setColor(Color.WHITE);
-        g2d.setStroke(new BasicStroke(1,BasicStroke.CAP_BUTT,BasicStroke.JOIN_BEVEL,0,new float[]{phase},phase));
-        g2d.drawRect(sel.x,sel.y,sel.width,sel.height);
-        //gets rid of the copy
-        g2d.dispose();
+		marker(g,sel,Color.BLACK,Color.WHITE,10);
         //cursor
         selectionCursor.setBounds(sel);
+	}
+	private static void marker(java.awt.Graphics g,Rectangle rect,Color a,Color b,int phase){
+		//creates a copy of the Graphics instance
+        Graphics2D g2d = (Graphics2D) g.create();
+        //black
+        g2d.setColor(a);
+        g2d.setStroke(new BasicStroke(1,BasicStroke.CAP_BUTT,BasicStroke.JOIN_BEVEL,0,new float[]{phase},0));
+        g2d.drawRect(rect.x,rect.y,rect.width,rect.height);
+        //white
+        g2d.setColor(b);
+        g2d.setStroke(new BasicStroke(1,BasicStroke.CAP_BUTT,BasicStroke.JOIN_BEVEL,0,new float[]{phase},phase));
+        g2d.drawRect(rect.x,rect.y,rect.width,rect.height);
+        //gets rid of the copy
+        g2d.dispose();
 	}
 	private BufferedImage baseImg;private BufferedImage selImg;private Point selection_motion;
 	private void selMerge(){
@@ -945,7 +963,7 @@ class Tools extends JPanel{
 		selB.setVisible(false);selE.setVisible(false);
 	}
 	//
-	private Integer size=1;
+	private static Integer size=1;
 	private JButton sizeButton;
 	private class sizeComponent extends JSlider implements ChangeListener{
 		private static final long serialVersionUID = 1L;
@@ -989,4 +1007,14 @@ class Tools extends JPanel{
 		gr.dispose();
 		sizeButton.setIcon(new ImageIcon(imge));
 	}
+	//
+	private static Point pencilLoc;
+	static void pencilMarkerDraw(java.awt.Graphics g){
+		if(pencilLoc==null)return;
+		int z=DBitsL.zoom_level;
+		marker(g,new Rectangle(pencilLoc.x*z,pencilLoc.y*z,size*z,size*z),new Color(192,128,96),new Color(192/2,128/2,96/2),2);
+		pencilLoc=null;
+	}
+	private MsMoveListener pencilMove;
+	private MsOutListener pencilOut;
 }

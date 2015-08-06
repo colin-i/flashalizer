@@ -120,6 +120,7 @@ public class DBitsL {
 			g.drawImage(img,0,0,w,h,null);//img.getScaledInstance,AffineTransform
 			Tools.easeGridDraw(g);
 			Tools.selectionMarkerDraw(g);
+			Tools.pencilMarkerDraw(g);
 		}
 	}
 	static void sizedZoom(){

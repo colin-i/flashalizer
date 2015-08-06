@@ -199,4 +199,34 @@ public class util {
 		public void mouseReleased(MouseEvent e) {}
 	}
 	//
+	public static class MsMoveListener implements MouseMotionListener{
+		private MsEvVRunnable r;private Component d;
+		public MsMoveListener(Component destDraw,MsEvVRunnable Runnable){
+			d=destDraw;r=Runnable;
+		}
+		@Override
+		public void mouseDragged(MouseEvent e) {}
+		@Override
+		public void mouseMoved(MouseEvent e) {
+			r.run(e);d.repaint();
+		}
+	}
+	public static class MsOutListener implements MouseListener{
+		public MsOutListener(Component destDraw,MsEvVRunnable msEvRunnable){
+			d=destDraw;r=msEvRunnable;
+		}
+		private MsEvVRunnable r;private Component d;
+		@Override
+		public void mouseClicked(MouseEvent e) {}
+		@Override
+		public void mouseEntered(MouseEvent e) {}
+		@Override
+		public void mouseExited(MouseEvent e) {
+			r.run(e);d.repaint();
+		}
+		@Override
+		public void mousePressed(MouseEvent e) {}
+		@Override
+		public void mouseReleased(MouseEvent e) {}
+	}
 }
