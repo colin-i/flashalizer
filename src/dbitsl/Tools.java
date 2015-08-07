@@ -136,16 +136,12 @@ class Tools extends JPanel{
 		sizeBut(w,h);
 		add(sizeButton);
 		//
-		ImageIcon im=image('e');
-		BufferedImage img=new BufferedImage(side_w,side_h,BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g = img.createGraphics();g.drawImage(im.getImage(),panel_button_add/2,panel_button_add/2,null);g.dispose();
-		easeB=new JCheckBox(new ImageIcon(img));easeB.setToolTipText("Mouse Coordinates and Gridlines");
-		img=new BufferedImage(side_w,side_h,BufferedImage.TYPE_INT_ARGB);
-		g = img.createGraphics();
-		g.setColor(Color.GREEN);g.fillRect(0,0,side_w,side_h);
-		g.drawImage(im.getImage(),panel_button_add/2,panel_button_add/2,null);
-		g.dispose();
-		easeB.setSelectedIcon(new ImageIcon(img));
+		composite=checkButton('m',"Alpha Composite Overwrite");
+		add(composite);
+		//
+		add(new JSeparator());
+		//
+		easeB=checkButton('e',"Mouse Coordinates and Gridlines");
 		easeB.addActionListener(new AcListener(draw,new Runnable(){
 			@Override
 			public void run() {
@@ -250,7 +246,6 @@ class Tools extends JPanel{
 				Point p=origPoint(e);if(p==null)return false;
 				Graphics2D g=(Graphics2D)draw.img.getGraphics();
 				color(g);
-				g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC));
 				g.fillRect(p.x,p.y,size,size);
 				g.dispose();
 				return true;
@@ -798,6 +793,7 @@ class Tools extends JPanel{
 		return true;
 	}
 	private void color(Graphics2D g){
+		if(composite.isSelected())g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC));
 		g.setColor(color);
 	}
 	//
@@ -1017,4 +1013,19 @@ class Tools extends JPanel{
 	}
 	private MsMoveListener pencilMove;
 	private MsOutListener pencilOut;
+	//
+	private JCheckBox checkButton(char c,String tip){
+		ImageIcon im=image(c);
+		BufferedImage img=new BufferedImage(side_w,side_h,BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = img.createGraphics();g.drawImage(im.getImage(),panel_button_add/2,panel_button_add/2,null);g.dispose();
+		JCheckBox b=new JCheckBox(new ImageIcon(img));b.setToolTipText(tip);
+		img=new BufferedImage(side_w,side_h,BufferedImage.TYPE_INT_ARGB);
+		g = img.createGraphics();
+		g.setColor(Color.GREEN);g.fillRect(0,0,side_w,side_h);
+		g.drawImage(im.getImage(),panel_button_add/2,panel_button_add/2,null);
+		g.dispose();
+		b.setSelectedIcon(new ImageIcon(img));
+		return b;
+	}
+	private JCheckBox composite;
 }
