@@ -512,7 +512,7 @@ public class character extends JPanel implements TreeSelectionListener{
 							dbl.imagepath=pth.getText();
 						}});
 					panel.add(pth);
-					JButton b=new JButton("View");
+					JButton b=new JButton("Editor");
 					b.addActionListener(new ActionListener(){
 						@Override
 						public void actionPerformed(ActionEvent arg0) {

@@ -136,7 +136,7 @@ class Tools extends JPanel{
 		sizeBut(w,h);
 		add(sizeButton);
 		//
-		composite=checkButton('m',"Alpha Composite Overwrite");
+		composite=checkButton('m',"Color Overwrite");
 		add(composite);
 		//
 		add(new JSeparator());

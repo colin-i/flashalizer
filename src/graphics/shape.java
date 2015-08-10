@@ -124,7 +124,7 @@ class shape {
 		
 		characterData.add(panel);
 		
-		subpanel=cr.new_panel();JButton bt=new JButton("Edit");bt.addActionListener(edit);
+		subpanel=cr.new_panel();JButton bt=new JButton("Editor");bt.addActionListener(edit);
 		subpanel.add(bt);
 		characterData.add(subpanel);
 	}
