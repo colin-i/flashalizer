@@ -45,6 +45,20 @@ class text{
 			character cr=Graphics.character;
 			JPanel panel;
 			
+			panel=cr.new_panel();
+			cr.add_one_field(panel,new JLabel("VariableName"));
+			InputText var=new InputText(t.variablename);
+			var.addFocusListener(new FocusListener(){
+				@Override
+				public void focusGained(FocusEvent e){}
+				@Override
+				public void focusLost(FocusEvent e){
+					t.variablename=var.getText();
+				}
+			});
+			panel.add(var);
+			Graphics.characterData.add(panel);
+			//
 			panel=new JPanel();panel.setLayout(new BorderLayout());
 			panel.add(new JLabel("Text"),BorderLayout.WEST);
 			AreaInputText tx=new AreaInputText(t.structure.initialtext);tx.setRows(5);
@@ -61,7 +75,7 @@ class text{
 			});
 			JScrollPane sc=new JScrollPane(tx);panel.add(sc);
 			Graphics.characterData.add(panel);
-			
+			//
 			panel=cr.new_panel();
 			cr.add_one_field(panel,new JLabel("Font"));
 			InputText txt=new InputText(t.structure.font_id);

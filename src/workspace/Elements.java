@@ -61,7 +61,7 @@ public class Elements {
 	public static class Text extends element{
 		public @WidthInt int width;
 		public @HeightInt int height;
-		String variablename;
+		public String variablename;
 		public int flags;
 		public EditText structure;
 		Text(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
