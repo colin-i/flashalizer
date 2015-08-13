@@ -273,9 +273,21 @@ class Tools extends JPanel{
 				int target_color=img.getRGB(x,y);
 				int fill_color=color.getRGB();
 				if(target_color==fill_color)return false;
+				//
 				int w=img.getWidth();int h=img.getHeight();
 				boolean b[][]=new boolean[h][w];
 				List<Point>points=new ArrayList<Point>();
+				//
+				if(composite.isSelected()==false){
+					//mix 2 colors with alpha
+					Graphics2D g=(Graphics2D)img.getGraphics();
+					g.setColor(color);g.fill(new Rectangle(x,y,1,1));
+					fill_color=img.getRGB(x,y);
+					g.dispose();
+					//set back
+					img.setRGB(x,y,target_color);
+				}
+				//
 				points.add(new Point(x,y));
 				while(0<points.size()){
 					int i=points.size()-1;
