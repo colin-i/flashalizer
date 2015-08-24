@@ -35,7 +35,8 @@ public class Project{
 	private Path path;
 	boolean folder_set(String folder,boolean straight){return folder_set_base(folder,straight,false);}
 	boolean folder_set_base(String folder,boolean straight,boolean no_open){
-		try{
+		Path p=path;//when want to test if 'open' a 'folder' has a '.xml'
+		try{ 
 			path=Paths.get(folder);
 			if(Files.isDirectory(path)){
 				if(straight==false){
@@ -51,6 +52,7 @@ public class Project{
 			}
 		}catch(IOException | XMLStreamException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e){
 			e.printStackTrace();
+			path=p;
 			JOptionPane.showMessageDialog(null,"Can't create/open: "+folder,null,JOptionPane.INFORMATION_MESSAGE);
 			return false;
 		}
@@ -132,8 +134,8 @@ public class Project{
 			wr.end(c.getSimpleName());
 		}
 		private void read() throws XMLStreamException, IOException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
-			fresh_proj();
 			StaXParser rd=new StaXParser(folder_file("xml"));
+			fresh_proj();
 			rd.advance();//s w f
 				rd.advance();//Header
 					width=Long.decode(rd.data()).intValue();
