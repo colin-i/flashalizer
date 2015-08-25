@@ -386,6 +386,8 @@ public class character extends JPanel implements TreeSelectionListener{
 			
 			panel=new_panel();
 			add_field(panel,"Name",chr.name,chr);
+			add_one_field(panel,new JLabel("Export Name"));
+			panel.add(new ExportInputText(chr,node));
 			Graphics.characterData.add(panel);
 			
 			Object elem=chr.element;
@@ -613,6 +615,7 @@ public class character extends JPanel implements TreeSelectionListener{
 	}
 	void add_separator(JPanel panel){panel.add(new JSeparator(SwingConstants.VERTICAL));}
 	class InputTextField extends InputText{
+	//used here&far at frame X,Y
 		private static final long serialVersionUID = 1L;
 		Field field;Object element;
 		private InputText inp;
@@ -662,5 +665,19 @@ public class character extends JPanel implements TreeSelectionListener{
 	}
 	int color2rgba(Color c){
 		return (c.getRed()*0x100*0x100*0x100)|(c.getGreen()*0x100*0x100)|(c.getBlue()*0x100)|c.getAlpha();
+	}
+	private class ExportInputText extends InputText implements FocusListener{
+		private static final long serialVersionUID = 1L;
+		private Character item;private DefaultMutableTreeNode node;
+		private ExportInputText(Character c,DefaultMutableTreeNode n){
+			super(c.export_name);
+			addFocusListener(this);item=c;node=n;
+		}
+		@Override public void focusGained(FocusEvent arg0) {}
+		@Override public void focusLost(FocusEvent arg0) {
+			String text=getText();if(text.equals(""))text=null;
+			item.export_name=text;
+			((DefaultTreeModel)tree.getModel()).nodeChanged(node);
+		}
 	}
 }
