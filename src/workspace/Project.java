@@ -35,8 +35,9 @@ public class Project{
 	private Path path;
 	boolean folder_set(String folder,boolean straight){return folder_set_base(folder,straight,false);}
 	boolean folder_set_base(String folder,boolean straight,boolean no_open){
-		Path p=path;//when want to test if 'open' a 'folder' has a '.xml'
-		try{ 
+		Path p=path;//when want to test if 'open' a 'folder' has a valid '.xml'
+		List<Object>clone=new ArrayList<Object>(elements);
+		try{
 			path=Paths.get(folder);
 			if(Files.isDirectory(path)){
 				if(straight==false){
@@ -50,9 +51,9 @@ public class Project{
 				}
 				Files.createDirectory(path);
 			}
-		}catch(IOException | XMLStreamException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e){
+		}catch(Throwable e){
 			e.printStackTrace();
-			path=p;
+			path=p;elements=clone;
 			JOptionPane.showMessageDialog(null,"Can't create/open: "+folder,null,JOptionPane.INFORMATION_MESSAGE);
 			return false;
 		}
@@ -66,11 +67,11 @@ public class Project{
 	public List<Object> elements=new ArrayList<Object>();//data,write,read,display,build   ,new project
 	void newproj(int wd,int hg,int bcolor,int fs){
 		width=wd;height=hg;backgroundcolor=bcolor;fps=fs;
+		elements.clear();
 		fresh_proj();
 		elements.add(new Elements.ShowFrame());
 	}
 	private void fresh_proj(){
-		elements.clear();
 		WorkSpace.frame.setTitle(path.getFileName().toString()+" - "+"Flashalizer");
 	}
 	public boolean isShapeBitmap(int type){
@@ -133,9 +134,9 @@ public class Project{
 			}
 			wr.end(c.getSimpleName());
 		}
-		private void read() throws XMLStreamException, IOException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
+		private void read() throws Throwable{
 			StaXParser rd=new StaXParser(folder_file("xml"));
-			fresh_proj();
+			elements.clear();
 			rd.advance();//s w f
 				rd.advance();//Header
 					width=Long.decode(rd.data()).intValue();
@@ -146,8 +147,15 @@ public class Project{
 				rd.advance();//Elements
 					String tag;
 					while((tag=rd.advance_start())!=null)elements.add(read_base(rd,tag,Elements.class.getDeclaredClasses()));
-			//rd.advance();
 			rd.close();
+			for(int i=0;i<elements.size();i++){
+				Object ob=elements.get(i).getClass();Object x=Elements.ShowFrame.class;
+				if(ob==x){
+					fresh_proj();
+					return;
+				}
+			}
+			throw new Throwable();
 		}
 		private Object read_base(StaXParser rd,String className,Class<?>[]cs) throws XMLStreamException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
 			for(int a=0;a<cs.length;a++){
@@ -190,7 +198,7 @@ public class Project{
 			e.printStackTrace();
 		}
 	}
-	private void open() throws XMLStreamException, IOException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
+	private void open() throws Throwable{
 		xml x=new xml();x.read();
 	}
 	void build(){
