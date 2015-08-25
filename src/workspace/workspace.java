@@ -352,8 +352,9 @@ public class WorkSpace {
 		workpath=new prop("workpath",System.getProperty("user.home")+"/Desktop");
 		menu menuBar=new menu();//Image,work path
 		frame = new JFrame();
-		if(args.length==1)project.folder_set(args[0],true);//frame,work path sets path
-		else{
+		boolean tryOpen=args.length==1;
+		if(tryOpen)tryOpen=project.folder_set(args[0],true);//frame,work path sets path
+		if(tryOpen==false){
 			project.folder_set_base(workpath.get(),true,true);//work path sets path
 			project.newproj(project.width_default,project.height_default,project.backgroundcolor_default,project.fps_default);//frame,use path
 		}
