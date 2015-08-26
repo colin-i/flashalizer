@@ -47,6 +47,7 @@ public class flashalizer {
 		}
 		catch (NotFoundException | CannotCompileException | ClassNotFoundException e1) {
 			e1.printStackTrace();
+			return;
 		}
 	
 		//go to folder location(from C, open C:\...flashalizer.jar, no external files)
@@ -59,6 +60,7 @@ public class flashalizer {
 			System.setProperty("user.dir",f.getPath()+"/");
 		} catch (URISyntaxException e1) {
 			e1.printStackTrace();
+			return;
 		}
 		//to avoid static on many declarations, use this
 		WorkSpace wspace=new WorkSpace();wspace.main(args);
