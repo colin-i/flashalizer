@@ -19,6 +19,7 @@ import javax.swing.JRadioButtonMenuItem;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Desktop;
 import java.awt.Dialog;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -28,6 +29,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.prefs.Preferences;
 
@@ -219,7 +221,7 @@ public class WorkSpace {
 			private static final long serialVersionUID = 1L;
 			private proj(JMenuBar menu){
 				super("Project");
-				build();
+				build();run();
 				
 				addSeparator();
 				ButtonGroup group = new ButtonGroup();
@@ -272,6 +274,19 @@ public class WorkSpace {
 					}
 				});
 				add(build);
+			}
+			private void run(){
+				JMenuItem run=new JMenuItem("Run");
+				run.addActionListener(new ActionListener(){
+					public void actionPerformed(ActionEvent e) {
+						try {
+							Desktop.getDesktop().open(new File(project.outString()));
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}
+					}
+				});
+				add(run);
 			}
 		}
 		private class help extends JMenu{

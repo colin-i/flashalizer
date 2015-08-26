@@ -36,7 +36,6 @@ public class Project{
 	boolean folder_set(String folder,boolean straight){return folder_set_base(folder,straight,false);}
 	boolean folder_set_base(String folder,boolean straight,boolean no_open){
 		Path p=path;//when want to test if 'open' a 'folder' has a valid '.xml'
-		List<Object>clone=new ArrayList<Object>(elements);
 		try{
 			path=Paths.get(folder);
 			if(Files.isDirectory(path)){
@@ -53,7 +52,7 @@ public class Project{
 			}
 		}catch(Throwable e){
 			e.printStackTrace();
-			path=p;elements=clone;
+			path=p;
 			JOptionPane.showMessageDialog(null,"Can't create/open: "+folder,null,JOptionPane.INFORMATION_MESSAGE);
 			return false;
 		}
@@ -199,7 +198,16 @@ public class Project{
 		}
 	}
 	private void open() throws Throwable{
-		xml x=new xml();x.read();
+		xml x=new xml();
+		List<Object>clone=new ArrayList<Object>(elements);
+		int w=width;int h=height;int c=backgroundcolor;int f=fps;
+		try{
+			x.read();
+		}catch(Throwable e){
+			elements=clone;
+			width=w;height=h;backgroundcolor=c;fps=f;
+			throw e;
+		}
 	}
 	void build(){
 		builder.build();
@@ -339,8 +347,11 @@ public class Project{
 			}
 		}
 		Object[] swf_new__arguments(){
-			return new Object[]{folder_file("swf"),width,height,backgroundcolor,fps};
+			return new Object[]{outString(),width,height,backgroundcolor,fps};
 		}
+	}
+	String outString(){
+		return folder_file("swf");
 	}
 	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)@interface Errors1{}
 	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)@interface Errors2{}
