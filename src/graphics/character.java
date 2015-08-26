@@ -347,6 +347,17 @@ public class character extends JPanel implements TreeSelectionListener{
 					}
 				}
 			}));
+			
+			add_button('m',"Action",new ActionListener(){
+				public void actionPerformed(ActionEvent e) {
+					TreePath pt=tree.getSelectionPath();
+					if(pt!=null){
+						DefaultMutableTreeNode node=(DefaultMutableTreeNode)pt.getLastPathComponent();
+						Character chr=(Character)node.getUserObject();
+						if(chr.frames!=null)frame.actionWin(chr.frames[0],e);
+					}
+				}
+			});
 		}
 		private void step(DefaultTreeModel model,DefaultMutableTreeNode main,Character out){
 			for(int i=0;i<model.getChildCount(main);i++){

@@ -77,6 +77,28 @@ public class frame extends JPanel{
 		JPanel pan=new bar();
 		add(pan,BorderLayout.SOUTH);
 	}
+	static void actionWin(frame_item f,ActionEvent e){
+		JDialog dg=new JDialog(SwingUtilities.getWindowAncestor((Component)e.getSource()),"Action",JDialog.ModalityType.DOCUMENT_MODAL);
+		Container c=dg.getContentPane();
+		c.setLayout(new BoxLayout(c,BoxLayout.Y_AXIS));
+		JTextArea t=new AreaInputText(f.action);
+		int a=20;
+		t.setRows(a);t.setColumns(2*a);
+		JScrollPane s=new JScrollPane(t);
+		c.add(s);
+		JButton b=new JButton("OK");
+		b.addActionListener(new ActionListener(){
+			@Override public void actionPerformed(ActionEvent arg0) {
+				f.action=t.getText();
+				DefaultTreeModel md=(DefaultTreeModel)tree.getModel();
+				walk(md,(DefaultMutableTreeNode)md.getRoot(),f,walk_frame_update);
+				dg.dispose();
+			}}
+		);
+		c.add(b);
+		dg.pack();
+		dg.setVisible(true);
+	}
 	private class bar extends JPanel{
 		private static final long serialVersionUID = 1L;
 		private void add_button(char img,String tip,ActionListener aclst){
@@ -177,29 +199,7 @@ public class frame extends JPanel{
 			add_button('a',"Action",new ActionListener(){
 				public void actionPerformed(ActionEvent e){
 					TreePath frame=selection_frame();
-					if(frame!=null){
-						frame_item f=(frame_item)((DefaultMutableTreeNode)frame.getLastPathComponent()).getUserObject();
-						JDialog dg=new JDialog(SwingUtilities.getWindowAncestor((Component)e.getSource()),"Action",JDialog.ModalityType.DOCUMENT_MODAL);
-						Container c=dg.getContentPane();
-						c.setLayout(new BoxLayout(c,BoxLayout.Y_AXIS));
-						JTextArea t=new AreaInputText(f.action);
-						int a=20;
-						t.setRows(a);t.setColumns(2*a);
-						JScrollPane s=new JScrollPane(t);
-						c.add(s);
-						JButton b=new JButton("OK");
-						b.addActionListener(new ActionListener(){
-							@Override public void actionPerformed(ActionEvent arg0) {
-								f.action=t.getText();
-								DefaultTreeModel md=(DefaultTreeModel)tree.getModel();
-								walk(md,(DefaultMutableTreeNode)md.getRoot(),f,walk_frame_update);
-								dg.dispose();
-							}}
-						);
-						c.add(b);
-						dg.pack();
-						dg.setVisible(true);
-					}
+					if(frame!=null)actionWin((frame_item)((DefaultMutableTreeNode)frame.getLastPathComponent()).getUserObject(),e);
 				}
 			});
 		}
@@ -479,7 +479,7 @@ public class frame extends JPanel{
 	}
 	private static final int walk_delete=-1;
 	private static final int walk_frame_update=-2;
-	private boolean walk(DefaultTreeModel model,DefaultMutableTreeNode boss,Object tree_entry,int pos_new){
+	private static boolean walk(DefaultTreeModel model,DefaultMutableTreeNode boss,Object tree_entry,int pos_new){
 		int  cc=model.getChildCount(boss);
 		for( int i=0; i < cc; i++){
 			DefaultMutableTreeNode child=(DefaultMutableTreeNode)model.getChild(boss,i);
