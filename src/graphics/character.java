@@ -139,6 +139,7 @@ public class character extends JPanel implements TreeSelectionListener{
 			type=t;element=el;
 			
 			name=element.getClass().getDeclaredField(NamedId);
+			uniqueName(name,element);
 			width=getAField(element.getClass(),WidthInt.class);
 			height=getAField(element.getClass(),HeightInt.class);
 			for(type p:placeableTags){
@@ -348,7 +349,7 @@ public class character extends JPanel implements TreeSelectionListener{
 				}
 			}));
 			
-			add_button('m',"Action",new ActionListener(){
+			add_button('m',"First Frame Action",new ActionListener(){
 				public void actionPerformed(ActionEvent e) {
 					TreePath pt=tree.getSelectionPath();
 					if(pt!=null){
@@ -378,7 +379,7 @@ public class character extends JPanel implements TreeSelectionListener{
 			}
 		} 
 	}
-	private void value_changed(){
+	private void value_nexted(){
 		Container ch_data=Graphics.characterData;
 		Container disp=ch_data.getParent();
 		int component_pos=0;
@@ -396,7 +397,9 @@ public class character extends JPanel implements TreeSelectionListener{
 			JPanel panel;
 			
 			panel=new_panel();
-			add_field(panel,"Name",chr.name,chr);
+			add_one_field(panel,new JLabel("Name"));
+			try{panel.add(new NameTextField(chr.name,chr.element,node));}
+			catch (IllegalArgumentException | IllegalAccessException e) {e.printStackTrace();}
 			add_one_field(panel,new JLabel("Export Name"));
 			panel.add(new ExportInputText(chr,node));
 			Graphics.characterData.add(panel);
@@ -574,7 +577,7 @@ public class character extends JPanel implements TreeSelectionListener{
 	}
 	@Override
 	public void valueChanged(TreeSelectionEvent arg0) {
-		value_changed();
+		value_nexted();
 	}
 	private boolean loop_check(frame_item[]new_frames,frame_item[]parent_frames){
 		if(parent_frames==new_frames)return true;
@@ -618,58 +621,103 @@ public class character extends JPanel implements TreeSelectionListener{
 	}
 	private void add_field(JPanel panel,String n,Field f,Character chr){
 		add_one_field(panel,new JLabel(n));
-		try{panel.add(new InputTextField(f,chr.element));}
+		try{panel.add(new IntInputTextField(f,chr.element));}
 		catch (IllegalArgumentException | IllegalAccessException e) {e.printStackTrace();}
 	}
 	void add_one_field(JPanel panel,JComponent c){
 		add_separator(panel);panel.add(c);
 	}
 	void add_separator(JPanel panel){panel.add(new JSeparator(SwingConstants.VERTICAL));}
-	class InputTextField extends InputText{
-	//used here&far at frame X,Y
+	private class NameTextField extends InputText{
 		private static final long serialVersionUID = 1L;
-		Field field;Object element;
-		private InputText inp;
-		InputTextField(Field f,Object el) throws IllegalArgumentException, IllegalAccessException{
-			super(f.get(el));field=f;element=el;
-			inp=this;addFocusListener(new FocListener(display.component,new Runnable(){
+		private Field field;private Object element;private DefaultMutableTreeNode node;
+		private NameTextField(Field f,Object el,DefaultMutableTreeNode n) throws IllegalArgumentException, IllegalAccessException{
+			super(f.get(el));field=f;element=el;node=n;
+			addFocusListener(new FocListener(display.component,new Runnable(){
 				@Override
 				public void run() {
 					try {
-						if(field.get(element) instanceof Integer){
-							inp.focus_Lost();
-							field.set(element,(Long.decode(getText())).intValue());
-						}else/*String*/{
-							field.set(element,getText());
-							DefaultTreeModel model;
-							model=(DefaultTreeModel)tree.getModel();
-							walk(model,model.getRoot(),false);
-							model=(DefaultTreeModel)frame.tree.getModel();
-							walk(model,model.getRoot(),true);
-						}
-					}
-					catch (IllegalArgumentException | IllegalAccessException e) {e.printStackTrace();}
+						field.set(element,getText());
+						String s=uniqueName(field,element);
+						if(s != null)setText(s);
+						DefaultTreeModel model;
+						model=(DefaultTreeModel)tree.getModel();
+						model.nodeChanged(node);
+						model=(DefaultTreeModel)frame.tree.getModel();
+						walking(model,model.getRoot());
+						Graphics.frame.value_changed();//in case an instance is selected
+					} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {e.printStackTrace();}
 				}
 			}));
 		}
-		private void walk(DefaultTreeModel model,Object o,boolean isItem){
+		private void walking(DefaultTreeModel model,Object o){
 			int  cc;
 			cc = model.getChildCount(o);
 			for( int i=0; i < cc; i++) {
 				DefaultMutableTreeNode child=(DefaultMutableTreeNode)model.getChild(o,i);
 				Object obj=child.getUserObject();
 				Object el=null;
-				if(isItem==true){if(obj instanceof item)el=((item)obj).character.element;}
-				else el=((Character)obj).element;
+				if(obj instanceof item)el=((item)obj).character.element;
 				if(el!=null){
 					if(el==element){
 						model.nodeChanged(child);
 						continue;//continue,will be a loop if there is a same sub-child
 					}
 				}
-				if(!model.isLeaf(child))walk(model,child,isItem);
+				if(!model.isLeaf(child))walking(model,child);
 			}
-		} 
+		}
+	}
+
+	private String uniqueName(Field f,Object e) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException{
+		List<String>a=new ArrayList<String>();
+		DefaultTreeModel model;
+		model=(DefaultTreeModel)tree.getModel();
+		int  cc;
+		Object o=model.getRoot();
+		cc = model.getChildCount(o);
+		for( int i=0; i < cc; i++) {
+			DefaultMutableTreeNode child=(DefaultMutableTreeNode)model.getChild(o,i);
+			Object obj=child.getUserObject();
+			Object el=((Character)obj).element;
+			if(el==e)continue;
+			Field fd=el.getClass().getDeclaredField(NamedId);
+			String s=(String)fd.get(el);
+			a.add(s);
+		}
+		String s=(String) f.get(e);
+		String unique=s;int n=2;
+		for(int i=0;i<a.size();){
+			if(unique.equals(a.get(i))){
+				unique=s.concat(String.valueOf(n));n++;
+				i=0;continue;
+			}
+			i++;
+		}
+		if(!unique.equals(s)){
+			f.set(e,unique);
+			return unique;
+		}
+		return null;
+	}
+	class IntInputTextField extends InputText{
+	//used here at width,height&far at frame X,Y
+		private static final long serialVersionUID = 1L;
+		Field field;Object element;
+		private InputText inp;
+		IntInputTextField(Field f,Object el) throws IllegalArgumentException, IllegalAccessException{
+			super(f.get(el));field=f;element=el;
+			inp=this;addFocusListener(new FocListener(display.component,new Runnable(){
+				@Override
+				public void run() {
+					try {
+						inp.focus_Lost();
+						field.set(element,(Long.decode(getText())).intValue());
+					}
+					catch (IllegalArgumentException | IllegalAccessException e) {e.printStackTrace();}
+				}
+			}));
+		}
 	}
 	Color rgba2color(int color){
 		return new Color(color>>>(8+8+8),(color>>>(8+8))&0xff,(color>>>8)&0xff,color&0xff);

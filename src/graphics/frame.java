@@ -574,9 +574,9 @@ public class frame extends JPanel{
 				try {
 					JPanel xy=new JPanel();xy.setLayout(new BoxLayout(xy,BoxLayout.X_AXIS));
 					xy.add(new JLabel("X"));
-					xy.add(Graphics.character.new InputTextField(getAField(item.class,X.class),it));
+					xy.add(Graphics.character.new IntInputTextField(getAField(item.class,X.class),it));
 					xy.add(new JLabel("Y"));
-					xy.add(Graphics.character.new InputTextField(getAField(item.class,Y.class),it));
+					xy.add(Graphics.character.new IntInputTextField(getAField(item.class,Y.class),it));
 					pan.add(xy);
 				}catch (IllegalArgumentException | IllegalAccessException e) {e.printStackTrace();}
 			}
