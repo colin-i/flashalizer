@@ -46,7 +46,8 @@ public class DBitsL {
 				if(src_file.isFile()){
 					Runtime runtime = Runtime.getRuntime();
 					Process shellProcess=runtime.exec("dbl2png.exe \""+src+"\" "+dest);
-					shellProcess.waitFor();
+					int result=shellProcess.waitFor();
+					if(result!=0)System.err.println("Is zlib1.dll missing?(dbl2png.exe error)");
 					File f=new File(dest);
 					img=ImageIO.read(f);
 					Files.delete(destPat);
