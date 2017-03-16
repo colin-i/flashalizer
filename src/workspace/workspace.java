@@ -14,6 +14,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
 
 import java.awt.Color;
@@ -28,8 +29,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.prefs.Preferences;
 
@@ -160,7 +167,7 @@ public class WorkSpace {
 				JMenuItem save=new JMenuItem("Save");
 				save.addActionListener(new ActionListener(){
 					public void actionPerformed(ActionEvent e) {
-						project.save();
+						project.save_default();
 					}
 				});
 				add(save);
@@ -211,7 +218,7 @@ public class WorkSpace {
 				JMenuItem exit=new JMenuItem("Exit");
 				exit.addActionListener(new ActionListener(){
 					public void actionPerformed(ActionEvent e) {
-						System.exit(0);
+						frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
 					}
 				});
 				add(exit);
@@ -379,8 +386,31 @@ public class WorkSpace {
 		addPerspective();//frame,use path,container
 		
 		//Set up the exit.
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		frame.addWindowListener(new WindowAdapter() {
+	        @Override
+	        public void windowClosing(WindowEvent arg0) {
+	        	try {
+	        		Boolean equality=false;
+	        		File proj_file=new File(project.folder_file_default());
+	        		if(proj_file.exists()){
+	        			String temp_ext="temp";
+	        			File temp_file=new File(project.folder_file(temp_ext));
+	        			project.save(temp_ext);
+	        			equality= file_a_eq_file_b(proj_file,temp_file);
+	        			temp_file.delete();
+	        		}
+	        		if(equality==false){
+		        		int result = JOptionPane.showConfirmDialog((Component)null, "Project not saved. Exit anyway?","Confirmation", JOptionPane.YES_NO_OPTION);
+		        		if (result != 0)return;
+	        		}
+	        	} catch (IOException e) {
+					e.printStackTrace();
+				}
+	        	System.exit(0);
+	        }
+	    });
+		
 		//Add program icon
 		frame.setIconImage(img.getImage());
 		
@@ -390,5 +420,24 @@ public class WorkSpace {
 		//Display the window.
 		frame.pack();
 		frame.setVisible(true);
+	}
+	Boolean file_a_eq_file_b(File file1,File file2) throws FileNotFoundException, IOException{
+		if(file1.length() != file2.length()){
+			return false;
+		}
+		try(InputStream in1 =new BufferedInputStream(new FileInputStream(file1));
+			InputStream in2 =new BufferedInputStream(new FileInputStream(file2));
+		){
+			int value1,value2;
+			do{
+				//since we're buffered read() isn't expensive
+				value1 = in1.read();
+				value2 = in2.read();
+				if(value1 !=value2){return false;}
+			}while(value1>=0);
+			//since we already checked that the file sizes are equal
+			//if we're here we reached the end of both files without a mismatch
+			return true;
+		}
 	}
 }

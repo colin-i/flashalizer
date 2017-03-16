@@ -58,8 +58,12 @@ public class Project{
 		}
 		return true;
 	}
-	private String folder_file(String ext){
+	public String folder_file(String ext){
 		return path.toString()+'/'+path.getFileName().toString()+"."+ext;
+	}
+	private static final String proj_ext="xml";
+	public String folder_file_default(){
+		return folder_file(proj_ext);
 	}
 	int width_default=640;int height_default=480;int backgroundcolor_default=0xffFFff;int fps_default=12;
 	public int width;     public int height;     public int backgroundcolor;          int fps;
@@ -90,8 +94,8 @@ public class Project{
 		return null;
 	}
 	private class xml{
-		private void write() throws XMLStreamException, IOException, IllegalAccessException{
-			StaXWriter wr=new StaXWriter(folder_file("xml"));
+		private void write(String ext) throws XMLStreamException, IOException, IllegalAccessException{
+			StaXWriter wr=new StaXWriter(folder_file(ext));
 			String swf="SWF";
 			wr.start(swf);
 				String head="Header";
@@ -189,10 +193,11 @@ public class Project{
 			return null;
 		}
 	}
-	void save(){
+	void save_default(){save(proj_ext);}
+	void save(String ext){
 		try {
 			WorkSpace.updateElements();
-			xml x=new xml();x.write();
+			xml x=new xml();x.write(ext);
 		} catch (XMLStreamException | IOException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			e.printStackTrace();
 		}
