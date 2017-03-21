@@ -89,11 +89,11 @@ public class frame extends JPanel{
 		JButton b=new JButton("OK");
 		b.addActionListener(new ActionListener(){
 			@Override public void actionPerformed(ActionEvent arg0) {
-				boolean has=f.action_has_length();//if(pos==0)compiler error letting uninitialized
+				boolean past=f.action_has_length();//if(pos==0)compiler error letting uninitialized
 				f.action=t.getText();
 				if(f.pos==0){
 					boolean have=f.action_has_length();//t.getText().length()>0;
-					if((has&&have==false)||(has==false&&have)){
+					if((past&&have==false)||(past==false&&have)){
 						f.character.redraw();
 					}
 				}
