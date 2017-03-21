@@ -118,7 +118,7 @@ public class Graphics extends JSplitPane{
 					else elements.add(new Remove(d));
 				}
 			}
-			if(f.action.length()>0){
+			if(f.action_has_length()){
 				if(sprite!=null)elements.add(new SpriteAction(sprite,f.action));
 				else elements.add(new Action(f.action));
 			}

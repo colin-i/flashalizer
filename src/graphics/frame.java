@@ -89,7 +89,14 @@ public class frame extends JPanel{
 		JButton b=new JButton("OK");
 		b.addActionListener(new ActionListener(){
 			@Override public void actionPerformed(ActionEvent arg0) {
+				boolean has=f.action_has_length();//if(pos==0)compiler error letting uninitialized
 				f.action=t.getText();
+				if(f.pos==0){
+					boolean have=f.action_has_length();//t.getText().length()>0;
+					if((has&&have==false)||(has==false&&have)){
+						f.character.redraw();
+					}
+				}
 				DefaultTreeModel md=(DefaultTreeModel)tree.getModel();
 				walk(md,(DefaultMutableTreeNode)md.getRoot(),f,walk_frame_update);
 				dg.dispose();
@@ -275,6 +282,8 @@ public class frame extends JPanel{
 		item[]elements;
 		item[]eshow;
 		String action;
+		Character character;
+		
 		private int pos;
 		private frame_item(item[]e,String a,int p){
 			elements=e;action=a;pos=p;
@@ -283,10 +292,11 @@ public class frame extends JPanel{
 			elements=new item[0];eshow=new item[0];action="";pos=p;
 		}
 		private void setPos(int p){pos=p;}
+		boolean action_has_length(){return action.length()!=0;}
 		@Override
 		public String toString(){
 			String value="Frame"+pos;
-			if(action.length()!=0)value+=" +Action";
+			if(action_has_length())value+=" +Action";
 			return value;
 		}
 	}

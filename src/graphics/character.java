@@ -113,21 +113,38 @@ public class character extends JPanel implements TreeSelectionListener{
 			name=n;letter=l;
 			icon=new ImageIcon("img/char/"+letter+".gif");
 			icon_exp=image_border(icon);
+			if(name.equals(spritedone)){
+				icon_a=image_char(icon);//new ImageIcon("img/char/"+letter+"0.gif") invisible sometimes
+				icon_exp_a=image_border(icon_a);
+			}
 		}
 		private type(String n,char l,String s){
 			this(n,l);screenName=s;
 		}
-	}
-	static ImageIcon image_border(ImageIcon icon){
-		Image image=icon.getImage();
-		BufferedImage bi=new BufferedImage(icon.getIconWidth(),icon.getIconHeight(),BufferedImage.TYPE_INT_RGB);
-		Graphics2D g = bi.createGraphics();
-		g.setColor(Color.BLUE);
-		g.drawImage(image,0,0,null);
-		g.setStroke(new BasicStroke(1));
-		g.drawRect(0,0,bi.getWidth()-1,bi.getHeight()-1);
-		g.dispose();
-		return new ImageIcon(bi);
+		private ImageIcon icon_a;private ImageIcon icon_exp_a;
+		//private void type_a(){icon_a=new ImageIcon("img/char/"+letter+"0.gif");icon_exp_a=image_border(icon_a);}
+		private ImageIcon image_border(ImageIcon icon){
+			Image image=icon.getImage();
+			BufferedImage bi=new BufferedImage(icon.getIconWidth(),icon.getIconHeight(),BufferedImage.TYPE_INT_RGB);
+			Graphics2D g = bi.createGraphics();
+			g.drawImage(image,0,0,null);
+			g.setColor(Color.BLUE);
+			g.setStroke(new BasicStroke(1));
+			g.drawRect(0,0,bi.getWidth()-1,bi.getHeight()-1);
+			g.dispose();
+			return new ImageIcon(bi);
+		}
+		private ImageIcon image_char(ImageIcon icon){
+			Image image=icon.getImage();
+			BufferedImage bi=new BufferedImage(icon.getIconWidth(),icon.getIconHeight(),BufferedImage.TYPE_INT_RGB);
+			Graphics2D g = bi.createGraphics();
+			g.drawImage(image,0,0,null);
+			g.setColor(Color.BLUE);
+			g.setStroke(new BasicStroke(1));
+			g.drawChars(new char[]{'0'}, 0, 1,7,bi.getHeight()-10);//is drawing from bottom
+			g.dispose();
+			return new ImageIcon(bi);
+		}
 	}
 	private class Character_pre{//using Character and Character_pre for not adding initialize() at every constructor
 		type type;
@@ -135,6 +152,7 @@ public class character extends JPanel implements TreeSelectionListener{
 		Field name;Field width;Field height;
 		boolean isPlaceable;//Default Value false
 		frame_item[]frames;
+		protected DefaultMutableTreeNode node=new DefaultMutableTreeNode(this);
 		private Character_pre(type t,Object el) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException{
 			type=t;element=el;
 			
@@ -152,6 +170,7 @@ public class character extends JPanel implements TreeSelectionListener{
 							Field b=frame.getSpriteField(spritedone);
 							frames=Graphics.frame.sprite_frames((String)b.get(element));
 						}
+						frames[0].character=(Character)this;
 					}
 					break;
 				}
@@ -173,8 +192,7 @@ public class character extends JPanel implements TreeSelectionListener{
 					}
 				}
 			}
-			DefaultMutableTreeNode n=new DefaultMutableTreeNode(this);
-			model.insertNodeInto(n,root,position);
+			model.insertNodeInto(node,root,position);
 			//~!@ this is dirty trick when deleting all the nodes and user add one new node but nothing on; the root is unexpanded
 			tree.setRootVisible(true);
 			tree.expandRow(0);
@@ -185,12 +203,13 @@ public class character extends JPanel implements TreeSelectionListener{
 	class Character extends Character_pre{
 		String export_name;
 		private Character(type t,Object el,Map<String,String>exp) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException{
-			super(t,el);
+			super(t,el);//this(t,el);
 			export_name=exp.get((String)name.get(element));
 		}
 		private Character(type t,Object el) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException{
-			super(t,el);
+			super(t,el);//if(type.name.equals(spritedone))frames[0].character=this;
 		}
+		void redraw(){((DefaultTreeModel)(tree.getModel())).nodeChanged(node);}
 		@Override
 		public String toString(){
 			try {return (String) name.get(element);}
@@ -218,7 +237,8 @@ public class character extends JPanel implements TreeSelectionListener{
 	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)public @interface HeightInt{}
 	private type Types[];
 	private type[]usedInImportantTags={new type(font,'f'),new type(dbl,'i',"Image")};
-	private type placeableTags[]={new type(button,'b'),new type(text,'t'),new type(shape,'s')/*,new type(image,'i')*/,new type(spritedone,'m',"Movie")};
+	//private type type_sprite=;
+	private type placeableTags[]={new type(button,'b'),new type(text,'t'),new type(shape,'s'),new type(spritedone,'m',"Movie")};
 	static Character placeableCharacter(String name){
 		int n=root.getChildCount();
 		for(int i=0;i<n;i++){
@@ -271,8 +291,15 @@ public class character extends JPanel implements TreeSelectionListener{
 			if(v != null){//getting null for some data
 				for(int i=0;i<Types.length;i++){
 					if(Types[i].letter==v.type.letter){
-						if(v.export_name!=null)setIcon(Types[i].icon_exp);
-						else setIcon(Types[i].icon);
+						ImageIcon im;
+						if(v.frames!=null&&v.frames[0].action_has_length()){
+							if(v.export_name!=null)im=Types[i].icon_exp_a;
+							else im=Types[i].icon_a;
+						}else{
+							if(v.export_name!=null)im=Types[i].icon_exp;
+							else im=Types[i].icon;
+						}
+						setIcon(im);
 						break;
 					}
 				}
