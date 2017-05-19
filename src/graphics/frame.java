@@ -7,6 +7,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -21,12 +23,14 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTextArea;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
@@ -82,8 +86,8 @@ public class frame extends JPanel{
 		Container c=dg.getContentPane();
 		c.setLayout(new BoxLayout(c,BoxLayout.Y_AXIS));
 		JTextArea t=new AreaInputText(f.action);
-		int a=20;
-		t.setRows(a);t.setColumns(2*a);
+		int a=40;
+		t.setRows(a);t.setColumns(a);
 		JScrollPane s=new JScrollPane(t);
 		c.add(s);
 		JButton b=new JButton("OK");
@@ -102,6 +106,17 @@ public class frame extends JPanel{
 				dg.dispose();
 			}}
 		);
+		dg.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		dg.addWindowListener(new WindowAdapter() 
+		{
+			public void windowClosing(WindowEvent ev) {
+				if(f.action.equals(t.getText())==false){
+					int result = JOptionPane.showConfirmDialog((Component)null, "Discard changes and close?","Confirmation", JOptionPane.YES_NO_OPTION);
+	        		if (result != 0)return;
+				}
+				dg.dispose();
+			}
+		});
 		c.add(b);
 		dg.pack();
 		dg.setVisible(true);
