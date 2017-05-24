@@ -2,6 +2,7 @@ package workspace;
 
 import graphics.frame.SpriteId;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -240,6 +241,11 @@ public class Project{
 			try{
 				WorkSpace.updateElements();
 				ids=new HashMap<String, Integer>();ids_sprite=new HashMap<String, Integer>();
+				//we have unidentified access violation and have to implement this
+				String rec_ext="recover";
+    			File rec_file=new File(folder_file(rec_ext));
+    			save(rec_ext);
+    			//
 				caller("swf_new",swf_new__arguments());
 				for(int a=0;a<elements.size();a++){
 					Object element=elements.get(a);
@@ -324,6 +330,8 @@ public class Project{
 					}
 				}
 				caller("swf_done",null);
+				//
+				rec_file.delete();
 			} catch (Throwable e) {
 				e.printStackTrace();
 				if(e instanceof ThrowAndStop)prv.abort();

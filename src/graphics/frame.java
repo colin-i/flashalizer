@@ -95,10 +95,12 @@ public class frame extends JPanel{
 			@Override public void actionPerformed(ActionEvent arg0) {
 				boolean past=f.action_has_length();//if(pos==0)compiler error letting uninitialized
 				f.action=t.getText();
-				if(f.pos==0){
-					boolean have=f.action_has_length();//t.getText().length()>0;
-					if((past&&have==false)||(past==false&&have)){
-						f.character.redraw();
+				if(f.character!=null){
+					if(f.pos==0){
+						boolean have=f.action_has_length();//t.getText().length()>0;
+						if((past&&have==false)||(past==false&&have)){
+							f.character.redraw();
+						}
 					}
 				}
 				DefaultTreeModel md=(DefaultTreeModel)tree.getModel();
