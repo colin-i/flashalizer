@@ -5,6 +5,8 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Insets;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -84,12 +86,11 @@ public class frame extends JPanel{
 	static void actionWin(frame_item f,ActionEvent e){
 		JDialog dg=new JDialog(SwingUtilities.getWindowAncestor((Component)e.getSource()),"Action",JDialog.ModalityType.DOCUMENT_MODAL);
 		Container c=dg.getContentPane();
-		c.setLayout(new BoxLayout(c,BoxLayout.Y_AXIS));
+		c.setLayout(new BorderLayout());//(new BoxLayout(c,BoxLayout.Y_AXIS));
 		JTextArea t=new AreaInputText(f.action);
 		int a=40;
-		t.setRows(a);t.setColumns(a);
+		t.setRows(a);t.setColumns(a*2);
 		JScrollPane s=new JScrollPane(t);
-		c.add(s);
 		JButton b=new JButton("OK");
 		b.addActionListener(new ActionListener(){
 			@Override public void actionPerformed(ActionEvent arg0) {
@@ -106,8 +107,18 @@ public class frame extends JPanel{
 				DefaultTreeModel md=(DefaultTreeModel)tree.getModel();
 				walk(md,(DefaultMutableTreeNode)md.getRoot(),f,walk_frame_update);
 				dg.dispose();
-			}}
-		);
+			}
+		});
+		JButton max=new JButton("Maximize");
+		max.addActionListener(new ActionListener(){
+			@Override public void actionPerformed(ActionEvent arg0){
+			    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+			    Insets bounds = Toolkit.getDefaultToolkit().getScreenInsets(dg.getGraphicsConfiguration());
+			    int w=(int)(screenSize.getWidth() - bounds.left - bounds.right);
+			    int h=(int)(screenSize.getHeight() - bounds.top - bounds.bottom);
+			    dg.setBounds(0,0,w,h);
+			}
+		});
 		dg.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		dg.addWindowListener(new WindowAdapter() 
 		{
@@ -119,7 +130,10 @@ public class frame extends JPanel{
 				dg.dispose();
 			}
 		});
-		c.add(b);
+		JPanel bottom=new JPanel(new FlowLayout());
+		bottom.add(b);bottom.add(max);
+		c.add(s,BorderLayout.CENTER);
+		c.add(bottom,BorderLayout.SOUTH);
 		dg.pack();
 		dg.setVisible(true);
 	}
