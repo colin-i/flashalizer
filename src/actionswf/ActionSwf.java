@@ -97,12 +97,19 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 	//const FontFlagsHasLayout=0x80     not implemented
 	
 	class ButtonData extends Structure{//the object is passed through com.sun.jna.Library, Structure is required,+public(throwing error otherwise)
+		public ButtonData(){
+			//super();
+			setAlignType(ALIGN_NONE);//without this pack(1) aligning(in dll) will make diferences after ycurve
+		}
 		public int def_fill;
 		public int def_line_sz;
 		public int def_line;
 		public int ov_fill;
 		public int ov_line_sz;
 		public int ov_line;
+		public int dn_fill;
+		public int dn_line_sz;
+		public int dn_line;
 		public int xcurve;
 		public int ycurve;
 		public String text;

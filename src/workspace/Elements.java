@@ -33,6 +33,9 @@ public class Elements {
 			public int ov_fill;
 			public int ov_line_sz;
 			public int ov_line;
+			public int dn_fill;
+			public int dn_line_sz;
+			public int dn_line;
 			public int xcurve;
 			public int ycurve;
 			public String text;
@@ -43,7 +46,8 @@ public class Elements {
 			public String actions;
 			ButtonData(Object[]v) throws IllegalArgumentException, IllegalAccessException{element.Element(v,this);}
 			ButtonData(){
-				def_fill=0xFF;/*def_line_sz=0;*/def_line=0xFF;ov_fill=0xFF;/*ov_line_sz=0;*/ov_line=0xFF;/*xcurve=0;ycurve=0;*/
+				def_fill=0xFF;/*def_line_sz=0;*/def_line=0xFF;ov_fill=0xFF;/*ov_line_sz=0;*/ov_line=0xFF;dn_fill=0xFF;/*dn_line_sz=0;*/dn_line=0xFF;
+				/*xcurve=0;ycurve=0;*/
 				text="";font_id="";/*font_height=0;font_vertical_offset=0;*/font_color=0xFF;
 				actions="";
 			}

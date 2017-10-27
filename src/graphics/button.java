@@ -42,6 +42,12 @@ class button {
 		line(new ButtonInputText(data.ov_line_sz,new button_Runnable_int(){@Override public void run(int val){data.ov_line_sz=val;}}),
 			color_chooser(data.ov_line,new button_Runnable_int(){@Override public void run(int c){data.ov_line=c;}}));
 		panel.add(subpanel);
+		subpanel=cr.new_panel();
+		subpanel.setBorder(BorderFactory.createTitledBorder("Down"));
+		subpanel.add(color_chooser(data.dn_fill,new button_Runnable_int(){@Override public void run(int c){data.dn_fill=c;}}));
+		line(new ButtonInputText(data.dn_line_sz,new button_Runnable_int(){@Override public void run(int val){data.dn_line_sz=val;}}),
+			color_chooser(data.dn_line,new button_Runnable_int(){@Override public void run(int c){data.dn_line=c;}}));
+		panel.add(subpanel);
 		characterData.add(panel);
 		
 		panel=cr.new_panel();
