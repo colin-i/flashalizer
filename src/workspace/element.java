@@ -12,7 +12,8 @@ public class element{
 		Element(x,this);
 	}
 	static void Element(Object[]v,Object c) throws IllegalArgumentException, IllegalAccessException{
-		Field[]f=c.getClass().getDeclaredFields();for(int i=0;i<f.length;i++)f[i].set(c,v[i]);
+		Field[]f=c.getClass().getDeclaredFields();
+		for(int i=0;i<f.length;i++)f[i].set(c,v[i]);
 	}
 	@Target({ElementType.PARAMETER,ElementType.FIELD})
 	@Retention(RetentionPolicy.RUNTIME)

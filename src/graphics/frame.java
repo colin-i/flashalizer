@@ -1,6 +1,7 @@
 package graphics;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -23,6 +24,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -34,6 +36,7 @@ import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
@@ -52,6 +55,7 @@ import static workspace.Project.spriteremove;
 import static workspace.Project.action;
 import static workspace.Project.actionsprite;
 import graphics.character.Character;
+
 import static graphics.Graphics.panel_button_add;
 import static graphics.character.getAField;
 import util.util.TreeSelListener;
@@ -73,6 +77,7 @@ public class frame extends JPanel{
 		frames=get_frames(ctag_root,null);
 		noding(top,frames);
 		tree=new JTree(top);
+		tree.setCellRenderer(new renderer());
 		tree.setRootVisible(false);
 		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		tree.addTreeSelectionListener(new TreeSelListener(display.component,new Runnable(){
@@ -278,6 +283,7 @@ public class frame extends JPanel{
 		private Field depth;
 		private Field x;
 		private Field y;
+		private Field exclude;
 		private ControlTag(String n){
 			name=n;
 			ref=getRefField(name);
@@ -286,6 +292,7 @@ public class frame extends JPanel{
 			depth=getDepthField(name);
 			x=getXField(name);
 			y=getYField(name);
+			exclude=getExcludeField(name);
 		}
 	}
 	private static final int ctag_root=0;private static final int ctag_sprite=1;
@@ -300,9 +307,10 @@ public class frame extends JPanel{
 	}
 	class item{
 		Character character;int depth;Integer remove;//remove=null or integer
+		boolean exclude;
 		@X int x;@Y int y;
-		item(Character c,int object,int x,int y){
-			character=c;depth=object;this.x=x;this.y=y;
+		item(Character c,int object,int x,int y,boolean b){
+			character=c;depth=object;this.x=x;this.y=y;exclude=b;
 		}
 		@Override
 		public String toString(){
@@ -459,12 +467,13 @@ public class frame extends JPanel{
 							String name=(String)t.ref.get(el);
 							Character c=character.placeableCharacter(name);
 							if(c!=null){
-								int x;int y;
-								if(n.equals(placement)){x=0;y=0;}
+								int x;int y;boolean excl;
+								if(n.equals(placement)){x=0;y=0;excl=false;}
 								else/*(n.equals(placement coordinates))*/{
 									x=(int) t.x.get(el);y=(int) t.y.get(el);
+									excl=(boolean)t.exclude.get(el);
 								}
-								items.add(new item(c,(int)t.depth.get(el),x,y));
+								items.add(new item(c,(int)t.depth.get(el),x,y,excl));
 							}
 						}
 					}
@@ -693,5 +702,26 @@ public class frame extends JPanel{
 	public @interface YInt{}
 	private Field getYField(String elem){
 		return character.getField(elem,YInt.class);
+	}
+	@Target(ElementType.FIELD)
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface EBool{}
+	private Field getExcludeField(String elem){
+		return character.getField(elem,EBool.class);
+	}
+	
+	private class renderer extends DefaultTreeCellRenderer{
+		private static final long serialVersionUID = 1L;
+		@Override
+		public JComponent getTreeCellRendererComponent(JTree tree,Object value,boolean sel,boolean expanded,boolean leaf,int row,boolean hasFocus) {
+			super.getTreeCellRendererComponent(tree,value,sel,expanded,leaf,row,hasFocus);
+			Object v=((DefaultMutableTreeNode) value).getUserObject();
+			if(v != null){//getting null at a simple debugger start
+				if(v instanceof item){
+					if(((item)v).exclude)setForeground(new Color(255,0,0));
+				}
+			}
+			return this;
+		}
 	}
 }

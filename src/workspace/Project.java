@@ -124,9 +124,12 @@ public class Project{
 			wr.end(swf);
 			wr.close();
 		}
+		private static final String exclude_xml="exclude";
 		private void write_base(StaXWriter wr,Object obj) throws XMLStreamException,IllegalAccessException{
 			Class<?>c=obj.getClass();
-			wr.start(c.getSimpleName());
+			String nm=c.getSimpleName();
+			if(obj instanceof elementplus)wr.start_attr(nm,exclude_xml,Boolean.toString(((elementplus)obj).exclude));
+			else wr.start(nm);
 			Field[]fields=c.getDeclaredFields();
 			for(int y=0;y<fields.length;y++){
 				Field fld=fields[y];
@@ -166,6 +169,10 @@ public class Project{
 				String simpleName=cs[a].getSimpleName();
 				if(simpleName.equals(className)){
 					Class<?>c=cs[a];
+					//
+					String exclstr=null;
+					if(c.getSuperclass().getSimpleName().equals(elementplus.class.getSimpleName()))exclstr=rd.get_attr(exclude_xml);
+					//
 					List<Object>values=new ArrayList<Object>();
 					Field[]fields=c.getDeclaredFields();
 					for(int z=0;z<fields.length;z++){
@@ -188,7 +195,9 @@ public class Project{
 					
 					//last reader advance
 					rd.advance();
-					return runtime_instance(c,values);
+					Object ob=runtime_instance(c,values);
+					if(exclstr!=null)((elementplus)ob).exclude=Boolean.parseBoolean(exclstr);
+					return ob;
 				}
 			}
 			return null;
@@ -249,24 +258,25 @@ public class Project{
 				caller("swf_new",swf_new__arguments());
 				for(int a=0;a<elements.size();a++){
 					Object element=elements.get(a);
-					String el_type=element.getClass().getSimpleName();
+					if(element instanceof elementplus&&((elementplus)element).exclude)continue;
+					Class<?>clas=element.getClass();
+					String el_type=clas.getSimpleName();
 					Class<?>[]el_types=Elements.class.getDeclaredClasses();
 					for(int x=0;x<el_types.length;x++){
 						Class<?>c=el_types[x];
-						function f = null;
 						if(el_type.equals(c.getSimpleName())){
-							List<Object>values=new ArrayList<Object>();
-							Field[]fields=c.getDeclaredFields();
 							String f_name=elements_names_convertor(el_type,null);
 							for(int z=0;z<Functions.f_list.size();z++){
-								f=Functions.f_list.get(z);
-								if(f_name.equals(f.name)){
-									for(int y=0;y<f.number_of_args;y++){
+								function fn=Functions.f_list.get(z);
+								if(f_name.equals(fn.name)){
+									List<Object>values=new ArrayList<Object>();
+									Field[]fields=c.getDeclaredFields();
+									for(int y=0;y<fn.number_of_args;y++){
 										Field fld=fields[y];
 										Object val=fld.get(element);
-										if(f.args_isNamed.get(y)==true)val=ids_get_ex((String)val,fld.isAnnotationPresent(SpriteId.class));
+										if(fn.args_isNamed.get(y)==true)val=ids_get_ex((String)val,fld.isAnnotationPresent(SpriteId.class));
 										else{
-											String tp=f.args_types.get(y);
+											String tp=fn.args_types.get(y);
 											if(tp.equals(Functions.ButtonData)||tp.equals(Functions.EditText)){
 												Object newobj;
 												if(tp.equals(Functions.ButtonData))newobj=new ActionSwf.ButtonData();
@@ -287,6 +297,7 @@ public class Project{
 																	@SuppressWarnings("unchecked")Class<? extends Annotation>cls=(Class<? extends Annotation>)cs;
 																	if(vals[n].isAnnotationPresent(cls)){
 																		if(cls==Errors1.class){
+																			//it is required to declare a font and enter the id for the text
 																			if((((Elements.Text)element).flags&HasText)==0)isError=false;
 																		}
 																		else/*Errors2.class*/{
@@ -314,16 +325,16 @@ public class Project{
 										}
 										values.add(val);
 									}
+									Object[]vals=values.toArray();
+									Object result=caller(elements_names_convertor(el_type,null),vals);
+									if(Functions.hasReturn(fn)){
+										Map<String, Integer>map;
+										if(f_name.equals("swf_sprite_new"))map=ids_sprite;
+										else map=ids;
+										map.put((String)c.getDeclaredField(NamedId).get(element),(Integer)result);
+									}
 									break;
 								}
-							}
-							Object[]vals=values.toArray();
-							Object result=caller(elements_names_convertor(el_type,null),vals);
-							if(Functions.hasReturn(f)){
-								Map<String, Integer>map;
-								if(f_name.equals("swf_sprite_new"))map=ids_sprite;
-								else map=ids;
-								map.put((String)c.getDeclaredField(NamedId).get(element),(Integer)result);
 							}
 							break;
 						}

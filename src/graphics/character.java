@@ -231,6 +231,10 @@ public class character extends JPanel implements TreeSelectionListener{
 		for(Field fd:flds){
 			if(fd.isAnnotationPresent(annotationClass))return fd;
 		}
+		flds=c.getSuperclass().getDeclaredFields();//for exclude field at elementplus
+		for(Field fd:flds){
+			if(fd.isAnnotationPresent(annotationClass))return fd;
+		}
 		return null;
 	}
 	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)public @interface WidthInt{}
@@ -300,6 +304,7 @@ public class character extends JPanel implements TreeSelectionListener{
 							else im=Types[i].icon;
 						}
 						setIcon(im);
+						//setForeground(new Color(0, 0,255));
 						break;
 					}
 				}
@@ -406,6 +411,7 @@ public class character extends JPanel implements TreeSelectionListener{
 			}
 		} 
 	}
+	private boolean place_exclude;private JButton place_ruler;
 	private void value_nexted(){
 		Container ch_data=Graphics.characterData;
 		Container disp=ch_data.getParent();
@@ -438,105 +444,117 @@ public class character extends JPanel implements TreeSelectionListener{
 					add_field(panel,"Width",chr.width,chr);
 					add_field(panel,"Height",chr.height,chr);
 				}
-				JButton b=new JButton("Place");
-				b.addActionListener(new AcListener(display.component,new Runnable(){
-					@Override
-					public void run(){
-						JTree t=frame.tree;
-						DefaultTreeModel model;
-						model=(DefaultTreeModel)t.getModel();
-						frame fr=Graphics.frame;
+				Runnable r1=new Runnable(){
+				@Override
+				public void run(){
+					JTree t=frame.tree;
+					DefaultTreeModel model;
+					model=(DefaultTreeModel)t.getModel();
+					frame fr=Graphics.frame;
 						
-						//frame to add the object
-						TreePath pt=fr.selection_frame();
-						DefaultMutableTreeNode p=fr.current_top();
-						int pos=0;
-						if(pt!=null){
-							DefaultMutableTreeNode frame_node=(DefaultMutableTreeNode)pt.getLastPathComponent();
-							for(;pos<p.getChildCount();pos++)if(p.getChildAt(pos)==frame_node)break;
-						}
-						DefaultMutableTreeNode f_root=(DefaultMutableTreeNode)model.getRoot();
-						frame_item[]frms=frame.get_frame_items(p);
+					//frame to add the object
+					TreePath pt=fr.selection_frame();
+					DefaultMutableTreeNode p=fr.current_top();
+					int pos=0;
+					if(pt!=null){
+						DefaultMutableTreeNode frame_node=(DefaultMutableTreeNode)pt.getLastPathComponent();
+						for(;pos<p.getChildCount();pos++)if(p.getChildAt(pos)==frame_node)break;
+					}
+					DefaultMutableTreeNode f_root=(DefaultMutableTreeNode)model.getRoot();
+					frame_item[]frms=frame.get_frame_items(p);
 						
-						//initial sprite in sprite infinite loop verification
-						if(chr.frames!=null){
-							if(p!=f_root){
-								if(loop_check(chr.frames,frms)){
-									Cursor initial_cursor=b.getCursor();
-									b.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(new ImageIcon("img/no.png").getImage(),new Point(),null));
-									ActionListener taskPerformer = new ActionListener() {
-										public void actionPerformed(ActionEvent evt) {
-											b.setCursor(initial_cursor);
-										}
-									};
-									new javax.swing.Timer(1000,taskPerformer).start();
-									return;
-								}
+					//initial sprite in sprite infinite loop verification
+					if(chr.frames!=null){
+						if(p!=f_root){
+							if(loop_check(chr.frames,frms)){
+								Cursor initial_cursor=place_ruler.getCursor();
+								place_ruler.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(new ImageIcon("img/no.png").getImage(),new Point(),null));
+								ActionListener taskPerformer = new ActionListener() {
+									public void actionPerformed(ActionEvent evt) {
+										place_ruler.setCursor(initial_cursor);
+									}
+								};
+								new javax.swing.Timer(1000,taskPerformer).start();
+								return;
 							}
 						}
+					}
 						
-						//add the placement
-						int new_pos=fr.get_max_depth(p)+1;
-						List<item>x=new ArrayList<item>();
-						for(item it:frms[pos].elements)x.add(it);
-						item it=fr.new item(chr,new_pos,0,0);
-						x.add(it);
-						frms[pos].elements=x.toArray(new item[x.size()]);
-						fr.build_eshow(frms);
+					//add the placement
+					int new_pos=fr.get_max_depth(p)+1;
+					List<item>x=new ArrayList<item>();
+					for(item it:frms[pos].elements)x.add(it);
+					item it=fr.new item(chr,new_pos,0,0,place_exclude);
+					x.add(it);
+					frms[pos].elements=x.toArray(new item[x.size()]);
+					fr.build_eshow(frms);
 						
-						//sort rule
-						if(chr.frames!=null){
-							if(p!=f_root){
-								
-								//a,b,c b;a c,b,c b;c b,a c,b;b,c b,a c (of course and b)
-								DefaultTreeModel md=(DefaultTreeModel) tree.getModel();
-								//this is also the small web format rule, will have "symbol (B) not defined" : example: Sprite A , this is Sprite B placed in Sprite A; sort for the ordered build time: Sprite B,Sprite A
-								List<Character>chars_unsorted=new ArrayList<Character>();//get movies from list
-								List<DefaultMutableTreeNode>chars_sorted=new ArrayList<DefaultMutableTreeNode>();//keep nodes
-								for(int i=0;i<root.getChildCount();i++){
-									DefaultMutableTreeNode n=(DefaultMutableTreeNode) root.getChildAt(i);
-									Character c=(Character)n.getUserObject();
-									if(c.frames!=null){
-										chars_unsorted.add(c);
-										chars_sorted.add(n);
-										md.removeNodeFromParent(n);
-									}
+					//sort rule
+					if(chr.frames!=null){
+						if(p!=f_root){
+							//a,b,c b;a c,b,c b;c b,a c,b;b,c b,a c (of course and b)
+							DefaultTreeModel md=(DefaultTreeModel) tree.getModel();
+							//this is also the small web format rule, will have "symbol (B) not defined" : example: Sprite A , this is Sprite B placed in Sprite A; sort for the ordered build time: Sprite B,Sprite A
+							List<Character>chars_unsorted=new ArrayList<Character>();//get movies from list
+							List<DefaultMutableTreeNode>chars_sorted=new ArrayList<DefaultMutableTreeNode>();//keep nodes
+							for(int i=0;i<root.getChildCount();i++){
+								DefaultMutableTreeNode n=(DefaultMutableTreeNode) root.getChildAt(i);
+								Character c=(Character)n.getUserObject();
+								if(c.frames!=null){
+									chars_unsorted.add(c);
+									chars_sorted.add(n);
+									md.removeNodeFromParent(n);
 								}
-								for(int i=0;i<chars_unsorted.size();i++){
-									Character unsorted_char=chars_unsorted.get(i);//every unsorted
-									int sorted_pos=0;
-									for(;sorted_pos<chars_sorted.size();sorted_pos++){//current sorted position
-										Character sorted_char=(Character)((DefaultMutableTreeNode)chars_sorted.get(sorted_pos)).getUserObject();
-										if(sorted_char==unsorted_char)break;
-									}
-									for(frame_item f:unsorted_char.frames){
-										for(item itm:f.elements){
-											if(itm.character.frames!=null){//all inner movies
-												int current_pos=sorted_pos+1;//not including the sorted position, forward
-												for(;current_pos<chars_sorted.size();current_pos++){
-													DefaultMutableTreeNode nod=(DefaultMutableTreeNode)chars_sorted.get(current_pos);
-													Character char_s=(Character)nod.getUserObject();
-													if(char_s==chr){//is placed wrong
-														chars_sorted.remove(current_pos);
-														chars_sorted.add(sorted_pos,nod);//in place of the sorted position
-														sorted_pos++;//advance the sorted position
-														break;
-													}
+							}
+							for(int i=0;i<chars_unsorted.size();i++){
+								Character unsorted_char=chars_unsorted.get(i);//every unsorted
+								int sorted_pos=0;
+								for(;sorted_pos<chars_sorted.size();sorted_pos++){//current sorted position
+									Character sorted_char=(Character)((DefaultMutableTreeNode)chars_sorted.get(sorted_pos)).getUserObject();
+									if(sorted_char==unsorted_char)break;
+								}
+								for(frame_item f:unsorted_char.frames){
+									for(item itm:f.elements){
+										if(itm.character.frames!=null){//all inner movies
+											int current_pos=sorted_pos+1;//not including the sorted position, forward
+											for(;current_pos<chars_sorted.size();current_pos++){
+												DefaultMutableTreeNode nod=(DefaultMutableTreeNode)chars_sorted.get(current_pos);
+												Character char_s=(Character)nod.getUserObject();
+												if(char_s==chr){//is placed wrong
+													chars_sorted.remove(current_pos);
+													chars_sorted.add(sorted_pos,nod);//in place of the sorted position
+													sorted_pos++;//advance the sorted position
+													break;
 												}
 											}
 										}
 									}
 								}
-								for(int i=0;i<chars_sorted.size();i++)md.insertNodeInto(chars_sorted.get(i),root,root.getChildCount());
-								
 							}
+							for(int i=0;i<chars_sorted.size();i++)md.insertNodeInto(chars_sorted.get(i),root,root.getChildCount());
 						}
+					}
 						
-						//frame, frame options and display
-						step(model,(DefaultMutableTreeNode)model.getRoot(),frms,pos,it);
-						fr.value_changed();
-					}}));
+					//frame, frame options and display
+					step(model,(DefaultMutableTreeNode)model.getRoot(),frms,pos,it);
+					fr.value_changed();
+				}};
+				JButton b=new JButton("Place");
+				b.addActionListener(new AcListener(display.component,new Runnable(){
+					@Override
+					public void run() {
+						place_exclude=false;place_ruler=b;
+						r1.run();
+				}}));
 				add_one_field(panel,b);
+				JButton b2=new JButton("Place & Exclude");
+				b2.addActionListener(new AcListener(display.component,new Runnable(){
+					@Override
+					public void run() {
+						place_exclude=true;place_ruler=b2;
+						r1.run();
+				}}));
+				add_one_field(panel,b2);
 				Graphics.characterData.add(panel);
 				
 				if(elem instanceof Text)new text(chr);

@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -19,10 +20,14 @@ public class StaXParser {
 		eventReader=inputFactory.createXMLEventReader(in);
 		eventReader.nextEvent();
 	}
+	private XMLEvent last_event;
 	public String advance_start() throws XMLStreamException{
-		XMLEvent e=eventReader.nextEvent();
-		if(e.isStartElement()==false)return null;
-		return e.asStartElement().getName().getLocalPart();
+		last_event=eventReader.nextEvent();
+		if(last_event.isStartElement()==false)return null;
+		return last_event.asStartElement().getName().getLocalPart();
+	}
+	public String get_attr(String name) throws XMLStreamException{
+		return last_event.asStartElement().getAttributeByName(new QName(name)).getValue();
 	}
 	public void advance() throws XMLStreamException{
 		eventReader.nextEvent();

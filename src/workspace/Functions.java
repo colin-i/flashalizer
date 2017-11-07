@@ -312,7 +312,7 @@ public class Functions extends util.util.TableEx{
 		//get default model
 		DefaultTableModel model=(DefaultTableModel)getModel();
 		//set rows and columns
-		for(int i=0;i<(1+total_args+1);i++)model.addColumn(null);
+		for(int i=0;i<(1+total_args+2);i++)model.addColumn(null);
 		//minimum model
 		Object[] n=WorkSpace.project.builder.swf_new__arguments();
 		ArrayList<Object> temp=new ArrayList<Object>(Arrays.asList(n));
@@ -338,6 +338,7 @@ public class Functions extends util.util.TableEx{
 								for(int y=0;y<f.number_of_args;y++){
 									obj[y+1]=fields[y].get(element);
 								}
+								if(element instanceof elementplus)obj[getColumnCount()-2]=((elementplus)element).exclude;
 								if(hasReturn(f))obj[getColumnCount()-1]=fields[fields.length-1].get(element);
 							}catch (IllegalArgumentException | IllegalAccessException e) {
 								e.printStackTrace();
@@ -379,10 +380,11 @@ public class Functions extends util.util.TableEx{
 											else/*if(t.equals("Object[]"))*/a=new Elements.Shape.ShapeWithStyle().toArray();
 											setValueAtEx(a,thisRow,i+1);
 										}
-										for(;i<-1+getColumnCount()-1;i++)setValueAtEx(null,thisRow,i+1);
-										Object named=null;
-										if(hasReturn(f))named="";
-										setValueAtEx(named,thisRow,getColumnCount()-1);
+										if(is_elementplus(f.name))setValueAtEx(false,thisRow,getColumnCount()-2);
+										//for(;i<-1+getColumnCount()-2;i++)setValueAtEx(null,thisRow,i+1);
+										//setValueAtEx(is_elementplus(f.name)?false:null,thisRow,i+1);
+										//Object named=null;
+										if(hasReturn(f))setValueAtEx("",thisRow,getColumnCount()-1);
 										int modelEnd_pos=getRowCount()-modelEnd_sum;
 										if(modelEnd_pos-1==getSelectedRow())model.insertRow(modelEnd_pos,new Object[getColumnCount()]);
 										break;
@@ -419,6 +421,19 @@ public class Functions extends util.util.TableEx{
 		//to frame container
 		container=new JScrollPane(this);
 		WorkSpace.container.add(container);
+	}
+	private boolean is_elementplus(String s){
+		boolean a=false;
+		Class<?>[]el_types=Elements.class.getDeclaredClasses();
+		for(int x=0;x<el_types.length;x++){
+			Class<?>c=el_types[x];
+			String f_name=Project.elements_names_convertor(c.getSimpleName(),null);
+			if(s.equals(f_name)){
+				if(c.getSuperclass().getSimpleName().equals(elementplus.class.getSimpleName()))a=true;
+				break;
+			}
+		}
+		return a;
 	}
 	// Determine editor to be used by row
 	@Override
@@ -532,7 +547,12 @@ public class Functions extends util.util.TableEx{
 											if(fields[z].getGenericType().getTypeName().equals("int"))o=Long.decode(o.toString()).intValue();
 											values.add(o);
 										}
-										elems.add(WorkSpace.project.runtime_instance(c,values));
+										Object obj=WorkSpace.project.runtime_instance(c,values);
+										if(is_elementplus(f.name)){
+											Object ob=getValueAt(i,getColumnCount()-2);
+											((elementplus)obj).exclude=Boolean.parseBoolean(ob.toString());//can be Boolean or user string input
+										}
+										elems.add(obj);
 										break;
 									}
 								}
@@ -569,12 +589,11 @@ public class Functions extends util.util.TableEx{
 	private static final Color NamedId_color=new Color(0xcc,0xff,0xcc);
 	private Component get_at_cell(int row,int column,Component renderer){
 		//column 0 is only at renderer, editor at 0 is combo box
-		function f = null;
 		ToolTipWrapper tt=(ToolTipWrapper)getValueAt(row,0);
 		if(tt!=null){
 			Object v=tt.value;
 			for(int i=0;i<f_list.size();i++){
-				f=f_list.get(i);
+				function f=f_list.get(i);
 				if(f.name.equals(v)){
 					int arg_index=column-1;
 					if(f.number_of_args>arg_index){
@@ -589,18 +608,19 @@ public class Functions extends util.util.TableEx{
 						}
 						return null;
 					}
+					if(renderer!=null){
+						if(column<getColumnCount()-2)renderer.setBackground(new Color(0xee,0xee,0xee));//Gray94
+						else if(column==getColumnCount()-2)renderer.setBackground(new Color(0x00,0xff,0xff));
+						else{
+							if(hasReturn(f))renderer.setBackground(NamedId_color);
+							else renderer.setBackground(new Color(0xcc,0xdd,0xcc));
+						}
+						return renderer;
+					}
 					break;
 				}
 			}
-		}
-		if(renderer!=null){
-			if(column<getColumnCount()-1||tt==null)renderer.setBackground(new Color(0xee,0xee,0xee));//Gray94
-			else{
-				if(hasReturn(f))renderer.setBackground(NamedId_color);
-				else renderer.setBackground(new Color(0xcc,0xdd,0xcc));
-			}
-			return renderer;
-		}
+		}else if(renderer!=null){renderer.setBackground(new Color(0xee,0xee,0xee));return renderer;}
 		return null;
 	}
 	static final String ButtonData="ButtonData";

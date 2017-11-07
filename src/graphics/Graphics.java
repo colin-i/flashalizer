@@ -103,8 +103,8 @@ public class Graphics extends JSplitPane{
 		for(int i=0;i<frames.length;i++){
 			frame_item f=frames[i];
 			for(item it:f.elements){
-				if(sprite!=null)elements.add(new SpritePlacementCoords(sprite,it.toString(),it.depth,it.x,it.y));
-				else elements.add(new PlacementCoords(it.toString(),it.depth,it.x,it.y));
+				if(sprite!=null)elements.add(new SpritePlacementCoords(sprite,it.toString(),it.depth,it.x,it.y,it.exclude));
+				else elements.add(new PlacementCoords(it.toString(),it.depth,it.x,it.y,it.exclude));
 				Integer d=it.remove;
 				if(d!=null){
 					List<Integer>lst=removes.get(d);if(lst==null){lst=new ArrayList<Integer>();removes.put(d,lst);}

@@ -180,10 +180,10 @@ public class Elements {
 		public @RefId String refid;public @DepthInt int depth;
 		Placement(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
-	public static class PlacementCoords extends element{
+	public static class PlacementCoords extends elementplus{
 		public @RefId String refid;public @DepthInt int depth;public @XInt int x;public @YInt int y;
 		PlacementCoords(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
-		public PlacementCoords(String string, int depth2, int x2, int y2){refid=string;depth=depth2;x=x2;y=y2;}
+		public PlacementCoords(String string, int depth2, int x2, int y2,boolean ex){refid=string;depth=depth2;x=x2;y=y2;exclude=ex;}
 	}
 	public static class Remove extends element{
 		public @DepthInt int depth;
@@ -204,10 +204,10 @@ public class Elements {
 		public @SpriteId String spriteid;public @RefId String refid;public @DepthInt int depth;
 		SpritePlacement(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
 	}
-	public static class SpritePlacementCoords extends element{
+	public static class SpritePlacementCoords extends elementplus{
 		public @SpriteId String spriteid;public @RefId String refid;public @DepthInt int depth;public @XInt int x;public @YInt int y;
 		SpritePlacementCoords(Object[]x)throws IllegalArgumentException,IllegalAccessException{super(x);}
-		public SpritePlacementCoords(String sprite,String string,int depth2,int x2,int y2){spriteid=sprite;refid=string;depth=depth2;x=x2;y=y2;}
+		public SpritePlacementCoords(String sprite,String string,int depth2,int x2,int y2,boolean ex){spriteid=sprite;refid=string;depth=depth2;x=x2;y=y2;exclude=ex;}
 	}
 	public static class SpriteRemove extends element{
 		public @SpriteId String spriteid;public @DepthInt int depth;
