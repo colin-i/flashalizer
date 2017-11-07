@@ -289,7 +289,7 @@ public class Functions extends util.util.TableEx{
 		for(int i=0;i<ToolTips.size();i++){
 			if(ToolTips.get(i).value.equals(v))return ToolTips.get(i);
 		}
-		return null;
+		return null;//Java Problem
 	}
 	Functions(){
 		//create the table

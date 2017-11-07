@@ -92,7 +92,7 @@ public class Project{
 				return ms[z].invoke(ctructor,object);
 			}
 		}
-		return null;
+		return null;//Java Problem
 	}
 	private class xml{
 		private void write(String ext) throws XMLStreamException, IOException, IllegalAccessException{
@@ -200,7 +200,7 @@ public class Project{
 					return ob;
 				}
 			}
-			return null;
+			return null;//Java Problem
 		}
 	}
 	void save_default(){save(proj_ext);}
@@ -361,7 +361,7 @@ public class Project{
 					return x;
 				}
 			}
-			return null;
+			return null;//Java Problem
 		}
 		private void error() throws Throwable{
 			Byte er=prv.erbool_get();
@@ -415,6 +415,6 @@ public class Project{
 		for(;i<values.length;i++){
 			if(fName.equals(values[i][1]))return values[i][0];
 		}
-		return null;
+		return null;//Java Problem
 	}
 }

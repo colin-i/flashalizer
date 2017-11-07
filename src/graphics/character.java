@@ -214,7 +214,7 @@ public class character extends JPanel implements TreeSelectionListener{
 		public String toString(){
 			try {return (String) name.get(element);}
 			catch (IllegalArgumentException | IllegalAccessException e) {e.printStackTrace();}
-			return null;
+			return null;//Java Problem
 		}
 	}
 	static Field getField(String elem,Class<? extends Annotation> annotationClass){
@@ -224,7 +224,7 @@ public class character extends JPanel implements TreeSelectionListener{
 				return getAField(c,annotationClass);
 			}
 		}
-		return null;
+		return null;//Java Problem
 	}
 	static Field getAField(Class<?>c,Class<? extends Annotation> annotationClass){
 		Field[]flds=c.getDeclaredFields();

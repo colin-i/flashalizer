@@ -48,7 +48,7 @@ class display extends JScrollPane{
 			for(int a=0;a<parent.getChildCount();a++){
 				if(parent.getChildAt(a)==f)return frms[a];
 			}
-			return null;
+			return null;//Java Problem
 		}
 		private TreePath sel_path;private int sel_pos;
 		private void showFrame(frame_item frame,boolean same_level,java.awt.Graphics g,int x_off,int y_off){
