@@ -420,7 +420,7 @@ public class WorkSpace {
 		frame.setVisible(true);
 	}
 	//static File f;static PrintStream outx;
-    public static final int WM_QUERYENDSESSION = 0x11;
+    private static final int WM_QUERYENDSESSION = 0x11;
     public static class CWPSSTRUCT extends Structure {
         public LPARAM lParam;
         public WPARAM wParam;
@@ -431,12 +431,12 @@ public class WorkSpace {
             return Arrays.asList(new String[] { "lParam", "wParam", "message", "hwnd" });
         }
     }
-    public interface WinHookProc extends WinUser.HOOKPROC {
+    private interface WinHookProc extends WinUser.HOOKPROC {
         WinDef.LRESULT callback(int nCode, WinDef.WPARAM wParam, CWPSSTRUCT hookProcStruct);
     }
     private final static String shd="shutdown";
-    public static final class MyHookProc implements WinHookProc {
-        public WinUser.HHOOK     hhook;
+    private final class MyHookProc implements WinHookProc {
+        private WinUser.HHOOK     hhook;
         @Override
         public LRESULT callback(int nCode, WPARAM wParam, CWPSSTRUCT hookProcStruct) {
             if (nCode >= 0) {
@@ -509,7 +509,7 @@ public class WorkSpace {
     	}
 		return b;
 	}
-	private static Boolean file_a_eq_file_b(File file1,File file2) throws FileNotFoundException, IOException{
+	private Boolean file_a_eq_file_b(File file1,File file2) throws FileNotFoundException, IOException{
 		if(file1.length() != file2.length()){
 			return false;
 		}
