@@ -1,5 +1,7 @@
 package actionswf;
 
+import java.util.List;
+
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Structure;
@@ -86,6 +88,11 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 		public int layout_rightmargin;
 		public int layout_indent;
 		public int layout_leading;
+		@Override
+		protected List<String> getFieldOrder() {
+			// TODO Auto-generated method stub
+			return null;
+		}
 	}
 	public static final int FontFlagsBold=1;
 	public static final int FontFlagsItalic=2; 
@@ -118,5 +125,10 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 		public int font_vertical_offset;
 		public int font_color;
 		public String actions;
+		@Override
+		protected List<String> getFieldOrder() {
+			// TODO Auto-generated method stub
+			return null;
+		}
 	}
 }

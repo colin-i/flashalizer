@@ -38,9 +38,23 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.prefs.Preferences;
 
 import util.util.PanelEx;
+
+import com.sun.jna.Callback;
+import com.sun.jna.Native;
+import com.sun.jna.Structure;
+import com.sun.jna.platform.win32.User32;
+import com.sun.jna.platform.win32.WinDef;
+import com.sun.jna.platform.win32.WinUser;
+import com.sun.jna.platform.win32.WinDef.DWORD;
+import com.sun.jna.platform.win32.WinDef.HWND;
+import com.sun.jna.platform.win32.WinDef.LPARAM;
+import com.sun.jna.platform.win32.WinDef.LRESULT;
+import com.sun.jna.platform.win32.WinDef.WPARAM;
 
 public class WorkSpace {
 	private Preferences prefs=Preferences.userRoot().node(this.getClass().getName());
@@ -385,43 +399,117 @@ public class WorkSpace {
 		frame.setContentPane(container);
 		addPerspective();//frame,use path,container
 		
-		//Set up the exit.
-		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		frame.addWindowListener(new WindowAdapter() {
-	        @Override
-	        public void windowClosing(WindowEvent arg0) {
-	        	try {
-	        		Boolean equality=false;
-	        		File proj_file=new File(project.folder_file_default());
-	        		if(proj_file.exists()){
-	        			String temp_ext="temp";
-	        			File temp_file=new File(project.folder_file(temp_ext));
-	        			project.save(temp_ext);
-	        			equality= file_a_eq_file_b(proj_file,temp_file);
-	        			temp_file.delete();
-	        		}
-	        		if(equality==false){
-		        		int result = JOptionPane.showConfirmDialog((Component)null, "Project not saved. Exit anyway?","Confirmation", JOptionPane.YES_NO_OPTION);
-		        		if (result != 0)return;
-	        		}
-	        	} catch (IOException e) {
-					e.printStackTrace();
-				}
-	        	System.exit(0);
-	        }
-	    });
-		
 		//Add program icon
 		frame.setIconImage(img.getImage());
 		
 		//MenuBar to frame
 		frame.setJMenuBar(menuBar);
 		
+		//Set up the exit.
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);frame.addWindowListener(new WindowAdapter() {@Override public void windowClosing(WindowEvent arg0) {if(close_window())System.exit(0);}});
+		//frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//default is HIDE_ON_CLOSE//showing dialog after Exit will not display
+		//this is useless: Runtime.getRuntime().addShutdownHook( shutdownHook );
+		
+		if(new File(project.folder_file(shd)).exists())JOptionPane.showMessageDialog(null, "There is a recovery file from the last shutdown.","Info",JOptionPane.INFORMATION_MESSAGE);
+	    //try {outx = new PrintStream(f = new File("C:/Users/eu/Desktop/shutdownTest.txt"));} catch (FileNotFoundException e) {e.printStackTrace();}
+		//this MUST be set before setVisible, otherwise there are chances to fail
+		register(frame);
+		
 		//Display the window.
 		frame.pack();
 		frame.setVisible(true);
 	}
-	Boolean file_a_eq_file_b(File file1,File file2) throws FileNotFoundException, IOException{
+	//static File f;static PrintStream outx;
+    public static final int WM_QUERYENDSESSION = 0x11;
+    public static class CWPSSTRUCT extends Structure {
+        public LPARAM lParam;
+        public WPARAM wParam;
+        public DWORD  message;
+        public HWND   hwnd;
+		@Override
+        protected List<String> getFieldOrder() {
+            return Arrays.asList(new String[] { "lParam", "wParam", "message", "hwnd" });
+        }
+    }
+    public interface WinHookProc extends WinUser.HOOKPROC {
+        WinDef.LRESULT callback(int nCode, WinDef.WPARAM wParam, CWPSSTRUCT hookProcStruct);
+    }
+    private final static String shd="shutdown";
+    public static final class MyHookProc implements WinHookProc {
+        public WinUser.HHOOK     hhook;
+        @Override
+        public LRESULT callback(int nCode, WPARAM wParam, CWPSSTRUCT hookProcStruct) {
+            if (nCode >= 0) {
+                //outx.println(hookProcStruct.message);
+                if (hookProcStruct.message.longValue() == WM_QUERYENDSESSION) {
+                	//JVM is killing anyway(even at return 0) the process
+                	//here is freezing
+                	//for(int i=0;i<10;i++){try {File filex = new File("C:/Users/eu/Desktop/shutdownTest"+i+".txt");PrintStream outx = new PrintStream(filex);outx.close();Thread.sleep(10000);} catch (FileNotFoundException | InterruptedException e) {e.printStackTrace();}}
+                	//this is runn ing, then stays frozen
+                	//anyway save the project to not loose it
+            		project.save(shd);
+            		File proj_file=new File(project.folder_file_default());
+                	if(proj_file.exists()){
+                		File temp_file=new File(project.folder_file(shd));
+                		try {if(file_a_eq_file_b(proj_file,temp_file))temp_file.delete();
+						} catch (IOException e) {e.printStackTrace();}
+                	}
+                    //
+                    return new LRESULT(1);
+                }
+            }
+            // pass the callback on to the next hook in the chain
+            return User32.INSTANCE.CallNextHookEx(hhook, nCode, wParam,hookProcStruct.lParam);
+        }
+    }
+    private void register(JFrame frame) {
+        Native.setCallbackExceptionHandler(new Callback.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Callback arg0, Throwable arg1) {
+                arg1.printStackTrace();
+            }
+        });
+        // get the window handle for the main window/frame
+        final HWND hwnd = new HWND();
+        hwnd.setPointer(Native.getComponentPointer(frame));
+        // retrieve the threadID associated with the main window/frame
+        int windowThreadID = User32.INSTANCE.GetWindowThreadProcessId(hwnd, null);
+        if (windowThreadID == 0) {
+            int x = Native.getLastError();
+            throw  new IllegalStateException("error calling GetWindowThreadProcessId when installing machine-shutdown handler " + x);
+        }
+        final MyHookProc proc = new MyHookProc();
+        proc.hhook = User32.INSTANCE.SetWindowsHookEx(4/* WH_CALLWNDPROC */, new MyHookProc(), null, windowThreadID/* dwThreadID */);
+        // null in dicates failure
+        if (proc.hhook == null) {
+            int x = Native.getLastError();
+            throw new IllegalStateException("error calling SetWindowsHookEx when installing machine-shutdown handler " + x);
+        }
+    }
+    private boolean close_window(){
+		try {
+    		if(closewindow()==false){
+        		int result = JOptionPane.showConfirmDialog((Component)null, "Project not saved. Exit anyway?","Confirmation", JOptionPane.YES_NO_OPTION);
+        		if (result != 0)return false;
+    		}
+    	} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return true;
+	}
+    private boolean closewindow() throws FileNotFoundException, IOException{
+    	Boolean b=false;
+    	String s="temp";
+    	File proj_file=new File(project.folder_file_default());
+    	if(proj_file.exists()){
+    		File temp_file=new File(project.folder_file(s));
+    		project.save(s);
+    		b=file_a_eq_file_b(proj_file,temp_file);
+    		temp_file.delete();
+    	}
+		return b;
+	}
+	private static Boolean file_a_eq_file_b(File file1,File file2) throws FileNotFoundException, IOException{
 		if(file1.length() != file2.length()){
 			return false;
 		}
