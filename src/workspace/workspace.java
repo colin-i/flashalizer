@@ -421,6 +421,8 @@ public class WorkSpace {
 	}
 	//static File f;static PrintStream outx;
     private static final int WM_QUERYENDSESSION = 0x11;
+    //without static Can't instantiate class workspace.WorkSpace$CWPSSTRUCT
+    //without public Instantiation of class workspace.WorkSpace$CWPSSTRUCT not allowed, is it public?
     public static class CWPSSTRUCT extends Structure {
         public LPARAM lParam;
         public WPARAM wParam;
@@ -432,6 +434,7 @@ public class WorkSpace {
         }
     }
     private interface WinHookProc extends WinUser.HOOKPROC {
+    	//private is Illegal modifier for the interface
         WinDef.LRESULT callback(int nCode, WinDef.WPARAM wParam, CWPSSTRUCT hookProcStruct);
     }
     private final static String shd="shutdown";
