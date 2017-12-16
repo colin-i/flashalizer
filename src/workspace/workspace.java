@@ -424,7 +424,8 @@ public class WorkSpace {
     //without static Can't instantiate class workspace.WorkSpace$CWPSSTRUCT
     //without public Instantiation of class workspace.WorkSpace$CWPSSTRUCT not allowed, is it public?
     public static class CWPSSTRUCT extends Structure {
-        public LPARAM lParam;
+    	//without public Structure.getFieldOrder() on class workspace.WorkSpace$CWPSSTRUCT does not provide enough names
+    	public LPARAM lParam;
         public WPARAM wParam;
         public DWORD  message;
         public HWND   hwnd;

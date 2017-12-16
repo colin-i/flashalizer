@@ -8,12 +8,18 @@
 	</delete>
     </target>
 
+    <path id="main.classpath">
+	<fileset dir="build">
+		<include name="*.jar"/>
+	</fileset>
+    </path>
+
     <target name="compile">
-        <javac srcdir="src" destdir="build" classpath="build/jna.jar;build/javassist.jar" includeantruntime="false"/>
+        <javac srcdir="src" destdir="build" classpathref="main.classpath" includeantruntime="false"/>
     </target>
 
     <target name="run">
-        <java classpath="build;build/jna.jar;build/javassist.jar" classname="flashalizer" fork="true"/>
+        <java classpath="build" classpathref="main.classpath" classname="flashalizer" fork="true"/>
     </target>
 
 </project>
