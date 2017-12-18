@@ -1,5 +1,6 @@
 package actionswf;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.sun.jna.Library;
@@ -76,7 +77,7 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 	public static final int Curved_edge=0;
 	public static final int Straight_edge=1;
 	class EditText extends Structure{
-		//"..Structure has unknown size, ensure all fields are public"
+		//without public: "can not access a member of class actionswf.ActionSwf$EditText with modifiers """
 		public int font_id;
 		public int font_height;
 		public String fontclassname;
@@ -90,8 +91,7 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 		public int layout_leading;
 		@Override
 		protected List<String> getFieldOrder() {
-			// TODO Auto-generated method stub
-			return null;
+			return Arrays.asList(new String[] {"font_id","font_height","fontclassname","rgba","maxlength","initialtext","layout_align","layout_leftmargin","layout_rightmargin","layout_indent","layout_leading"});
 		}
 	}
 	public static final int FontFlagsBold=1;
@@ -108,6 +108,7 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 			//super();
 			setAlignType(ALIGN_NONE);//without this pack(1) aligning(in dll) will make diferences after ycurve
 		}
+		//without public: "can not access a member of class actionswf.ActionSwf$EditText with modifiers """
 		public int def_fill;
 		public int def_line_sz;
 		public int def_line;
@@ -127,8 +128,7 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 		public String actions;
 		@Override
 		protected List<String> getFieldOrder() {
-			// TODO Auto-generated method stub
-			return null;
+			return Arrays.asList(new String[] {"def_fill","def_line_sz","def_line","ov_fill","ov_line_sz","ov_line","dn_fill","dn_line_sz","dn_line","xcurve","ycurve","text","font_id","font_height","font_vertical_offset","font_color","actions"});
 		}
 	}
 }
