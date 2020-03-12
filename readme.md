@@ -7,4 +7,4 @@
 
 - costin.botescu@gmail.com
 
-- eth: 0xd8ea69f877b93fa663652bc2d944e71a338cd5f9
+- bitcoin: 1DcXWYXpmopfgg3oZYWVBTLbDTmQ6nWG7s
