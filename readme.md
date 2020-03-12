@@ -1,5 +1,5 @@
 
-![alt tag](https://drive.google.com/uc?export=view&id=1C1cCOCPH8S_PhxsPHewIyNgUv4kKg-lz)
+- png image: https://drive.google.com/open?id=1C1cCOCPH8S_PhxsPHewIyNgUv4kKg-lz
 
 -clone the project with: git clone https://github.com/colin-i/flashalizer.git<br>-download Java Native Access from https://github.com/twall/jna to "build" folder<br>-download Javassist from https://github.com/jboss-javassist/javassist/releases to the same "build" folder<br>-run: ant compile run ; clean all with: ant clean
 
