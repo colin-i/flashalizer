@@ -8,3 +8,7 @@
 - costin.botescu@gmail.com
 
 - bitcoin: 1DcXWYXpmopfgg3oZYWVBTLbDTmQ6nWG7s
+
+## Donations
+The *donations* section is here
+*https://gist.github.com/colin-i/e324e85e0438ed71219673fbcc661da6*
