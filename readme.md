@@ -3,7 +3,7 @@
 <br>-download Java Native Access from https://github.com/twall/jna to "build" folder
 <br>-download Javassist from https://github.com/jboss-javassist/javassist/releases to the same "build" folder
 <br>-dbl2png and png2dbl are with ming at http://www.libming.org/ ; on windows are found with cygwin; pngdbl.zip has them
-<br>-ActionSWF actionswf.zip is in the same folder with this program
+<br>-ActionSWF actionswf.dll is in the same folder with this program
 <br>
 <br>-clone the project with: git clone https://github.com/colin-i/flashalizer.git
 <br>-run: ant compile run ; clean all with: ant clean
