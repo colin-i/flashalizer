@@ -345,7 +345,7 @@ public class Project{
 				rec_file.delete();
 			} catch (Throwable e) {
 				e.printStackTrace();
-				if(e instanceof ThrowAndStop)prv.abort();
+				if(e instanceof ThrowAndStop)prv.freereset();
 				JOptionPane.showMessageDialog(null,e.getMessage());
 			}
 		}

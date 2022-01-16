@@ -44,7 +44,7 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 		privat INST=(privat)Native.loadLibrary(lib_name,privat.class);
 		Byte erbool_get();
 		void erbool_reset();
-		void abort();
+		void freereset();
 		//integer swf_dbl_width(String image path);
 		//integer swf_dbl_height(String image path);
 	}
