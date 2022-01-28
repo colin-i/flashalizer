@@ -14,7 +14,6 @@
 		<include name="jna-5.9.0.jar"/>
 		<include name="jna-platform-5.9.0.jar"/>
 	</fileset>
-	<fileset dir="/usr/lib/x86_64-linux-gnu/">
     </path>
 
     <target name="compile">
