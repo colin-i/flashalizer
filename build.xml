@@ -11,8 +11,8 @@
     <path id="main.classpath">
 	<fileset dir="/usr/share/java">
 		<include name="javassist.jar"/>
-		<include name="jna-5.9.0.jar"/>
-		<include name="jna-platform-5.9.0.jar"/>
+		<include name="jna-4.5.1.jar"/>
+		<include name="jna-platform-4.5.1.jar"/>
 	</fileset>
     </path>
 
