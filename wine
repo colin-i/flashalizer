@@ -1,0 +1,5 @@
+
+cd build
+
+wine "/home/bc/.wine/drive_c/Program Files (x86)/Java/jdk1.8.0_202/bin/javac.exe" -verbose -d "./" -classpath C:\\jna-4.5.0.jar -sourcepath "../src" -g:none ../src/actionswf/ActionSwf.java
+#javac -verbose -d "./" -classpath ./:./javassist.jar:./jna-4.5.0.jar:./jna-platform-4.5.0.jar -sourcepath "../src" -g:none ../src/actionswf/ActionSwf.java
