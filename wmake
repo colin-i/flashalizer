@@ -8,5 +8,5 @@ cd flashalizer && \
 jar cf ../flashalizer.jar . && \
 cd .. && \
 rm -r flashalizer && \
-jar tf flashalizer.jar && \
-ant clean
+ant clean && \
+jar tf flashalizer.jar
