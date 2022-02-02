@@ -1,5 +1,48 @@
 
+a=`pwd`
+
+cd ~/.wine/drive_c
+if [ "$?" != 0 ]; then
+exit
+fi
+
+j1=`find . -maxdepth 1 -regex '.*jna-[0-9].*'`
+j1=C:\\${j1:2}
+j2=`find . -maxdepth 1 -regex '.*jna-platform-[0-9].*'`
+j2=C:\\${j2:2}
+j3=`find . -maxdepth 1 -name 'javassist.jar'`
+j3=C:\\${j3:2}
+
+jn=$j1\;$j2\;$j3
+
+cd $a
+
+if [ -n "$1" ]; then
+jn=.\\build\;$jn
+echo $jn
+wine "/home/bc/.wine/drive_c/Program Files (x86)/Java/jdk1.8.0_202/bin/java.exe" -classpath $jn flashalizer
+exit
+fi
+
+echo $jn
+
 cd build
 
-wine "/home/bc/.wine/drive_c/Program Files (x86)/Java/jdk1.8.0_202/bin/javac.exe" -verbose -d "./" -classpath C:\\jna-4.5.0.jar -sourcepath "../src" -g:none ../src/actionswf/ActionSwf.java
-#javac -verbose -d "./" -classpath ./:./javassist.jar:./jna-4.5.0.jar:./jna-platform-4.5.0.jar -sourcepath "../src" -g:none ../src/actionswf/ActionSwf.java
+d=dbitsl/
+dd="${d}DBitsL ${d}Tools"
+g=graphics/
+gg="${g}Graphics ${g}button ${g}character ${g}display ${g}frame ${g}shape ${g}text"
+w=workspace/
+ww="${w}AreaInputText ${w}Elements ${w}Functions ${w}Input ${w}InputText ${w}IntInputText ${w}PopUp ${w}Project ${w}WorkSpace ${w}element ${w}elementplus ${w}function"
+x=xml/
+xx="${x}StaXParser ${x}StaXWriter"
+files=( actionswf/ActionSwf $dd flashalizer $gg util/util $ww $xx )
+
+for f in "${files[@]}"
+do
+	echo $f
+	wine "/home/bc/.wine/drive_c/Program Files (x86)/Java/jdk1.8.0_202/bin/javac.exe" -d "./" -classpath $jn -sourcepath "../src" -g:none ../src/$f.java
+	if [ "$?" != 0 ]; then
+	exit
+	fi
+done
