@@ -1,6 +1,6 @@
 - png image: https://drive.google.com/open?id=1C1cCOCPH8S_PhxsPHewIyNgUv4kKg-lz
 
-<br>-download Java Native Access from https://github.com/twall/jna to "build" folder (two jar files)
+<br>-download Java Native Access from https://github.com/twall/jna to "build" folder (jna and jna-platform)
 <br>-download Javassist from https://github.com/jboss-javassist/javassist/releases to the same "build" folder
 <br>-dbl2png and png2dbl are with ming at http://www.libming.org/ ; on windows are found with cygwin; pngdbl.zip has them
 <br>-[ActionSWF](https://github.com/colin-i/actionswf)'s actionswf.dll is in the same folder with this program
