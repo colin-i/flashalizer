@@ -1,0 +1,10 @@
+
+mkdir flashalizer && \
+rsync -a --exclude=.gitignore ./build/ ./flashalizer && \
+rsync -a ./img ./flashalizer && \
+cd flashalizer && \
+jar cfm ../flashalizer.jar ../MANIFEST.MF . && \
+cd .. && \
+rm -r flashalizer && \
+ant clean && \
+jar tf flashalizer.jar

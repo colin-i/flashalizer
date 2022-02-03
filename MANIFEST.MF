@@ -1,0 +1,2 @@
+Main-Class: flashalizer
+Class-Path: jna.jar jna-platform.jar javassist.jar

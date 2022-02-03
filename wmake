@@ -1,12 +1,3 @@
 
-./wine && \
-mkdir flashalizer && \
-rsync -a --exclude=.gitignore ./build ./flashalizer && \
-rsync -a ./img ./flashalizer && \
-rsync -a --exclude=.gitignore ./tmp ./flashalizer && \
-cd flashalizer && \
-jar cf ../flashalizer.jar . && \
-cd .. && \
-rm -r flashalizer && \
-ant clean && \
-jar tf flashalizer.jar
+./jwine && \
+./wjmake

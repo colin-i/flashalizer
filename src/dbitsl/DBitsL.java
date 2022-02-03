@@ -42,7 +42,7 @@ public class DBitsL {
 				BufferedImage img = null;
 				File src_file=new File(src);
 				String n=ManagementFactory.getRuntimeMXBean().getName();
-				String dest="tmp/"+n.split("@")[0]+".png";Path destPat=Paths.get(dest);
+				String dest=System.getProperty("java.io.tmpdir")+n.split("@")[0]+".png";Path destPat=Paths.get(dest);
 				if(src_file.isFile()){
 					Runtime runtime = Runtime.getRuntime();
 					Process shellProcess=runtime.exec("dbl2png.exe \""+src+"\" "+dest);
