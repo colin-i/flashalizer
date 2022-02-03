@@ -7,7 +7,7 @@ On Linux, the jar file can be run with `wine`.
 
 ## From source
 ### Requirements
--clone the project with: git clone https://github.com/colin-i/flashalizer.git \
+-clone the project with: `git clone https://github.com/colin-i/flashalizer.git` \
 -download Java Native Access from https://github.com/twall/jna (jna and jna-platform) \
 -download Javassist from https://github.com/jboss-javassist/javassist/releases \
 -dbl2png and png2dbl are with ming at http://www.libming.org/ ; on windows are found with cygwin \
