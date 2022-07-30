@@ -10,9 +10,9 @@
 
     <path id="main.classpath">
 	<fileset dir="/usr/share/java">
-		<include name="javassist.jar"/>
-		<include name="jna-5.9.0.jar"/> <!-- 4.5.1 -->
-		<include name="jna-platform-5.9.0.jar"/> <!-- 4.5.1 -->
+		<include name="javassist.jar"/> <!-- 3.19.0.GA -->
+		<include name="jna-5.9.0.jar"/> <!-- 4.5.0 4.5.1 -->
+		<include name="jna-platform-5.9.0.jar"/> <!-- 4.5.0 4.5.1 -->
 	</fileset>
     </path>
 
