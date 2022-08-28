@@ -1,4 +1,20 @@
 
+if [ -n "$1" ]; then
+
+if [ "$1" != "j" ]; then
+wine "/home/bc/.wine/drive_c/Program Files/Java/jdk1.8.0_202/bin/java.exe" -jar flashalizer.jar $@
+else
+wine "/home/bc/.wine/drive_c/Program Files/Java/jdk1.8.0_202/bin/java.exe" -jar flashalizer.jar
+fi
+
+#wine "/home/bc/.wine/drive_c/Program Files/Java/jdk1.8.0_202/bin/java.exe" -classpath $jn flashalizer
+
+exit
+
+fi
+
+
+
 a=`pwd`
 
 cd ~/.wine/drive_c
@@ -17,28 +33,13 @@ jn=$j1\;$j2\;$j3
 
 cd $a
 
-if [ -n "$1" ]; then
 
-if [ "$1" = "j" ]; then
-wine "/home/bc/.wine/drive_c/Program Files (x86)/Java/jdk1.8.0_202/bin/java.exe" -jar flashalizer.jar
-exit
-fi
 
-if [ "$1" = "u" ]; then
-unzip flashalizer.jar -x "img/*" "META-INF/*" -d build
-exit
-fi
-
-jn=.\\build\;$jn
+#jn=.\\flashalizer\;$jn
 echo $jn
 
-wine "/home/bc/.wine/drive_c/Program Files (x86)/Java/jdk1.8.0_202/bin/java.exe" -classpath $jn flashalizer
-exit
-fi
-
-echo $jn
-
-cd build
+mkdir flashalizer
+cd flashalizer
 
 d=dbitsl/
 dd="${d}DBitsL ${d}Tools"
@@ -53,7 +54,7 @@ files=( actionswf/ActionSwf $dd flashalizer $gg util/util $ww $xx )
 for f in "${files[@]}"
 do
 	echo $f
-	wine "/home/bc/.wine/drive_c/Program Files (x86)/Java/jdk1.8.0_202/bin/javac.exe" -d "./" -classpath $jn -sourcepath "../src" -g:none ../src/$f.java
+	wine "/home/bc/.wine/drive_c/Program Files/Java/jdk1.8.0_202/bin/javac.exe" -d "./" -classpath $jn -sourcepath "../src" -g:none ../src/$f.java
 	#sourcepath is for other source links
 	if [ "$?" != 0 ]; then
 	exit 1

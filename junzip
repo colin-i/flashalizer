@@ -1,0 +1,2 @@
+
+unzip flashalizer.jar -x "img/*" "META-INF/*" -d build

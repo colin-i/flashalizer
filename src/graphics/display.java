@@ -25,7 +25,7 @@ class display extends JScrollPane{
 		private Image img;
 		private content(){
 			try {
-				img=ImageIO.read(new File("img/display.gif"));
+				img=ImageIO.read(getClass().getResource("/img/display.gif"));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
