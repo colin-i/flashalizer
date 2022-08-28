@@ -145,7 +145,7 @@ public class frame extends JPanel{
 	private class bar extends JPanel{
 		private static final long serialVersionUID = 1L;
 		private void add_button(char img,String tip,ActionListener aclst){
-			ImageIcon im=new ImageIcon("img/frame/"+img+".gif");
+			ImageIcon im=new ImageIcon(getClass().getResource("/img/frame/"+img+".gif"));
 			JButton b=new JButton(im);
 			b.setToolTipText(tip);
 			b.addActionListener(aclst);

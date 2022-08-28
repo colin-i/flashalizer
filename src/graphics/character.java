@@ -111,7 +111,7 @@ public class character extends JPanel implements TreeSelectionListener{
 		private String screenName;
 		private type(String n,char l){
 			name=n;letter=l;
-			icon=new ImageIcon("img/char/"+letter+".gif");
+			icon=new ImageIcon(getClass().getResource("/img/char/"+letter+".gif"));
 			icon_exp=image_border(icon);
 			if(name.equals(spritedone)){
 				icon_a=image_char(icon);//new ImageIcon("img/char/"+letter+"0.gif") invisible sometimes
@@ -335,7 +335,7 @@ public class character extends JPanel implements TreeSelectionListener{
 			}
 		}
 		private void add_button(char img,String tip,ActionListener aclst){
-			ImageIcon im=new ImageIcon("img/character/"+img+".gif");
+			ImageIcon im=new ImageIcon(getClass().getResource("/img/character/"+img+".gif"));
 			JButton b=new JButton(im);
 			b.setToolTipText(tip);
 			b.addActionListener(aclst);
@@ -468,7 +468,7 @@ public class character extends JPanel implements TreeSelectionListener{
 						if(p!=f_root){
 							if(loop_check(chr.frames,frms)){
 								Cursor initial_cursor=place_ruler.getCursor();
-								place_ruler.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(new ImageIcon("img/no.png").getImage(),new Point(),null));
+								place_ruler.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(new ImageIcon(getClass().getResource("/img/no.png")).getImage(),new Point(),null));
 								ActionListener taskPerformer = new ActionListener() {
 									public void actionPerformed(ActionEvent evt) {
 										place_ruler.setCursor(initial_cursor);

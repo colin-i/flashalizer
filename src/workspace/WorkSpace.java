@@ -57,7 +57,8 @@ import com.sun.jna.platform.win32.WinDef.LRESULT;
 import com.sun.jna.platform.win32.WinDef.WPARAM;
 
 public class WorkSpace {
-	private Preferences prefs=Preferences.userRoot().node(this.getClass().getName());
+	//private Preferences prefs=Preferences.userRoot().node(this.getClass().getName());
+	private Preferences prefs=Preferences.userNodeForPackage(this.getClass());
 	private class prop{
 		private Label label;
 		private String name;
@@ -65,8 +66,11 @@ public class WorkSpace {
 			name=n;
 			label=new Label();
 			String x=prefs.get(name,null);
-			if(x==null)set(init_value);
-			else label.setText(x);
+			//try{prefs.clear();}catch (java.util.prefs.BackingStoreException e){}
+			if(x==null)
+				set(init_value);
+			else
+				label.setText(x);
 		}
 		private void set(String value){
 			label.setText(value);
@@ -384,8 +388,9 @@ public class WorkSpace {
 	}
 	public void main(String[] args) {
 		//keep this order of declarations
-		img = new ImageIcon(System.getProperty("user.dir")+"img/icon.jpg");
-		workpath=new prop("workpath",System.getProperty("user.home")+"/Desktop");
+		//img = new ImageIcon(System.getProperty("user.dir")+"img/icon.jpg");
+		img = new ImageIcon(getClass().getResource("/img/icon.jpg"));
+		workpath=new prop("workpath",System.getProperty("user.home"));  //+"/Desktop"  this on linux is problematic
 		menu menuBar=new menu();//Image,work path
 		frame = new JFrame();
 		boolean tryOpen=args.length==1;

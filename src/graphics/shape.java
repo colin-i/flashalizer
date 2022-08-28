@@ -269,9 +269,9 @@ class shape {
 		if(isCheckbox==false)b=new JButton();
 		else{
 			b=new JCheckBox();plus="0";
-			b.setSelectedIcon(new ImageIcon("img/shape/"+l+"1.gif"));
+			b.setSelectedIcon(new ImageIcon(getClass().getResource("/img/shape/"+l+"1.gif")));
 		}
-		ImageIcon im=new ImageIcon("img/shape/"+l+plus+".gif");
+		ImageIcon im=new ImageIcon(getClass().getResource("/img/shape/"+l+plus+".gif"));
 		b.setIcon(im);
 		b.setToolTipText(tip);
 		b.addActionListener(acl);

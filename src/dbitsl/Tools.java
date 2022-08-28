@@ -538,7 +538,8 @@ class Tools extends JPanel{
 		return imageX(Character.toString(c));
 	}
 	private static ImageIcon imageX(String s){
-		return new ImageIcon("img/dbl/"+s+".png");
+		//return new ImageIcon(Tools.class.getClassLoader().getResource("/img/dbl/"+s+".png"));
+		return new ImageIcon(Tools.class.getResource("/img/dbl/"+s+".png"));
 	}
 	private radio add_rBt_plus(char c,String tip,MsEvRunnable hit,MsEvRunnable drag,Runnable deselect,boolean bCursor){
 		ImageIcon im=image(c);
