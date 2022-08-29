@@ -57,6 +57,10 @@ public class Project{
 			JOptionPane.showMessageDialog(null,"Can't create/open: "+folder,null,JOptionPane.INFORMATION_MESSAGE);
 			return false;
 		}
+
+		//System.setProperty("user.dir",path.toString());  //this for dbl with relative paths, but is still not resolving
+		//maybe with native SetCurrentDirectory
+
 		return true;
 	}
 	public String folder_file(String ext){
@@ -261,6 +265,7 @@ public class Project{
 					if(element instanceof elementplus&&((elementplus)element).exclude)continue;
 					Class<?>clas=element.getClass();
 					String el_type=clas.getSimpleName();
+					//System.out.println("Working Directory = " + System.getProperty("user.dir"));
 					Class<?>[]el_types=Elements.class.getDeclaredClasses();
 					for(int x=0;x<el_types.length;x++){
 						Class<?>c=el_types[x];

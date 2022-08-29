@@ -1,15 +1,20 @@
 
+debug=:none
+
 if [ -n "$1" ]; then
 
-if [ "$1" != "j" ]; then
+if [ "$1" = "g" ]; then
+echo "debug"
+debug=
+elif [ "$1" != "j" ]; then
 wine "/home/bc/.wine/drive_c/Program Files/Java/jdk1.8.0_202/bin/java.exe" -jar flashalizer.jar $@
+exit
 else
 wine "/home/bc/.wine/drive_c/Program Files/Java/jdk1.8.0_202/bin/java.exe" -jar flashalizer.jar
+exit
 fi
 
 #wine "/home/bc/.wine/drive_c/Program Files/Java/jdk1.8.0_202/bin/java.exe" -classpath $jn flashalizer
-
-exit
 
 fi
 
@@ -54,9 +59,12 @@ files=( actionswf/ActionSwf $dd flashalizer $gg util/util $ww $xx )
 for f in "${files[@]}"
 do
 	echo $f
-	wine "/home/bc/.wine/drive_c/Program Files/Java/jdk1.8.0_202/bin/javac.exe" -d "./" -classpath $jn -sourcepath "../src" -g:none ../src/$f.java
+	wine "/home/bc/.wine/drive_c/Program Files/Java/jdk1.8.0_202/bin/javac.exe" -d "./" -classpath $jn -sourcepath "../src" -g${debug} ../src/$f.java
 	#sourcepath is for other source links
 	if [ "$?" != 0 ]; then
 	exit 1
 	fi
 done
+
+#jdb.ini in users/bc
+#wine "/home/bc/.wine/drive_c/Program Files/Java/jdk1.8.0_202/bin/jdb.exe" -sourcepath "/home/bc/f/flashalizer/src" -classpath "/home/bc/f/b/flashalizer;/home/bc/f/b/javassist.jar;/home/bc/f/b/jna-4.5.0.jar;/home/bc/f/b/jna-platform-4.5.0.jar" -launch flashalizer /home/bc/f/flashalizer/demo
