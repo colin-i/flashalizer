@@ -1,5 +1,8 @@
 package workspace;
 
+import com.sun.jna.Library;
+import com.sun.jna.Native;
+
 import graphics.frame.SpriteId;
 
 import java.io.File;
@@ -36,6 +39,8 @@ public class Project{
 	private Path path;
 	boolean folder_set(String folder,boolean straight){return folder_set_base(folder,straight,false);}
 	boolean folder_set_base(String folder,boolean straight,boolean no_open){
+	//return folder_set_base_extra(folder,straight,no_open,null);}
+	//boolean folder_set_base_extra(String folder,boolean straight,boolean no_open,String extra){
 		Path p=path;//when want to test if 'open' a 'folder' has a valid '.xml'
 		try{
 			path=Paths.get(folder);
@@ -59,10 +64,37 @@ public class Project{
 		}
 
 		//System.setProperty("user.dir",path.toString());  //this for dbl with relative paths, but is still not resolving
-		//maybe with native SetCurrentDirectory
+		//the below method is failing random
+		//char[] test = new char[300];
+		//int q=Kernel32.GetCurrentDirectoryW(300,test);
+		//System.out.println("test "+String.valueOf(q)+" "+String.valueOf(test));
+		/*String s=path.toString();
+		char[] c=s.toCharArray();
+		int x=Kernel32.SetCurrentDirectoryW(c);
+		if(x==0){
+			System.out.println("SetCurrentDirectoryW failed for "+s);
+			if(extra!=null){
+				x=Kernel32.SetCurrentDirectoryW(extra.toCharArray());
+				if(x==0){
+					System.out.println("SetCurrentDirectoryW failed for "+extra);
+				}
+			}
+		}*/
+		//use Path p = Paths.get(dbl); if (p.isAbsolute())
 
 		return true;
 	}
+
+	/*private static interface MyKernel32 extends Library {
+		public MyKernel32 INSTANCE = (MyKernel32) Native.loadLibrary("Kernel32", MyKernel32.class);
+
+		//BOOL SetCurrentDirectory( LPCTSTR lpPathName );
+		int SetCurrentDirectoryW(char[] pathName);
+
+		int GetCurrentDirectoryW(int nBufferLength,char[] lpBuffer);
+	}
+	private MyKernel32 Kernel32=MyKernel32.INSTANCE;*/
+
 	public String folder_file(String ext){
 		return path.toString()+'/'+path.getFileName().toString()+"."+ext;
 	}
@@ -265,7 +297,6 @@ public class Project{
 					if(element instanceof elementplus&&((elementplus)element).exclude)continue;
 					Class<?>clas=element.getClass();
 					String el_type=clas.getSimpleName();
-					//System.out.println("Working Directory = " + System.getProperty("user.dir"));
 					Class<?>[]el_types=Elements.class.getDeclaredClasses();
 					for(int x=0;x<el_types.length;x++){
 						Class<?>c=el_types[x];

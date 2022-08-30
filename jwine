@@ -68,3 +68,4 @@ done
 
 #jdb.ini in users/bc
 #wine "/home/bc/.wine/drive_c/Program Files/Java/jdk1.8.0_202/bin/jdb.exe" -sourcepath "/home/bc/f/flashalizer/src" -classpath "/home/bc/f/b/flashalizer;/home/bc/f/b/javassist.jar;/home/bc/f/b/jna-4.5.0.jar;/home/bc/f/b/jna-platform-4.5.0.jar" -launch flashalizer /home/bc/f/flashalizer/demo
+#"C:\\javassist.jar;C:\\jna-4.5.0.jar;C:\\jna-platform-4.5.0.jar"

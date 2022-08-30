@@ -393,8 +393,12 @@ public class WorkSpace {
 		workpath=new prop("workpath",System.getProperty("user.home"));  //+"/Desktop"  this on linux is problematic
 		menu menuBar=new menu();//Image,work path
 		frame = new JFrame();
-		boolean tryOpen=args.length==1;
-		if(tryOpen)tryOpen=project.folder_set(args[0],true);//frame,work path sets path
+		boolean tryOpen=args.length>=1;
+		if(tryOpen){
+			//if(args.length==1)
+			tryOpen=project.folder_set(args[0],true);//frame,work path sets path
+			//else tryOpen=project.folder_set_base_extra(args[0],true,false,args[1]);
+		}
 		if(tryOpen==false){
 			project.folder_set_base(workpath.get(),true,true);//work path sets path
 			project.newproj(project.width_default,project.height_default,project.backgroundcolor_default,project.fps_default);//frame,use path
