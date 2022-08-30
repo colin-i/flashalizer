@@ -80,7 +80,7 @@ public class Project{
 				}
 			}
 		}*/
-		//use Path p = Paths.get(dbl); if (p.isAbsolute())
+		//use Path p = Paths.get(dbl); if (p.isAbsolute())  or file.isAbsolute()
 
 		return true;
 	}
