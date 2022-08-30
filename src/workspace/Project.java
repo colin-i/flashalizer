@@ -91,7 +91,7 @@ public class Project{
 		//BOOL SetCurrentDirectory( LPCTSTR lpPathName );
 		int SetCurrentDirectoryW(char[] pathName);
 
-		int GetCurrentDirectoryW(int nBufferLength,char[] lpBuffer);
+		//int GetCurrentDirectoryW(int nBufferLength,char[] lpBuffer);
 	}
 	private MyKernel32 Kernel32=MyKernel32.INSTANCE;*/
 
