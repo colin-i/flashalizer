@@ -36,9 +36,10 @@ import util.util.MsEvBRunnable;
 
 public class DBitsL {
 	//private static BufferedImage img;
-	public DBitsL(String src,Component c){
+	public DBitsL(String sr,Component c){
 		try {
-			if(src.length()>0){
+			if(sr.length()>0){
+				String src=workspace.WorkSpace.project.dblString(sr);
 				BufferedImage img = null;
 				File src_file=new File(src);
 				String n=ManagementFactory.getRuntimeMXBean().getName();

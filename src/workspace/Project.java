@@ -80,7 +80,7 @@ public class Project{
 				}
 			}
 		}*/
-		//use Path p = Paths.get(dbl); if (p.isAbsolute())  or file.isAbsolute()
+		//near caller with relative paths for dbl
 
 		return true;
 	}
@@ -362,6 +362,9 @@ public class Project{
 										values.add(val);
 									}
 									Object[]vals=values.toArray();
+									if(el_type.equals(workspace.Project.dbl)){
+										vals[0]=dblString((String)vals[0]);
+									}
 									Object result=caller(elements_names_convertor(el_type,null),vals);
 									if(Functions.hasReturn(fn)){
 										Map<String, Integer>map;
@@ -412,6 +415,11 @@ public class Project{
 	}
 	String outString(){
 		return folder_file("swf");
+	}
+	public String dblString(String s){
+		if(Paths.get(s).isAbsolute())
+			return s;
+		return path.toString()+"/"+s;
 	}
 	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)@interface Errors1{}
 	@Target(ElementType.FIELD)@Retention(RetentionPolicy.RUNTIME)@interface Errors2{}

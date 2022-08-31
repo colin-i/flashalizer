@@ -46,25 +46,27 @@ echo $jn
 mkdir flashalizer
 cd flashalizer
 
-d=dbitsl/
-dd="${d}DBitsL ${d}Tools"
-g=graphics/
-gg="${g}Graphics ${g}button ${g}character ${g}display ${g}frame ${g}shape ${g}text"
-w=workspace/
-ww="${w}AreaInputText ${w}Elements ${w}Functions ${w}Input ${w}InputText ${w}IntInputText ${w}PopUp ${w}Project ${w}WorkSpace ${w}element ${w}elementplus ${w}function"
-x=xml/
-xx="${x}StaXParser ${x}StaXWriter"
-files=( actionswf/ActionSwf $dd flashalizer $gg util/util $ww $xx )
+#d=dbitsl/
+#dd="${d}DBitsL ${d}Tools"
+#g=graphics/
+#gg="${g}Graphics ${g}button ${g}character ${g}display ${g}frame ${g}shape ${g}text"
+#w=workspace/
+#ww="${w}AreaInputText ${w}Elements ${w}Functions ${w}Input ${w}InputText ${w}IntInputText ${w}PopUp ${w}Project ${w}WorkSpace ${w}element ${w}elementplus ${w}function"
+#x=xml/
+#xx="${x}StaXParser ${x}StaXWriter"
+#files=( actionswf/ActionSwf $dd flashalizer $gg util/util $ww $xx )
+#for f in "${files[@]}"
+#do
+#	echo $f
+#	wine "/home/bc/.wine/drive_c/Program Files/Java/jdk1.8.0_202/bin/javac.exe" -d "./" -classpath $jn -sourcepath "../src" -g${debug} ../src/$f.java
+#	#sourcepath is for other source links
+#	if [ "$?" != 0 ]; then
+#		exit 1
+#	fi
+#done
 
-for f in "${files[@]}"
-do
-	echo $f
-	wine "/home/bc/.wine/drive_c/Program Files/Java/jdk1.8.0_202/bin/javac.exe" -d "./" -classpath $jn -sourcepath "../src" -g${debug} ../src/$f.java
-	#sourcepath is for other source links
-	if [ "$?" != 0 ]; then
-	exit 1
-	fi
-done
+#main class is enough
+wine "/home/bc/.wine/drive_c/Program Files/Java/jdk1.8.0_202/bin/javac.exe" -d "./" -classpath $jn -sourcepath ../src -g${debug} ../src/flashalizer.java
 
 #jdb.ini in users/bc
 #wine "/home/bc/.wine/drive_c/Program Files/Java/jdk1.8.0_202/bin/jdb.exe" -sourcepath "/home/bc/f/flashalizer/src" -classpath "/home/bc/f/b/flashalizer;/home/bc/f/b/javassist.jar;/home/bc/f/b/jna-4.5.0.jar;/home/bc/f/b/jna-platform-4.5.0.jar" -launch flashalizer /home/bc/f/flashalizer/demo
