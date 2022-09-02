@@ -13,7 +13,7 @@ On Linux, the jar file can be run with `wine`.
 - dbl2png and png2dbl are with ming at http://www.libming.org/ ; on windows are found with cygwin
 - ActionSwf is [here](https://github.com/colin-i/actionswf)
 ### Compile and run
-<i>jwine</i> and <i>wmake</i> bash files will use wine to compile, run a jar, run without a jar.
+<i>jwine</i> and <i>wmake</i> bash files will use wine to compile and run.
 
 ## Info
 - if starting with an argument, the argument will be the project folder, same as File > Open

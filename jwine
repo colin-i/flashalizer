@@ -7,10 +7,16 @@ if [ "$1" = "g" ]; then
 echo "debug"
 debug=
 elif [ "$1" != "j" ]; then
+
+#run with argument
 wine "/home/bc/.wine/drive_c/Program Files/Java/jdk1.8.0_202/bin/java.exe" -jar flashalizer.jar $@
+
 exit
 else
+
+#run
 wine "/home/bc/.wine/drive_c/Program Files/Java/jdk1.8.0_202/bin/java.exe" -jar flashalizer.jar
+
 exit
 fi
 

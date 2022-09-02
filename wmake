@@ -1,3 +1,5 @@
 
+#to run, see the command at the of jwine
+
 ./jwine && \
 ./wjmake
