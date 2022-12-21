@@ -161,7 +161,7 @@ public class Project{
 			wr.close();
 		}
 		private static final String exclude_xml="exclude";
-		private void write_base(StaXWriter wr,Object obj) throws XMLStreamException,IllegalAccessException{
+		private void write_base(StaXWriter wr,Object obj) throws XMLStreamException,IllegalAccessException,IOException{
 			Class<?>c=obj.getClass();
 			String nm=c.getSimpleName();
 			if(obj instanceof elementplus)wr.start_attr(nm,exclude_xml,Boolean.toString(((elementplus)obj).exclude));
@@ -187,6 +187,7 @@ public class Project{
 					backgroundcolor=Long.decode(rd.data()).intValue();
 					fps=Long.decode(rd.data()).intValue();
 				rd.advance();
+				rd.advance();//our new line
 				rd.advance();//Elements
 					String tag;
 					while((tag=rd.advance_start())!=null)elements.add(read_base(rd,tag,Elements.class.getDeclaredClasses()));
@@ -224,6 +225,7 @@ public class Project{
 								if(isShapeBitmap((int)dest[0])){i=2;dest[1]=ints.get(1);}
 								for(;i<dest.length;i++)dest[i]=Long.decode((String)ints.get(i)).intValue();
 								values.add(dest);
+								rd.advance();//our new line
 							}
 							else/*EditText,button*/values.add(read_base(rd,tp,c.getDeclaredClasses()));
 						}
@@ -231,6 +233,7 @@ public class Project{
 					
 					//last reader advance
 					rd.advance();
+					rd.advance();//our new line
 					Object ob=runtime_instance(c,values);
 					if(exclstr!=null)((elementplus)ob).exclude=Boolean.parseBoolean(exclstr);
 					return ob;

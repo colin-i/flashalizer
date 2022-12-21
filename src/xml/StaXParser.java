@@ -36,7 +36,9 @@ public class StaXParser {
 		XMLEvent start=eventReader.nextEvent();
 		if(start.isStartElement()==false)return null;
 		XMLEvent e=eventReader.nextEvent();
-		if(e.isEndElement()==true)return "";
+		if(e.isEndElement()==true){
+			return "";
+		}
 		String s="";
 		do{
 			s+=e.asCharacters().getData();//this is required there are cases when (text multiple lines breaks text again lines) is chopped

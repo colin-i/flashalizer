@@ -49,9 +49,12 @@ public class StaXWriter {
 		EndElement eElement = eventFactory.createEndElement("", "", s);
 		eventWriter.add(eElement);
 	}
-	public void end(String s) throws XMLStreamException{
+	public void end(String s) throws XMLStreamException,IOException{
 		EndElement eElement = eventFactory.createEndElement("", "", s);
 		eventWriter.add(eElement);
+		eventWriter.flush();//important
+//		out.flush();
+		out.write('\n');
 	}
 	public void close() throws XMLStreamException, IOException{
 		eventWriter.add(eventFactory.createEndDocument());
