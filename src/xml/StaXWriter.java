@@ -39,7 +39,7 @@ public class StaXWriter {
 		StartElement StartElement = eventFactory.createStartElement("","",s,Arrays.asList(attr).iterator(),Arrays.asList().iterator());
 		eventWriter.add(StartElement);
 	}
-	public void data(String s,String value) throws XMLStreamException{
+	public void data(String s,String value) throws XMLStreamException,IOException{
 		StartElement StartElement = eventFactory.createStartElement("","",s);
 		eventWriter.add(StartElement);
 		// create Content
@@ -48,13 +48,17 @@ public class StaXWriter {
 		// create End node
 		EndElement eElement = eventFactory.createEndElement("", "", s);
 		eventWriter.add(eElement);
+
+		eventWriter.flush();//important
+		out.write('\n');//new line 2
 	}
 	public void end(String s) throws XMLStreamException,IOException{
 		EndElement eElement = eventFactory.createEndElement("", "", s);
 		eventWriter.add(eElement);
+
 		eventWriter.flush();//important
 //		out.flush();
-		out.write('\n');
+		out.write('\n');//new line 1
 	}
 	public void close() throws XMLStreamException, IOException{
 		eventWriter.add(eventFactory.createEndDocument());

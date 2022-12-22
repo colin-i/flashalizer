@@ -37,6 +37,7 @@ public class StaXParser {
 		if(start.isStartElement()==false)return null;
 		XMLEvent e=eventReader.nextEvent();
 		if(e.isEndElement()==true){
+			advance();//our new line 2, needed also at demo
 			return "";
 		}
 		String s="";
@@ -44,6 +45,7 @@ public class StaXParser {
 			s+=e.asCharacters().getData();//this is required there are cases when (text multiple lines breaks text again lines) is chopped
 			e=eventReader.nextEvent();
 		}while(e.isEndElement()==false);
+		advance();//our new line 2, needed also at demo
 		return s;
 	}
 	public void close() throws IOException, XMLStreamException{

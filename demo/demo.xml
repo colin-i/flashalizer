@@ -1,39 +1,182 @@
-<?xml version="1.0"?><SWF><Header><width>800</width><height>600</height><backgroundcolor>15790335</backgroundcolor><fps>12</fps></Header>
-<Elements><Font><fontname>_sans</fontname><font_flags>0</font_flags><NamedId>font</NamedId></Font>
-<DBL><imagepath>dbl1.dbl</imagepath><NamedId>image_rgb</NamedId></DBL>
-<DBL><imagepath>dbl2.dbl</imagepath><NamedId>image_rgba</NamedId></DBL>
-<Text><width>800</width><height>100</height><variablename></variablename><flags>129</flags><EditText><font_id>font</font_id><font_height>20</font_height><fontclassname></fontclassname><rgba>0</rgba><maxlength>0</maxlength><initialtext>Demo</initialtext><layout_align>0</layout_align><layout_leftmargin>0</layout_leftmargin><layout_rightmargin>0</layout_rightmargin><layout_indent>0</layout_indent><layout_leading>0</layout_leading></EditText>
-<NamedId>text</NamedId></Text>
-<Shape><width>164</width><height>164</height><Array><I0>64</I0><I1>image_rgb</I1><I2>0</I2><I3>0</I3><I4>2</I4><I5>1</I5><I6>1</I6><I7>164</I7><I8>0</I8><I9>1</I9><I10>1</I10><I11>0</I11><I12>164</I12><I13>1</I13><I14>1</I14><I15>-164</I15><I16>0</I16><I17>1</I17><I18>1</I18><I19>0</I19><I20>-164</I20><I21>-1</I21></Array>
-<NamedId>shape</NamedId></Shape>
-<Button><width>200</width><height>100</height><ButtonData><def_fill>-16776961</def_fill><def_line_sz>10</def_line_sz><def_line>255</def_line><ov_fill>16711935</ov_fill><ov_line_sz>10</ov_line_sz><ov_line>65535</ov_line><dn_fill>8947848</dn_fill><dn_line_sz>10</dn_line_sz><dn_line>34952</dn_line><xcurve>30</xcurve><ycurve>20</ycurve><text>Button</text><font_id>font</font_id><font_height>20</font_height><font_vertical_offset>0</font_vertical_offset><font_color>255</font_color><actions>gotoAndPlay(0)</actions></ButtonData>
-<NamedId>button</NamedId></Button>
-<Shape><width>164</width><height>164</height><Array><I0>64</I0><I1>image_rgba</I1><I2>0</I2><I3>0</I3><I4>2</I4><I5>1</I5><I6>1</I6><I7>164</I7><I8>0</I8><I9>1</I9><I10>1</I10><I11>0</I11><I12>164</I12><I13>1</I13><I14>1</I14><I15>-164</I15><I16>0</I16><I17>1</I17><I18>1</I18><I19>0</I19><I20>-164</I20><I21>-1</I21></Array>
-<NamedId>shape transp</NamedId></Shape>
-<SpriteNew><NamedId>0</NamedId></SpriteNew>
-<SpritePlacementCoords exclude="false"><spriteid>0</spriteid><refid>button</refid><depth>0</depth><x>0</x><y>0</y></SpritePlacementCoords>
-<SpritePlacementCoords exclude="false"><spriteid>0</spriteid><refid>shape</refid><depth>1</depth><x>175</x><y>0</y></SpritePlacementCoords>
-<SpriteAction><spriteid>0</spriteid><ac>trace("mc 0");
-stop()</ac></SpriteAction>
-<SpriteShowFrame><spriteid>0</spriteid></SpriteShowFrame>
-<SpriteRemove><spriteid>0</spriteid><depth>1</depth></SpriteRemove>
-<SpriteAction><spriteid>0</spriteid><ac>trace("mc 1");
-stop()</ac></SpriteAction>
-<SpriteShowFrame><spriteid>0</spriteid></SpriteShowFrame>
-<SpriteDone><spriteid>0</spriteid><NamedId>movieclip</NamedId></SpriteDone>
-<ExportsAdd><refid>movieclip</refid><name>movieTest</name></ExportsAdd>
+<?xml version="1.0"?><SWF><Header><width>800</width>
+<height>600</height>
+<backgroundcolor>15790335</backgroundcolor>
+<fps>12</fps>
+</Header>
+<Elements><Font><fontname>_sans</fontname>
+<font_flags>0</font_flags>
+<NamedId>font</NamedId>
+</Font>
+<DBL><imagepath>dbl1.dbl</imagepath>
+<NamedId>image_rgb</NamedId>
+</DBL>
+<DBL><imagepath>dbl2.dbl</imagepath>
+<NamedId>image_rgba</NamedId>
+</DBL>
+<Text><width>800</width>
+<height>100</height>
+<variablename></variablename>
+<flags>129</flags>
+<EditText><font_id>font</font_id>
+<font_height>20</font_height>
+<fontclassname></fontclassname>
+<rgba>0</rgba>
+<maxlength>0</maxlength>
+<initialtext>Demo</initialtext>
+<layout_align>0</layout_align>
+<layout_leftmargin>0</layout_leftmargin>
+<layout_rightmargin>0</layout_rightmargin>
+<layout_indent>0</layout_indent>
+<layout_leading>0</layout_leading>
+</EditText>
+<NamedId>text</NamedId>
+</Text>
+<Shape><width>164</width>
+<height>164</height>
+<Array><I0>64</I0>
+<I1>image_rgb</I1>
+<I2>0</I2>
+<I3>0</I3>
+<I4>2</I4>
+<I5>1</I5>
+<I6>1</I6>
+<I7>164</I7>
+<I8>0</I8>
+<I9>1</I9>
+<I10>1</I10>
+<I11>0</I11>
+<I12>164</I12>
+<I13>1</I13>
+<I14>1</I14>
+<I15>-164</I15>
+<I16>0</I16>
+<I17>1</I17>
+<I18>1</I18>
+<I19>0</I19>
+<I20>-164</I20>
+<I21>-1</I21>
+</Array>
+<NamedId>shape</NamedId>
+</Shape>
+<Button><width>200</width>
+<height>100</height>
+<ButtonData><def_fill>-16776961</def_fill>
+<def_line_sz>10</def_line_sz>
+<def_line>255</def_line>
+<ov_fill>16711935</ov_fill>
+<ov_line_sz>10</ov_line_sz>
+<ov_line>65535</ov_line>
+<dn_fill>8947848</dn_fill>
+<dn_line_sz>10</dn_line_sz>
+<dn_line>34952</dn_line>
+<xcurve>30</xcurve>
+<ycurve>20</ycurve>
+<text>Button</text>
+<font_id>font</font_id>
+<font_height>20</font_height>
+<font_vertical_offset>0</font_vertical_offset>
+<font_color>255</font_color>
+<actions>gotoAndPlay(0)</actions>
+</ButtonData>
+<NamedId>button</NamedId>
+</Button>
+<Shape><width>164</width>
+<height>164</height>
+<Array><I0>64</I0>
+<I1>image_rgba</I1>
+<I2>0</I2>
+<I3>0</I3>
+<I4>2</I4>
+<I5>1</I5>
+<I6>1</I6>
+<I7>164</I7>
+<I8>0</I8>
+<I9>1</I9>
+<I10>1</I10>
+<I11>0</I11>
+<I12>164</I12>
+<I13>1</I13>
+<I14>1</I14>
+<I15>-164</I15>
+<I16>0</I16>
+<I17>1</I17>
+<I18>1</I18>
+<I19>0</I19>
+<I20>-164</I20>
+<I21>-1</I21>
+</Array>
+<NamedId>shape transp</NamedId>
+</Shape>
+<SpriteNew><NamedId>0</NamedId>
+</SpriteNew>
+<SpritePlacementCoords exclude="false"><spriteid>0</spriteid>
+<refid>button</refid>
+<depth>0</depth>
+<x>0</x>
+<y>0</y>
+</SpritePlacementCoords>
+<SpritePlacementCoords exclude="false"><spriteid>0</spriteid>
+<refid>shape</refid>
+<depth>1</depth>
+<x>175</x>
+<y>0</y>
+</SpritePlacementCoords>
+<SpriteAction><spriteid>0</spriteid>
+<ac>trace("mc 0");
+stop()</ac>
+</SpriteAction>
+<SpriteShowFrame><spriteid>0</spriteid>
+</SpriteShowFrame>
+<SpriteRemove><spriteid>0</spriteid>
+<depth>1</depth>
+</SpriteRemove>
+<SpriteAction><spriteid>0</spriteid>
+<ac>trace("mc 1");
+stop()</ac>
+</SpriteAction>
+<SpriteShowFrame><spriteid>0</spriteid>
+</SpriteShowFrame>
+<SpriteDone><spriteid>0</spriteid>
+<NamedId>movieclip</NamedId>
+</SpriteDone>
+<ExportsAdd><refid>movieclip</refid>
+<name>movieTest</name>
+</ExportsAdd>
 <ExportsDone></ExportsDone>
-<PlacementCoords exclude="false"><refid>text</refid><depth>0</depth><x>0</x><y>0</y></PlacementCoords>
-<PlacementCoords exclude="false"><refid>shape transp</refid><depth>1</depth><x>250</x><y>50</y></PlacementCoords>
-<PlacementCoords exclude="false"><refid>button</refid><depth>2</depth><x>25</x><y>200</y></PlacementCoords>
-<PlacementCoords exclude="false"><refid>movieclip</refid><depth>3</depth><x>50</x><y>400</y></PlacementCoords>
-<Action><ac>trace("frame 0")</ac></Action>
+<PlacementCoords exclude="false"><refid>text</refid>
+<depth>0</depth>
+<x>0</x>
+<y>0</y>
+</PlacementCoords>
+<PlacementCoords exclude="false"><refid>shape transp</refid>
+<depth>1</depth>
+<x>250</x>
+<y>50</y>
+</PlacementCoords>
+<PlacementCoords exclude="false"><refid>button</refid>
+<depth>2</depth>
+<x>25</x>
+<y>200</y>
+</PlacementCoords>
+<PlacementCoords exclude="false"><refid>movieclip</refid>
+<depth>3</depth>
+<x>50</x>
+<y>400</y>
+</PlacementCoords>
+<Action><ac>trace("frame 0")</ac>
+</Action>
 <ShowFrame></ShowFrame>
-<PlacementCoords exclude="false"><refid>movieclip</refid><depth>4</depth><x>100</x><y>0</y></PlacementCoords>
-<Remove><depth>1</depth></Remove>
+<PlacementCoords exclude="false"><refid>movieclip</refid>
+<depth>4</depth>
+<x>100</x>
+<y>0</y>
+</PlacementCoords>
+<Remove><depth>1</depth>
+</Remove>
 <Action><ac>trace("frame 1");
 attachMovie('movieTest','test',100);test._x=300;test._y=200;
-stop()</ac></Action>
+stop()</ac>
+</Action>
 <ShowFrame></ShowFrame>
 </Elements>
 </SWF>
