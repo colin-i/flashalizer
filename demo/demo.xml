@@ -2,6 +2,7 @@
 <height>600</height>
 <backgroundcolor>15790335</backgroundcolor>
 <fps>12</fps>
+<asflags>0</asflags>
 </Header>
 <Elements><Font><fontname>_sans</fontname>
 <font_flags>0</font_flags>
@@ -76,7 +77,7 @@
 <font_height>20</font_height>
 <font_vertical_offset>0</font_vertical_offset>
 <font_color>255</font_color>
-<actions>gotoAndPlay(0)</actions>
+<actions>gotoAndPlay(1)</actions>
 </ButtonData>
 <NamedId>button</NamedId>
 </Button>

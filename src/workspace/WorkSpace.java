@@ -146,13 +146,17 @@ public class WorkSpace {
 				InputText new_fps=new IntInputText(project.fps_default);
 				ct.add(new_fps);
 				//
+				ct.add(new Label("AS Flags"));
+				InputText new_asflags=new IntInputText(project.asflags_default);
+				ct.add(new_asflags);
+				//
 				ctnr.add(ct);
 				//x
 				JButton btn=new JButton("OK");
 				btn.addActionListener(new ActionListener(){
 					public void actionPerformed(ActionEvent e) {
 						if(project.folder_set(workpath.get()+"/"+new_name.getText(),false)){
-							project.newproj(Long.decode(new_width.getText()).intValue(),Long.decode(new_height.getText()).intValue(),colorChooser.getColor().getRGB()&0xffFFff,Long.decode(new_fps.getText()).intValue());
+							project.newproj(Long.decode(new_width.getText()).intValue(),Long.decode(new_height.getText()).intValue(),colorChooser.getColor().getRGB()&0xffFFff,Long.decode(new_fps.getText()).intValue(),Long.decode(new_asflags.getText()).intValue());
 							dg.setVisible(false);
 							resetPerspective();
 						}
@@ -401,7 +405,7 @@ public class WorkSpace {
 		}
 		if(tryOpen==false){
 			project.folder_set_base(workpath.get(),true,true);//work path sets path
-			project.newproj(project.width_default,project.height_default,project.backgroundcolor_default,project.fps_default);//frame,use path
+			project.newproj(project.width_default,project.height_default,project.backgroundcolor_default,project.fps_default,project.asflags_default);//frame,use path
 		}
 		
 		container=new PanelEx();container.setLayout(new BoxLayout(container,BoxLayout.Y_AXIS));

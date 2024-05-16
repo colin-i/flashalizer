@@ -102,11 +102,12 @@ public class Project{
 	public String folder_file_default(){
 		return folder_file(proj_ext);
 	}
-	int width_default=640;int height_default=480;int backgroundcolor_default=0xffFFff;int fps_default=12;
-	public int width;     public int height;     public int backgroundcolor;          int fps;
+	static final int width_default=640;static final int height_default=480;static final int backgroundcolor_default=0xffFFff;
+	static final int fps_default=12;static final int asflags_default=0;
+	public int width;     public int height;     public int backgroundcolor;          int fps;   int asflags;
 	public List<Object> elements=new ArrayList<Object>();//data,write,read,display,build   ,new project
-	void newproj(int wd,int hg,int bcolor,int fs){
-		width=wd;height=hg;backgroundcolor=bcolor;fps=fs;
+	void newproj(int wd,int hg,int bcolor,int fs,int asf){
+		width=wd;height=hg;backgroundcolor=bcolor;fps=fs;asflags=asf;
 		elements.clear();
 		fresh_proj();
 		elements.add(new Elements.ShowFrame());
@@ -141,6 +142,7 @@ public class Project{
 					wr.data("height",Integer.toString(height));
 					wr.data("backgroundcolor",Integer.toString(backgroundcolor));
 					wr.data("fps",Integer.toString(fps));
+					wr.data("asflags",Integer.toString(asflags));
 				wr.end(head);
 				String els="Elements";
 				wr.start(els);
@@ -186,6 +188,7 @@ public class Project{
 					height=Long.decode(rd.data()).intValue();
 					backgroundcolor=Long.decode(rd.data()).intValue();
 					fps=Long.decode(rd.data()).intValue();
+					asflags=Long.decode(rd.data()).intValue();
 				rd.advance();
 				rd.advance();//our new line 1
 				rd.advance();//Elements
@@ -254,12 +257,12 @@ public class Project{
 	private void open() throws Throwable{
 		xml x=new xml();
 		List<Object>clone=new ArrayList<Object>(elements);
-		int w=width;int h=height;int c=backgroundcolor;int f=fps;
+		int w=width;int h=height;int c=backgroundcolor;int f=fps;int a=asflags;
 		try{
 			x.read();
 		}catch(Throwable e){
 			elements=clone;
-			width=w;height=h;backgroundcolor=c;fps=f;
+			width=w;height=h;backgroundcolor=c;fps=f;asflags=a;
 			throw e;
 		}
 	}
@@ -294,7 +297,7 @@ public class Project{
     			File rec_file=new File(folder_file(rec_ext));
     			save(rec_ext);
     			//
-				caller("swf_new",swf_new__arguments());
+				caller("swf_new_ex",swf_new_ex__arguments());
 				for(int a=0;a<elements.size();a++){
 					Object element=elements.get(a);
 					if(element instanceof elementplus&&((elementplus)element).exclude)continue;
@@ -412,8 +415,8 @@ public class Project{
 				throw new Throwable("Error(user input or space)");
 			}
 		}
-		Object[] swf_new__arguments(){
-			return new Object[]{outString(),width,height,backgroundcolor,fps};
+		Object[] swf_new_ex__arguments(){
+			return new Object[]{outString(),width,height,backgroundcolor,fps,asflags};
 		}
 	}
 	String outString(){

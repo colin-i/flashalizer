@@ -42,7 +42,7 @@ public class flashalizer {
 					c.toClass();
 				}
 			}
-			Functions.f_list.add(new function(x.getDeclaredMethod("swf_new")));Functions.f_list.add(new function(x.getDeclaredMethod("swf_done")));
+			Functions.f_list.add(new function(x.getDeclaredMethod("swf_new_ex")));Functions.f_list.add(new function(x.getDeclaredMethod("swf_done")));
 			for(function f:Functions.f_list)f.set_type(x.getDeclaredMethod(f.name));
 		}
 		catch (NotFoundException | CannotCompileException | ClassNotFoundException e1) {

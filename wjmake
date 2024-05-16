@@ -4,6 +4,7 @@
 
 rsync -a ./img ./flashalizer && \
 cd flashalizer && \
+# openjdk-8-jdk-headless
 jar cfm ../flashalizer.jar ../MANIFEST.MF . && \
 cd .. && \
 rm -r flashalizer && \

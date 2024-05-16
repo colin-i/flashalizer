@@ -21,7 +21,7 @@ public interface ActionSwf extends Library{//Library is used by com.sun.jna.Nati
 	int swf_dbl(String imagepath);
 	
 	void swf_done();
-	void swf_new(String path,int width,int height,int backgroundcolor,int fps);
+	void swf_new_ex(String path,int width,int height,int backgroundcolor,int fps,int asflags);
 	void swf_placeobject(@NamedId int refid,int depth);
 	void swf_placeobject_coords(@NamedId int refid,int depth,int x,int y);
 	void swf_removeobject(int depth);

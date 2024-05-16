@@ -303,7 +303,7 @@ public class Functions extends util.util.TableEx{
 		for(function f:f_list){
 			String n=f.name;
 			total_args=Math.max(f.number_of_args,total_args);
-			if(n.equals("swf_new")==false&&n.equals("swf_done")==false){
+			if(n.equals("swf_new_ex")==false&&n.equals("swf_done")==false){
 				ToolTips.add(new ToolTipWrapper(n,n));
 				comboBox.addItem(ToolTips.get(ToolTips.size()-1));
 			}
@@ -314,9 +314,9 @@ public class Functions extends util.util.TableEx{
 		//set rows and columns
 		for(int i=0;i<(1+total_args+2);i++)model.addColumn(null);
 		//minimum model
-		Object[] n=WorkSpace.project.builder.swf_new__arguments();
+		Object[] n=WorkSpace.project.builder.swf_new_ex__arguments();
 		ArrayList<Object> temp=new ArrayList<Object>(Arrays.asList(n));
-		temp.add(0,new ToolTipWrapper("swf_new","swf_new"));
+		temp.add(0,new ToolTipWrapper("swf_new_ex","swf_new_ex"));
 		n=temp.toArray();
 		model.addRow(n);
 		//last show frame is wrote later
@@ -464,7 +464,7 @@ public class Functions extends util.util.TableEx{
 				else if(f.equals("swf_dbl"))tips=new String[]{"DefineBitsLossless 1 or 2 image path"};
 				
 				//else if(f.equals("swf_done"))
-				else if(f.equals("swf_new"))tips=new String[]{"SWF file name: "+getValueAt(row,1),"Width in pixels","Height in pixels","Background rgb color","Frames per second"};
+				else if(f.equals("swf_new_ex"))tips=new String[]{"SWF file name: "+getValueAt(row,1),"Width in pixels","Height in pixels","Background rgb color","Frames per second"};
 				else if(f.equals("swf_placeobject"))tips=new String[]{"CharacterId field","Depth of character"};
 				else if(f.equals("swf_placeobject_coords"))tips=new String[]{"CharacterId field","Depth of character","X position in pixels","Y position in pixels"};
 				else if(f.equals("swf_removeobject"))tips=new String[]{"Depth of character"};
@@ -530,8 +530,8 @@ public class Functions extends util.util.TableEx{
 							if(hasReturn(f))x.add(getValueAt(i,getColumnCount()-1));
 							//
 							if(s.equals("swf_done"))break;
-							if(s.equals("swf_new")){
-								WorkSpace.project.width=Long.decode(x.get(1).toString()).intValue();WorkSpace.project.height=Long.decode(x.get(2).toString()).intValue();WorkSpace.project.backgroundcolor=Long.decode(x.get(3).toString()).intValue();WorkSpace.project.fps=Long.decode(x.get(4).toString()).intValue();
+							if(s.equals("swf_new_ex")){
+								WorkSpace.project.width=Long.decode(x.get(1).toString()).intValue();WorkSpace.project.height=Long.decode(x.get(2).toString()).intValue();WorkSpace.project.backgroundcolor=Long.decode(x.get(3).toString()).intValue();WorkSpace.project.fps=Long.decode(x.get(4).toString()).intValue();;WorkSpace.project.asflags=Long.decode(x.get(5).toString()).intValue();
 							}
 							else{
 								String element=Project.elements_names_convertor(null,s);
