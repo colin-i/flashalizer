@@ -1,4 +1,11 @@
 
+if [ -z "${winerun}" ]; then
+winerun=wine
+fi
+if [ -z "${winedir}" ]; then
+winedir=.wine
+fi
+
 debug=:none
 
 if [ -n "$1" ]; then
@@ -9,13 +16,13 @@ debug=
 elif [ "$1" != "j" ]; then
 
 #run with argument
-wine "/home/bc/.wine/drive_c/Program Files/Java/jdk1.8.0_202/bin/java.exe" -jar flashalizer.jar $@
+${winerun} "/home/bc/${winedir}/drive_c/Program Files/Java/jdk1.8.0_202/bin/java.exe" -jar flashalizer.jar $@
 
 exit
 else
 
 #run
-wine "/home/bc/.wine/drive_c/Program Files/Java/jdk1.8.0_202/bin/java.exe" -jar flashalizer.jar
+${winerun} "/home/bc/${winedir}/drive_c/Program Files/Java/jdk1.8.0_202/bin/java.exe" -jar flashalizer.jar
 
 exit
 fi
@@ -28,7 +35,7 @@ fi
 
 a=`pwd`
 
-cd ~/.wine/drive_c
+cd ~/${winedir}/drive_c
 if [ "$?" != 0 ]; then
 exit 1
 fi
@@ -72,7 +79,7 @@ cd flashalizer
 #done
 
 #main class is enough
-wine "/home/bc/.wine/drive_c/Program Files/Java/jdk1.8.0_202/bin/javac.exe" -d "./" -classpath $jn -sourcepath ../src -g${debug} ../src/flashalizer.java
+${winerun} "/home/bc/${winedir}/drive_c/Program Files/Java/jdk1.8.0_202/bin/javac.exe" -d "./" -classpath $jn -sourcepath ../src -g${debug} ../src/flashalizer.java
 
 #java
 #wine "/home/bc/.wine/drive_c/Program Files/Java/jdk1.8.0_202/bin/java.exe" -jar flashalizer.jar /home/bc/f/flashalizer/demo
