@@ -2,7 +2,7 @@
 <height>600</height>
 <backgroundcolor>15790335</backgroundcolor>
 <fps>12</fps>
-<asflags>256</asflags>
+<asflags>16640</asflags>
 </Header>
 <Elements><Font><fontname>_sans</fontname>
 <font_flags>0</font_flags>
