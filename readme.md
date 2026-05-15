@@ -21,5 +21,4 @@ On Linux, the jar file can be run with `wine`.
 - png image: https://drive.google.com/open?id=1C1cCOCPH8S_PhxsPHewIyNgUv4kKg-lz
 
 ## Donations
-The *donations* section is here
-*https://gist.github.com/colin-i/e324e85e0438ed71219673fbcc661da6*
+The *donations* section is [here](https://gist.github.com/colin-i/e324e85e0438ed71219673fbcc661da6#donations).
