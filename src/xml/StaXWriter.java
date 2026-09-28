@@ -1,6 +1,6 @@
 package xml;
 
-import java.io.FileNotFoundException;
+//import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,7 +13,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.EndElement;
-import javax.xml.stream.events.StartDocument;
+//import javax.xml.stream.events.StartDocument;
 import javax.xml.stream.events.StartElement;
 
 public class StaXWriter {
@@ -22,13 +22,15 @@ public class StaXWriter {
 	// create an EventFactory
 	private XMLEventFactory eventFactory = XMLEventFactory.newInstance();
 	private OutputStream out;
-	public StaXWriter(String f) throws FileNotFoundException, XMLStreamException{
+	public StaXWriter(String f) throws IOException, XMLStreamException{ //FileNotFoundException is a subclass of IOException
 		// create an XMLOutputFactory
 		XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
 		out=new FileOutputStream(f);
+		out.write("<?xml version=\"1.0\"?>".getBytes("US-ASCII"));
 		eventWriter=outputFactory.createXMLEventWriter(out);
-		StartDocument startDocument = eventFactory.createStartDocument();
-		eventWriter.add(startDocument);
+		// no createStartDocument(): the declaration was written above
+		//StartDocument startDocument = eventFactory.createStartDocument();
+		//eventWriter.add(startDocument);
 	}
 	public void start(String s) throws XMLStreamException{
 		StartElement StartElement = eventFactory.createStartElement("","",s);

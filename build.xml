@@ -1,4 +1,10 @@
-<project>
+<project xmlns:if="ant:if">
+
+    <property environment="env"/>
+
+    <condition property="build.debug" value="true" else="false">
+        <isset property="env.DEBUG"/>
+    </condition>
 
     <target name="clean">
 	<delete includeemptydirs="true">
@@ -11,17 +17,38 @@
     <path id="main.classpath">
 	<fileset dir="/usr/share/java">
 		<include name="javassist.jar"/> <!-- 3.19.0.GA -->
-		<include name="jna-5.9.0.jar"/> <!-- 4.5.0 4.5.1 -->
-		<include name="jna-platform-5.9.0.jar"/> <!-- 4.5.0 4.5.1 -->
+		<include name="jna.jar"/> <!-- 4.5.0 4.5.1 5.9.0 -->
+		<include name="jna-platform.jar"/> <!-- 4.5.0 4.5.1 5.9.0 -->
 	</fileset>
     </path>
 
     <target name="compile">
-        <javac srcdir="src" destdir="build" classpathref="main.classpath" includeantruntime="false"/>
+        <mkdir dir="build"/>
+        <javac srcdir="src" destdir="build" classpathref="main.classpath" includeantruntime="false" debug="${build.debug}"/>
+        <copy todir="build">
+            <fileset dir="." includes="img/**"/>
+        </copy>
     </target>
 
     <target name="run">
-        <java classpath="build" classpathref="main.classpath" classname="flashalizer" fork="true"/>
+        <java classname="flashalizer" fork="true">
+            <arg line="${env.APP_ARGS}" if:set="env.APP_ARGS"/>
+
+            <classpath>
+                <pathelement location="build"/>
+                <path refid="main.classpath"/>
+            </classpath>
+
+            <!-- optional: local libactionswf build instead of the global one -->
+            <jvmarg if:set="env.ACTIONSWF_LIB" value="-Djna.library.path=${env.ACTIONSWF_LIB}"/>
+
+            <!-- optional: wait for jdb on port 5005 -->
+            <jvmarg if:set="env.JDWP" value="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005"/>
+
+            <!-- optional: libactionswf built with ASan -->
+            <env if:set="env.ACTIONSWF_ASAN" key="LD_PRELOAD" value="${env.ACTIONSWF_ASAN}"/>
+            <env if:set="env.ACTIONSWF_ASAN" key="ASAN_OPTIONS" value="detect_leaks=0:handle_segv=0:handle_sigbus=0:handle_sigfpe=0:allow_user_segv_handler=1"/>
+        </java>
     </target>
 
 </project>

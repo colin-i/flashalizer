@@ -62,7 +62,15 @@ public class flashalizer {
 			e1.printStackTrace();
 			return;
 		}
+
 		//to avoid static on many declarations, use this
-		WorkSpace wspace=new WorkSpace();wspace.main(args);
+		//WorkSpace wspace=new WorkSpace();wspace.main(args);
+		final WorkSpace wspace = new WorkSpace();
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				wspace.main(args);
+			}
+		});
 	}
 }

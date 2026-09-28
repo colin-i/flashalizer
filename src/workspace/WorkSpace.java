@@ -46,6 +46,7 @@ import util.util.PanelEx;
 
 import com.sun.jna.Callback;
 import com.sun.jna.Native;
+import com.sun.jna.Platform;
 import com.sun.jna.Structure;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
@@ -419,7 +420,7 @@ public class WorkSpace {
 		frame.setJMenuBar(menuBar);
 		
 		//Set up the exit.
-		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);frame.addWindowListener(new WindowAdapter() {@Override public void windowClosing(WindowEvent arg0) {if(close_window())System.exit(0);}});
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);frame.addWindowListener(new WindowAdapter() {@Override public void windowClosing(WindowEvent arg0) {if(close_window()){exiting_normally=true;System.exit(0);}}});
 		//frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//default is HIDE_ON_CLOSE//showing dialog after Exit will not display
 		//this is useless: Runtime.getRuntime().addShutdownHook( shutdownHook );
 		
@@ -452,6 +453,20 @@ public class WorkSpace {
         WinDef.LRESULT callback(int nCode, WinDef.WPARAM wParam, CWPSSTRUCT hookProcStruct);
     }
     private final static String shd="shutdown";
+    //set when the user confirmed a normal exit, so the linux shutdown hook must not create a recovery file
+    private volatile boolean exiting_normally=false;
+    //keeps the windows callback referenced, otherwise it can be garbage collected and crash the JVM
+    private MyHookProc hookProc;
+    //saves the project as recovery file, deletes it if identical with the project file
+    private void shutdown_save(){
+        project.save(shd);
+        File proj_file=new File(project.folder_file_default());
+        if(proj_file.exists()){
+            File temp_file=new File(project.folder_file(shd));
+            try {if(file_a_eq_file_b(proj_file,temp_file))temp_file.delete();
+            } catch (IOException e) {e.printStackTrace();}
+        }
+    }
     private final class MyHookProc implements WinHookProc {
         private WinUser.HHOOK     hhook;
         @Override
@@ -459,19 +474,7 @@ public class WorkSpace {
             if (nCode >= 0) {
                 //outx.println(hookProcStruct.message);
                 if (hookProcStruct.message.longValue() == WM_QUERYENDSESSION) {
-                	//JVM is killing anyway(even at return 0) the process
-                	//here is freezing
-                	//for(int i=0;i<10;i++){try {File filex = new File("C:/Users/eu/Desktop/shutdownTest"+i+".txt");PrintStream outx = new PrintStream(filex);outx.close();Thread.sleep(10000);} catch (FileNotFoundException | InterruptedException e) {e.printStackTrace();}}
-                	//this is runn ing, then stays frozen
-                	//anyway save the project to not loose it
-            		project.save(shd);
-            		File proj_file=new File(project.folder_file_default());
-                	if(proj_file.exists()){
-                		File temp_file=new File(project.folder_file(shd));
-                		try {if(file_a_eq_file_b(proj_file,temp_file))temp_file.delete();
-						} catch (IOException e) {e.printStackTrace();}
-                	}
-                    //
+                    shutdown_save();
                     return new LRESULT(1);
                 }
             }
@@ -480,6 +483,16 @@ public class WorkSpace {
         }
     }
     private void register(JFrame frame) {
+        if (!Platform.isWindows()) {
+            //linux: the session end sends SIGTERM/SIGHUP, which runs the JVM shutdown hooks
+            Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (!exiting_normally) shutdown_save();
+                }
+            }));
+            return;
+        }
         Native.setCallbackExceptionHandler(new Callback.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Callback arg0, Throwable arg1) {
@@ -495,10 +508,10 @@ public class WorkSpace {
             int x = Native.getLastError();
             throw  new IllegalStateException("error calling GetWindowThreadProcessId when installing machine-shutdown handler " + x);
         }
-        final MyHookProc proc = new MyHookProc();
-        proc.hhook = User32.INSTANCE.SetWindowsHookEx(4/* WH_CALLWNDPROC */, new MyHookProc(), null, windowThreadID/* dwThreadID */);
+        hookProc = new MyHookProc();
+        hookProc.hhook = User32.INSTANCE.SetWindowsHookEx(4/* WH_CALLWNDPROC */, hookProc, null, windowThreadID/* dwThreadID */);
         // null in dicates failure
-        if (proc.hhook == null) {
+        if (hookProc.hhook == null) {
             int x = Native.getLastError();
             throw new IllegalStateException("error calling SetWindowsHookEx when installing machine-shutdown handler " + x);
         }
