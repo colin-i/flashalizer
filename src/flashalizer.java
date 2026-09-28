@@ -20,6 +20,7 @@ import static workspace.element.NamedId;
 
 public class flashalizer {
 	public static void main(String[] args) {
+		Project.initializeNativeNumericLocale();
 		//create f_list and NamedId to elements
 		//run this later and got: duplicate class definition for name:... ; may be from .class. or some reflection or other thing, java assist using same reflection and cause the duplicate 
 		try{

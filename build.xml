@@ -9,7 +9,7 @@
     <target name="clean">
 	<delete includeemptydirs="true">
 		<fileset dir="build">
-			<exclude name=".gitignore"/>
+			<!-- <exclude name=".gitignore"/> -->
 		</fileset>
 	</delete>
     </target>
@@ -25,9 +25,7 @@
     <target name="compile">
         <mkdir dir="build"/>
         <javac srcdir="src" destdir="build" classpathref="main.classpath" includeantruntime="false" debug="${build.debug}"/>
-        <copy todir="build">
-            <fileset dir="." includes="img/**"/>
-        </copy>
+        <!-- <copy todir="build"> <fileset dir="." includes="img/**"/> </copy> -->
     </target>
 
     <target name="run">
@@ -36,6 +34,7 @@
 
             <classpath>
                 <pathelement location="build"/>
+                <pathelement location="."/>
                 <path refid="main.classpath"/>
             </classpath>
 

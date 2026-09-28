@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.prefs.Preferences;
 
 import javax.swing.JOptionPane;
 import javax.xml.stream.XMLStreamException;
@@ -36,6 +37,25 @@ import static actionswf.ActionSwf.HasText;
 import static actionswf.ActionSwf.repeating_bitmap_fill;
 
 public class Project{
+	private static final String SWF_IMG_PREFERENCE="useSwfImg";
+	private static final String NATIVE_NUMERIC_LOCALE_PREFERENCE="setNativeNumericLocale";
+	private static final Preferences preferences=Preferences.userNodeForPackage(WorkSpace.class);
+	public static void initializeNativeNumericLocale(){
+		if(preferences.getBoolean(NATIVE_NUMERIC_LOCALE_PREFERENCE,false))
+			CLocale.useCLocaleForNumeric();
+	}
+	static boolean useNativeNumericLocale(){
+		return preferences.getBoolean(NATIVE_NUMERIC_LOCALE_PREFERENCE,false);
+	}
+	static void setUseNativeNumericLocale(boolean enabled){
+		preferences.putBoolean(NATIVE_NUMERIC_LOCALE_PREFERENCE,enabled);
+	}
+	static boolean useSwfImg(){
+		return preferences.getBoolean(SWF_IMG_PREFERENCE,false);
+	}
+	static void setUseSwfImg(boolean useSwfImg){
+		preferences.putBoolean(SWF_IMG_PREFERENCE,useSwfImg);
+	}
 	private Path path;
 	boolean folder_set(String folder,boolean straight){return folder_set_base(folder,straight,false);}
 	boolean folder_set_base(String folder,boolean straight,boolean no_open){
@@ -269,6 +289,7 @@ public class Project{
 	void build(){
 		builder.build();
 	}
+	static final String rec_ext="recover";//we have unidentified access violation and have to implement this
 	Builder builder=new Builder();
 	class Builder{
 		private ActionSwf as=ActionSwf.INSTANCE;
@@ -292,8 +313,6 @@ public class Project{
 			try{
 				WorkSpace.updateElements();
 				ids=new HashMap<String, Integer>();ids_sprite=new HashMap<String, Integer>();
-				//we have unidentified access violation and have to implement this
-				String rec_ext="recover";
     			File rec_file=new File(folder_file(rec_ext));
     			save(rec_ext);
     			//
@@ -412,7 +431,7 @@ public class Project{
 			Byte er=prv.erbool_get();
 			if(er!=0){
 				prv.erbool_reset();
-				throw new Throwable("Error(user input or space)");
+				throw new Throwable("Error(user input or parse)");
 			}
 		}
 		Object[] swf_new_ex__arguments(){
@@ -450,7 +469,7 @@ public class Project{
 	public static final String actionsprite=sprite+"Action";
 	public static String elements_names_convertor(String cName,String fName){
 		String[][]values={
-			{button,"swf_button"},{font,"swf_font"},{text,"swf_text"},{shape,"swf_shape"}/*,{image,"swf_image"}*/,{dbl,"swf_dbl"}
+			{button,"swf_button"},{font,"swf_font"},{text,"swf_text"},{shape,"swf_shape"}/*,{image,"swf_image"}*/,{dbl,useSwfImg()?"swf_img":"swf_dbl"}
 			,{placement,"swf_placeobject"},{placementcoords,"swf_placeobject_coords"},{remove,"swf_removeobject"},{showframe,"swf_showframe"}
 			,{spritedone,"swf_sprite_done"},{"SpriteNew","swf_sprite_new"},{spriteplacement,"swf_sprite_placeobject"},{spriteplacementcoords,"swf_sprite_placeobject_coords"},{spriteremove,"swf_sprite_removeobject"},{spriteshowframe,"swf_sprite_showframe"}
 			,{exportsadd,"swf_exports_add"},{"ExportsDone","swf_exports_done"}

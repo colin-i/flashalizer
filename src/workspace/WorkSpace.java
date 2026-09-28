@@ -7,6 +7,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -217,12 +218,32 @@ public class WorkSpace {
 				});
 				cnt1.add(workpath_browse);
 				cnt1.add(workpath.label);
+				JCheckBox useSwfImg=new JCheckBox("Use swf_img instead of swf_dbl",Project.useSwfImg());
+				cnt1.add(new Label("Image API"));
+				cnt1.add(useSwfImg);
+				JCheckBox useNativeNumericLocale=new JCheckBox("Set native LC_NUMERIC to C at startup",Project.useNativeNumericLocale());
+				useNativeNumericLocale.setToolTipText("Applies on the next application start; default is disabled.");
+				cnt1.add(new Label("Native numeric locale"));
+				cnt1.add(useNativeNumericLocale);
 				//add
 				cnt.add(cnt1);
 				//OK
 				JButton bt=new JButton("OK");
 				bt.addActionListener(new ActionListener(){
 					public void actionPerformed(ActionEvent e) {
+						Project.setUseNativeNumericLocale(useNativeNumericLocale.isSelected());
+						if(useSwfImg.isSelected()!=Project.useSwfImg()){
+							try{
+								updateElements();
+								Project.setUseSwfImg(useSwfImg.isSelected());
+								Functions.setImageFunction(useSwfImg.isSelected());
+								resetPerspective();
+							}catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException e1){
+								e1.printStackTrace();
+								JOptionPane.showMessageDialog(dl,e1.getMessage(),"Properties",JOptionPane.ERROR_MESSAGE);
+								return;
+							}
+						}
 						dl.setVisible(false);
 					}
 				});
@@ -425,7 +446,9 @@ public class WorkSpace {
 		//this is useless: Runtime.getRuntime().addShutdownHook( shutdownHook );
 		
 		if(new File(project.folder_file(shd)).exists())JOptionPane.showMessageDialog(null, "There is a recovery file from the last shutdown.","Info",JOptionPane.INFORMATION_MESSAGE);
-	    //try {outx = new PrintStream(f = new File("C:/Users/eu/Desktop/shutdownTest.txt"));} catch (FileNotFoundException e) {e.printStackTrace();}
+		//try {outx = new PrintStream(f = new File("C:/Users/eu/Desktop/shutdownTest.txt"));} catch (FileNotFoundException e) {e.printStackTrace();}
+		new File(project.folder_file(Project.rec_ext)).delete();//the .recover file is a forced crash, if i restart the program, means i didn't needed the .recover
+
 		//this MUST be set before setVisible, otherwise there are chances to fail
 		register(frame);
 		

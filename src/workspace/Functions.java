@@ -461,7 +461,7 @@ public class Functions extends util.util.TableEx{
 				else if(f.equals("swf_text"))tips=new Object[]{"Width in pixels","Height in pixels","VariableName field",new String[]{"HasFont=0x1|HasMaxLength=0x2|HasTextColor=0x4|ReadOnly=0x8","Password=0x10|Multiline=0x20|WordWrap=0x40|HasText=0x80","UseOutlines=0x100|HTML=0x200|WasStatic=0x400|Border=0x800","NoSelect=0x1000|HasLayout=0x2000|AutoSize=0x4000|HasFontClass=0x8000"},"EditText structure"};
 				else if(f.equals("swf_shape"))tips=new String[]{"Width in pixels","Height in pixels","SHAPEWITHSTYLE field"};
 				//else if(f.equals("swf_image"))tips=new String[]{"DefineBitsLossless 1 or 2 image path"};
-				else if(f.equals("swf_dbl"))tips=new String[]{"DefineBitsLossless 1 or 2 image path"};
+				else if(f.equals("swf_dbl")||f.equals("swf_img"))tips=new String[]{"DefineBitsLossless 1 or 2 image path"};
 				
 				//else if(f.equals("swf_done"))
 				else if(f.equals("swf_new_ex"))tips=new String[]{"SWF file name: "+getValueAt(row,1),"Width in pixels","Height in pixels","Background rgb color","Frames per second"};
@@ -571,6 +571,15 @@ public class Functions extends util.util.TableEx{
 	}
 	private int modelEnd_sum;
 	public static List<function> f_list;
+	static void setImageFunction(boolean useSwfImg){
+		String name=useSwfImg?"swf_img":"swf_dbl";
+		for(function f:f_list){
+			if(f.name.equals("swf_img")||f.name.equals("swf_dbl")){
+				f.name=name;
+				return;
+			}
+		}
+	}
 	private class TableRenderer extends DefaultTableCellRenderer{
 		//TableCellRenderer doesn't have setBackground
 		private static final long serialVersionUID = 1L;
