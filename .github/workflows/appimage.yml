@@ -1,0 +1,55 @@
+
+on:
+ workflow_dispatch:
+  inputs:
+   ppa:
+    description: "ppa sufix"
+   fcheckout:
+    description: "Force checkout even when ./src already exists"
+    type: boolean
+    default: false
+
+jobs:
+ build:
+  runs-on: ubuntu-24.04 #also at downdeb
+  steps:
+   - name: Check for existing source directory
+     id: src
+     run: |
+      if [ -d ./src ]; then
+       echo "exists=true" >> "$GITHUB_OUTPUT"
+      else
+       echo "exists=false" >> "$GITHUB_OUTPUT"
+      fi
+   - uses: actions/checkout@master
+     if: steps.src.outputs.exists != 'true' || inputs.fcheckout
+   - name: Install build dependencies
+     run: |
+      which ant || {
+       if [ "$(id -u)" -eq 0 ]; then
+        apt-get update
+        apt-get install -y ant libjna-java libjna-platform-java libjavassist-java
+       else
+        sudo apt-get update
+        sudo apt-get install -y ant libjna-java libjna-platform-java libjavassist-java
+       fi
+      }
+   - name: Run a multi-line script
+     run: |
+      apd=AppDir
+      mkdir -p ${apd}
+
+      run=runtime
+      if [ ! -e "${run}" ]; then
+       archfile=runtime-x86_64
+       wget -c https://github.com/AppImage/type2-runtime/releases/download/continuous/${archfile}
+       mv ${archfile} ${run}
+      fi
+
+      ant compile
+      shr=AppDir/usr/share/flashalizer
+      mkdir -p ${shr}
+      if [ ! -e ${shr}/flashalizer.class ]; then
+       cp -av build/. AppDir/usr/share/flashalizer/
+       cp -av img AppDir/usr/share/flashalizer/
+      fi

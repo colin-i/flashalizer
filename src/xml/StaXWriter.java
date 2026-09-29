@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Collections;
 
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventWriter;
@@ -14,6 +15,7 @@ import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.EndElement;
 //import javax.xml.stream.events.StartDocument;
+import javax.xml.stream.events.Namespace;
 import javax.xml.stream.events.StartElement;
 
 public class StaXWriter {
@@ -38,7 +40,7 @@ public class StaXWriter {
 	}
 	public void start_attr(String s,String a,String b) throws XMLStreamException{
 		Attribute attr=eventFactory.createAttribute(a,b);//b=boolean. inexistent
-		StartElement StartElement = eventFactory.createStartElement("","",s,Arrays.asList(attr).iterator(),Arrays.asList().iterator());
+		StartElement StartElement = eventFactory.createStartElement("","",s,Arrays.asList(attr).iterator(),Collections.<Namespace>emptyList().iterator());
 		eventWriter.add(StartElement);
 	}
 	public void data(String s,String value) throws XMLStreamException,IOException{
