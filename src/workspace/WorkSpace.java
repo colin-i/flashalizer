@@ -481,15 +481,16 @@ public class WorkSpace {
     //keeps the windows callback referenced, otherwise it can be garbage collected and crash the JVM
     private MyHookProc hookProc;
     //saves the project as recovery file, deletes it if identical with the project file
-    private void shutdown_save(){
-        project.save(shd);
-        File proj_file=new File(project.folder_file_default());
-        if(proj_file.exists()){
-            File temp_file=new File(project.folder_file(shd));
-            try {if(file_a_eq_file_b(proj_file,temp_file))temp_file.delete();
-            } catch (IOException e) {e.printStackTrace();}
-        }
-    }
+	private void shutdown_save(){
+		project.save(shd);
+		File proj_file=new File(project.folder_file_default());
+		if(proj_file.exists()){
+			File temp_file=new File(project.folder_file(shd));
+			try {
+				if(file_a_eq_file_b(proj_file,temp_file))temp_file.delete();
+			} catch (IOException e) {e.printStackTrace();}
+		}
+	}
     private final class MyHookProc implements WinHookProc {
         private WinUser.HHOOK     hhook;
         @Override
@@ -505,17 +506,18 @@ public class WorkSpace {
             return User32.INSTANCE.CallNextHookEx(hhook, nCode, wParam,hookProcStruct.lParam);
         }
     }
-    private void register(JFrame frame) {
-        if (!Platform.isWindows()) {
-            //linux: the session end sends SIGTERM/SIGHUP, which runs the JVM shutdown hooks
-            Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    if (!exiting_normally) shutdown_save();
-                }
-            }));
-            return;
-        }
+	private void register(JFrame frame) {
+		if (!Platform.isWindows()) {
+			//linux: the session end sends SIGTERM/SIGHUP, which runs the JVM shutdown hooks
+			Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+			@Override
+			public void run() {
+				if (!exiting_normally){
+					shutdown_save();
+				}
+			}}));
+			return;
+		}
         Native.setCallbackExceptionHandler(new Callback.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Callback arg0, Throwable arg1) {
