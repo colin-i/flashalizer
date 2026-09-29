@@ -421,8 +421,10 @@ public class WorkSpace {
 		frame = new JFrame();
 		boolean tryOpen=args.length>=1;
 		if(tryOpen){
-			//if(args.length==1)
-			tryOpen=project.folder_set(args[0],true);//frame,work path sets path
+			//File folder=new File(args[0]);
+			//if(!folder.isAbsolute())folder=new File(System.getProperty("user.dir"),args[0]);
+			//folder=folder.getAbsolutePath();
+			tryOpen=project.folder_set(args[0],true);//frame, work path sets path
 			//else tryOpen=project.folder_set_base_extra(args[0],true,false,args[1]);
 		}
 		if(tryOpen==false){

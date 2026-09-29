@@ -29,7 +29,7 @@
     </target>
 
     <target name="run">
-        <java classname="flashalizer" fork="true">
+        <java classname="flashalizer" fork="true" dir="${user.dir}">
             <arg line="${env.APP_ARGS}" if:set="env.APP_ARGS"/>
 
             <classpath>

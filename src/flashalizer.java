@@ -51,7 +51,7 @@ public class flashalizer {
 			return;
 		}
 	
-		//go to folder location(from C, open C:\...flashalizer.jar, no external files)
+		/*//go to folder location(from C, open C:\...flashalizer.jar, no external files)
 		Class<?> c=MethodHandles.lookup().lookupClass();
 		URL url = c.getProtectionDomain().getCodeSource().getLocation();
 		File f;
@@ -62,7 +62,7 @@ public class flashalizer {
 		} catch (URISyntaxException e1) {
 			e1.printStackTrace();
 			return;
-		}
+		}*/
 
 		//to avoid static on many declarations, use this
 		//WorkSpace wspace=new WorkSpace();wspace.main(args);
