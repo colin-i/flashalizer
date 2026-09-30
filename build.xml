@@ -29,15 +29,32 @@
     </target>
 
     <target name="run">
+        <condition property="run.extra.jvm.args" value="${env.APP_EXTRA}" else="">
+            <isset property="env.APP_EXTRA"/>
+        </condition>
+        <condition property="run.jna.jvm.arg" value="-Djna.library.path=${env.ACTIONSWF_LIB}" else="">
+            <isset property="env.ACTIONSWF_LIB"/>
+        </condition>
+        <condition property="run.jdwp.jvm.arg" value="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005" else="">
+            <isset property="env.JDWP"/>
+        </condition>
+        <condition property="run.app.args" value="${env.APP_ARGS}" else="">
+            <isset property="env.APP_ARGS"/>
+        </condition>
+        <path id="run.classpath">
+            <pathelement location="build"/>
+            <pathelement location="."/>
+            <path refid="main.classpath"/>
+        </path>
+        <pathconvert property="run.classpath.string" refid="run.classpath" pathsep=":"/>
+        <echo message="Running: ${java.home}/bin/java --add-opens=java.base/java.lang=ALL-UNNAMED ${run.extra.jvm.args} ${run.jna.jvm.arg} ${run.jdwp.jvm.arg} -cp ${run.classpath.string} flashalizer ${run.app.args}"/>
         <java classname="flashalizer" fork="true" dir="${user.dir}">
             <arg line="${env.APP_ARGS}" if:set="env.APP_ARGS"/>
 
-            <classpath>
-                <pathelement location="build"/>
-                <pathelement location="."/>
-                <path refid="main.classpath"/>
-            </classpath>
+            <classpath refid="run.classpath"/>
 
+            <jvmarg value="--add-opens=java.base/java.lang=ALL-UNNAMED"/>
+            <jvmarg line="${env.APP_EXTRA}" if:set="env.APP_EXTRA"/>
             <!-- optional: local libactionswf build instead of the global one -->
             <jvmarg if:set="env.ACTIONSWF_LIB" value="-Djna.library.path=${env.ACTIONSWF_LIB}"/>
 

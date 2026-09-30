@@ -26,19 +26,17 @@ jobs:
    - name: Install build dependencies
      run: |
       if ! command -v ant || [ "${{ inputs.frefresh }}" = "true" ]; then
+       deps='ant default-jre libjna-java libjna-platform-java libjavassist-java squashfs-tools'
        if [ "$(id -u)" -eq 0 ]; then
         apt-get update
-        apt-get install -y ant libjna-java libjna-platform-java libjavassist-java squashfs-tools
+        apt-get install -y ${deps}
        else
         sudo apt-get update
-        sudo apt-get install -y ant libjna-java libjna-platform-java libjavassist-java squashfs-tools
+        sudo apt-get install -y ${deps}
        fi
       fi
    - name: Run a multi-line script
      run: |
-      apd=AppDir
-      mkdir -p ${apd}
-
       run=runtime
       if [ ! -e "${run}" ]; then
        archfile=runtime-x86_64
@@ -50,11 +48,26 @@ jobs:
       name2=Flashalizer
 
       ant compile
-      shr=AppDir/usr/share/${name}
+
+      apd=AppDir
+      mkdir -p ${apd}
+      shr=${apd}/usr/share
       mkdir -p ${shr}
-      if [ ! -e ${shr}/${name}.class ]; then
-       cp -av build/. AppDir/usr/share/${name}/
-       cp -av img AppDir/usr/share/${name}/
+      fshr=${shr}/${name}
+      if [ ! -e ${fshr} ]; then
+       mkdir ${fshr}
+       cp -av build/. ${fshr}/
+       cp -av img ${fshr}/
+      fi
+      jshr=${shr}/java
+      if [ ! -e ${jshr} ]; then
+       mkdir -p ${jshr}
+       cp -avL /usr/share/java/jna.jar /usr/share/java/jna-platform.jar /usr/share/java/javassist.jar ${jshr}/
+      fi
+      jav=${apd}/usr/lib/jvm
+      if [ ! -x ${jav}/default-java/bin/java ]; then
+       mkdir -p ${jav}
+       cp -avL "$(readlink -f /usr/lib/jvm/default-java)" ${jav}/default-java
       fi
 
       cd ${apd}
@@ -64,7 +77,7 @@ jobs:
        cat > ${file} <<EOF
       #!/bin/sh
       root_dir="\$(readlink -f "\$(dirname "\$0")"/usr)"
-      exec java -cp "\${root_dir}"/${name}:/usr/share/java/jna.jar:/usr/share/java/jna-platform.jar:/usr/share/java/javassist.jar ${name} "\$@"
+      exec "\${root_dir}"/lib/jvm/default-java/bin/java --add-opens=java.base/java.lang=ALL-UNNAMED -cp "\${root_dir}"/share/${name}:"\${root_dir}"/share/java/jna.jar:"\${root_dir}"/share/java/jna-platform.jar:"\${root_dir}"/share/java/javassist.jar ${name} "\$@"
       EOF
        chmod 755 ${file}
       fi

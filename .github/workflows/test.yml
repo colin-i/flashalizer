@@ -9,7 +9,18 @@ jobs:
    matrix:
     os: [ubuntu-24.04]
   steps:
-   - uses: actions/checkout@master
+   - name: Install build dependencies
+     run: |
+      command -v Xvfb || {
+       deps='xvfb fuse3' #imagemagick
+       if [ "$(id -u)" -eq 0 ]; then
+        apt-get update
+        apt-get install -y ${deps}
+       else
+        sudo apt-get update
+        sudo apt-get install -y ${deps}
+       fi
+      }
    - name: run and take screenshot
      run: |
       name=flashalizer
@@ -19,7 +30,7 @@ jobs:
        branch=$(git rev-parse --abbrev-ref HEAD)
        #fi
        id=$(gh run list --workflow=appimage.yml -b ${branch} | cut -f7 | head -1)
-       repo_at_gh=`cat debian/control | grep "^Homepage" | grep -o "[^/]*$"`
+       repo_at_gh=${name}
        url=`gh api -H "Accept: application/vnd.github.v3+json" /repos/colin-i/${repo_at_gh}/actions/runs/${id}/artifacts | jq ".artifacts[0].archive_download_url"`
        url=${url:1:-1}
        curl -L -H "Authorization: token ${{ secrets.PAT }}" ${url} --output a.zip
@@ -27,9 +38,8 @@ jobs:
        chmod +x ./${name}.AppImage
       fi
 
-      sudo apt install -y xvfb imagemagick fuse3
       Xvfb :99 -screen 0 1920x1080x24 &
-      sleep 3
+      sleep 5
       export DISPLAY=:99
       ./${name}.AppImage &
       sleep 9
