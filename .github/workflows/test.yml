@@ -1,0 +1,41 @@
+on:
+ workflow_dispatch:
+env:
+ GITHUB_TOKEN: ${{ secrets.PAT }}
+jobs:
+ takescreen:
+  runs-on: ${{ matrix.os }}
+  strategy:
+   matrix:
+    os: [ubuntu-24.04]
+  steps:
+   - uses: actions/checkout@master
+   - name: run and take screenshot
+     run: |
+      name=flashalizer
+      if [ ! -e ./${name}.AppImage ]; then
+       #branch=${{ github.event.inputs.branch }}
+       #if [ -z "${branch}" ]; then
+       branch=$(git rev-parse --abbrev-ref HEAD)
+       #fi
+       id=$(gh run list --workflow=appimage.yml -b ${branch} | cut -f7 | head -1)
+       repo_at_gh=`cat debian/control | grep "^Homepage" | grep -o "[^/]*$"`
+       url=`gh api -H "Accept: application/vnd.github.v3+json" /repos/colin-i/${repo_at_gh}/actions/runs/${id}/artifacts | jq ".artifacts[0].archive_download_url"`
+       url=${url:1:-1}
+       curl -L -H "Authorization: token ${{ secrets.PAT }}" ${url} --output a.zip
+       unzip ./a.zip
+       chmod +x ./${name}.AppImage
+      fi
+
+      sudo apt install -y xvfb imagemagick fuse3
+      Xvfb :99 -screen 0 1920x1080x24 &
+      sleep 3
+      export DISPLAY=:99
+      ./${name}.AppImage &
+      sleep 9
+      import -window root screenshot.png
+   #- name: upload artifact
+   #		uses: actions/upload-artifact@master
+   #		with:
+   #			name: screenshot-${{ matrix.os }}
+   #			path: screenshot.png
