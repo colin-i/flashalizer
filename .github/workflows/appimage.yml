@@ -25,7 +25,7 @@ jobs:
      if: steps.src.outputs.exists != 'true' || inputs.frefresh
    - name: Install build dependencies
      run: |
-      if ! command -v ant || [ "${{ inputs.frefresh }}" = true ]; then
+      dpkg -s actionswf || [ "${{ inputs.frefresh }}" = true ] || {
        deps='ant default-jre libjna-java libjna-platform-java libjavassist-java squashfs-tools software-properties-common'
        if [ "$(id -u)" -eq 0 ]; then
         apt-get update
@@ -33,14 +33,14 @@ jobs:
         add-apt-repository -y ppa:colin-i/ppa
         apt-get update
         apt-get install -y actionswf
-       else
+       else # ! command -v ant
         sudo apt-get update
         sudo apt-get install -y ${deps}
         sudo add-apt-repository -y ppa:colin-i/ppa
         sudo apt-get update
         sudo apt-get install -y actionswf
        fi
-      fi
+      }
    - name: Run a multi-line script
      run: |
       run=runtime
