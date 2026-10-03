@@ -44,8 +44,8 @@ jobs:
       ./${name}.AppImage &
       sleep 9
       import -window root screenshot.png
-   #- name: upload artifact
-   #		uses: actions/upload-artifact@master
-   #		with:
-   #			name: screenshot-${{ matrix.os }}
-   #			path: screenshot.png
+   - name: upload artifact
+     uses: actions/upload-artifact@master
+     with:
+      name: screenshot-${{ matrix.os }}
+      path: screenshot.png
