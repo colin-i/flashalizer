@@ -72,7 +72,7 @@ jobs:
       if [ ! -e ${jshr} ] || [ "${{ inputs.frefresh }}" = true ]; then
        mkdir -p ${jshr}
        cp -avL /usr/share/java/jna.jar /usr/share/java/jna-platform.jar /usr/share/java/javassist.jar ${jshr}/
-      fi
+      fi    #-L will copy links but -a will track inodes and will hard link if is the case
 
       multiarch=$(dpkg-architecture -qDEB_HOST_MULTIARCH)
       jna_native=$(dpkg -L libjna-jni | grep '/libjnidispatch\.system\.so$')
