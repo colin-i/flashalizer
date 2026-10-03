@@ -12,7 +12,7 @@ jobs:
    - name: Install build dependencies
      run: |
       command -v Xvfb || {
-       deps='xvfb fuse3' #imagemagick
+       deps='xvfb fuse3 libxtst6 libxi6' #imagemagick
        if [ "$(id -u)" -eq 0 ]; then
         apt-get update
         apt-get install -y ${deps}

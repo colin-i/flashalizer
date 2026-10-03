@@ -25,7 +25,7 @@ jobs:
      if: steps.src.outputs.exists != 'true' || inputs.frefresh
    - name: Install build dependencies
      run: |
-      if ! command -v ant || [ "${{ inputs.frefresh }}" = "true" ]; then
+      if ! command -v ant || [ "${{ inputs.frefresh }}" = true ]; then
        deps='ant default-jre libjna-java libjna-platform-java libjavassist-java squashfs-tools'
        if [ "$(id -u)" -eq 0 ]; then
         apt-get update
@@ -38,7 +38,7 @@ jobs:
    - name: Run a multi-line script
      run: |
       run=runtime
-      if [ ! -e "${run}" ]; then
+      if [ ! -e "${run}" ] || [ "${{ inputs.frefresh }}" = true ]; then
        archfile=runtime-x86_64
        wget -c https://github.com/AppImage/type2-runtime/releases/download/continuous/${archfile}
        mv ${archfile} ${run}
@@ -54,36 +54,53 @@ jobs:
       shr=${apd}/usr/share
       mkdir -p ${shr}
       fshr=${shr}/${name}
-      if [ ! -e ${fshr} ]; then
-       mkdir ${fshr}
+      if [ ! -e ${fshr} ] || [ "${{ inputs.frefresh }}" = true ]; then
+       mkdir -p ${fshr}
        cp -av build/. ${fshr}/
        cp -av img ${fshr}/
       fi
+
       jshr=${shr}/java
-      if [ ! -e ${jshr} ]; then
+      if [ ! -e ${jshr} ] || [ "${{ inputs.frefresh }}" = true ]; then
        mkdir -p ${jshr}
        cp -avL /usr/share/java/jna.jar /usr/share/java/jna-platform.jar /usr/share/java/javassist.jar ${jshr}/
       fi
-      jav=${apd}/usr/lib/jvm
-      if [ ! -x ${jav}/default-java/bin/java ]; then
+
+      multiarch=$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+      jna_native=$(dpkg -L libjna-jni | grep '/libjnidispatch\.system\.so$')
+      if [ -z "${jna_native}" ]; then
+       echo "Could not locate libjnidispatch from libjna-jni" >&2
+       exit 1
+      fi
+      jni=${fshr}/com/sun/jna/linux-x86-64
+      if [ ! -e ${jni} ] || [ "${{ inputs.frefresh }}" = true ]; then
+       mkdir -p ${jni}
+       cp -avL "${jna_native}" ${jni}/libjnidispatch.so
+      fi
+
+      lib=${apd}/usr/lib
+      jav=${lib}/jvm
+      if [ ! -x ${jav}/default-java/bin/java ] || [ "${{ inputs.frefresh }}" = true ]; then
        mkdir -p ${jav}
        cp -avL "$(readlink -f /usr/lib/jvm/default-java)" ${jav}/default-java
       fi
 
       cd ${apd}
       file=AppRun
-      if [ ! -e "${file}" ]; then
+      if [ ! -e "${file}" ] || [ "${{ inputs.frefresh }}" = true ]; then
        echo launcher
        cat > ${file} <<EOF
       #!/bin/sh
       root_dir="\$(readlink -f "\$(dirname "\$0")"/usr)"
-      exec "\${root_dir}"/lib/jvm/default-java/bin/java --add-opens=java.base/java.lang=ALL-UNNAMED -cp "\${root_dir}"/share/${name}:"\${root_dir}"/share/java/jna.jar:"\${root_dir}"/share/java/jna-platform.jar:"\${root_dir}"/share/java/javassist.jar ${name} "\$@"
+      exec "\${root_dir}"/lib/jvm/default-java/bin/java --add-opens=java.base/java.lang=ALL-UNNAMED \
+       -cp "\${root_dir}"/share/${name}:"\${root_dir}"/share/java/jna.jar:"\${root_dir}"/share/java/jna-platform.jar:"\${root_dir}"/share/java/javassist.jar \
+       ${name} "\$@"
       EOF
        chmod 755 ${file}
       fi
 
       pngfile=${name}.png
-      if [ ! -e "${pngfile}" ]; then
+      if [ ! -e "${pngfile}" ] || [ "${{ inputs.frefresh }}" = true ]; then
       #.DirIcon must be a PNG for the AppDir convention. Use a standard icon size such as 128x128 or 256x256 pixels. A JPG can still be used as your app's source image, but convert it to PNG for .DirIcon.
        echo pngfile
        wget https://github.com/colin-i/test/releases/download/1.5/${name}.png -O ${pngfile}
@@ -95,13 +112,13 @@ jobs:
       Icon=${name}
       Categories=Utility
       EOF
-       ln -s ${pngfile} .DirIcon
+       ln -sf ${pngfile} .DirIcon
       fi
 
       #metadata file
       mi=usr/share/metainfo
       mif=${mi}/com.colin.${name}.appdata.xml
-      if [ ! -e "${mif}" ]; then
+      if [ ! -e "${mif}" ] || [ "${{ inputs.frefresh }}" = true ]; then
        echo metadata
        mkdir -p ${mi}
        cat > ${mif} <<EOF
@@ -132,7 +149,7 @@ jobs:
       fi
 
       cd ..
-      if [ ! -e "${name}.AppImage" ]; then
+      if [ ! -e "${name}.AppImage" ] || [ "${{ inputs.frefresh }}" = true ]; then
        mksquashfs ${apd} ${name}.squashfs -root-owned -noappend
        cat ${run} > ${name}.AppImage
        cat ${name}.squashfs >> ${name}.AppImage
