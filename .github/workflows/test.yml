@@ -21,6 +21,7 @@ jobs:
         sudo apt-get install -y ${deps}
        fi
       }
+   - uses: actions/checkout@master
    - name: run and take screenshot
      run: |
       name=flashalizer
