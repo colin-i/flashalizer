@@ -13,12 +13,12 @@ jobs:
      run: |
       if [ "$(id -u)" -eq 0 ]; then
        command -v Xvfb || {
-        sudo apt-get update
-        sudo apt-get install -y xvfb fuse3 libxtst6 libxi6
+        apt-get update
+        apt-get install -y xvfb fuse3 libxtst6 libxi6
        }
       else
-       apt-get update
-       apt-get install -y imagemagick
+       sudo apt-get update
+       sudo apt-get install -y imagemagick
       fi
    - uses: actions/checkout@master
    - name: run and take screenshot

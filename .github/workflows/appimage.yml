@@ -26,11 +26,11 @@ jobs:
    - name: Install build dependencies
      run: |
       dpkg -s actionswf || [ "${{ inputs.frefresh }}" = true ] || {
-       deps='ant default-jre libjna-java libjna-platform-java libjavassist-java squashfs-tools software-properties-common'
+       deps='default-jre libjna-java libjna-platform-java libjavassist-java'
        if [ "$(id -u)" -eq 0 ]; then
          command -v ant || {
           apt-get update
-          apt-get install -y ${deps}
+          apt-get install -y ${deps} ant squashfs-tools software-properties-common
           add-apt-repository -y ppa:colin-i/ppa
           apt-get update
           apt-get install -y actionswf
