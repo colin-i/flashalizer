@@ -26,13 +26,19 @@ jobs:
    - name: Install build dependencies
      run: |
       if ! command -v ant || [ "${{ inputs.frefresh }}" = true ]; then
-       deps='ant default-jre libjna-java libjna-platform-java libjavassist-java squashfs-tools'
+       deps='ant default-jre libjna-java libjna-platform-java libjavassist-java squashfs-tools software-properties-common'
        if [ "$(id -u)" -eq 0 ]; then
         apt-get update
         apt-get install -y ${deps}
+        add-apt-repository -y ppa:colin-i/ppa
+        apt-get update
+        apt-get install -y actionswf
        else
         sudo apt-get update
         sudo apt-get install -y ${deps}
+        sudo add-apt-repository -y ppa:colin-i/ppa
+        sudo apt-get update
+        sudo apt-get install -y actionswf
        fi
       fi
    - name: Run a multi-line script
@@ -79,6 +85,17 @@ jobs:
       fi
 
       lib=${apd}/usr/lib
+      actionlib=$(dpkg -L actionswf | grep -E '/libactionswf\.so(\.[0-9]+)*$' | head -n 1)
+      if [ -z "${actionlib}" ]; then
+       echo "Could not locate libactionswf.so from actionswf package" >&2
+       exit 1
+      fi
+      actionlibdir=${lib}/${multiarch}
+      if [ ! -e "${actionlibdir}" ] || [ "${{ inputs.frefresh }}" = true ]; then
+       mkdir -p "${actionlibdir}"
+       cp -avL "${actionlib}" "${actionlibdir}"/libactionswf.so
+      fi
+
       jav=${lib}/jvm
       if [ ! -x ${jav}/default-java/bin/java ] || [ "${{ inputs.frefresh }}" = true ]; then
        mkdir -p ${jav}
@@ -92,6 +109,7 @@ jobs:
        cat > ${file} <<EOF
       #!/bin/sh
       root_dir="\$(readlink -f "\$(dirname "\$0")"/usr)"
+      export LD_LIBRARY_PATH="\${root_dir}"/lib/${multiarch}"\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}"
       exec "\${root_dir}"/lib/jvm/default-java/bin/java --add-opens=java.base/java.lang=ALL-UNNAMED \
        -cp "\${root_dir}"/share/${name}:"\${root_dir}"/share/java/jna.jar:"\${root_dir}"/share/java/jna-platform.jar:"\${root_dir}"/share/java/javassist.jar \
        ${name} "\$@"
