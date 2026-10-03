@@ -1,0 +1,53 @@
+
+on:
+ workflow_dispatch:
+
+jobs:
+ uabuild:
+  runs-on: ubuntu-latest
+  steps:
+   - uses: actions/checkout@v3
+   - name: Run a multi-line script
+     run: |
+      #proj
+      name=flashalizer
+      #get up_url
+      up_url=$(gh api "/repos/colin-i/${name}/releases/latest" --jq '.upload_url')
+      if [ -z "$up_url" ]; then
+       echo "Could not find the latest release upload URL for colin-i/${name}" >&2
+       exit 1
+      fi
+      echo "up_url=${up_url}" >> "$GITHUB_ENV"
+      #get appimage artifact, normally lists the newest runs first
+      id=$(gh run list --workflow=appimage.yml -b $(git rev-parse --abbrev-ref HEAD) | cut -f7 | head -1)
+      #
+      artifacts=$(gh api "/repos/colin-i/${name}/actions/runs/${id}/artifacts")
+      url=$(echo "$artifacts" | jq -r '.artifacts[0].archive_download_url // empty')
+      artifact_id=$(echo "$artifacts" | jq -r '.artifacts[0].id // empty')
+      if [ -z "$url" ] || [ -z "$artifact_id" ]; then
+       echo "No AppImage artifact found for workflow run ${id}" >&2
+       exit 1
+      fi
+      echo ${url}
+      curl -L -H "Authorization: token ${{ secrets.PAT }}" ${url} --output a.zip
+      echo "artifact_id=${artifact_id}" >> "$GITHUB_ENV"
+      #to env
+      unzip ./a.zip
+      echo "file=${name}.AppImage" >> $GITHUB_ENV
+      echo "fullfile=${name}.amd64.AppImage" >> $GITHUB_ENV
+     env:
+      #for gh
+      GITHUB_TOKEN: ${{ secrets.PAT }}
+   - name: Upload Release Asset
+     uses: actions/upload-release-asset@v1
+     env:
+      GITHUB_TOKEN: ${{ secrets.PAT }}
+     with:
+      upload_url: ${{ env.up_url }}
+      asset_path: ./${{ env.file }}
+      asset_name: ${{ env.fullfile }}
+      asset_content_type: application/x-executable
+   - name: Delete uploaded AppImage artifact
+     run: gh api --method DELETE "/repos/colin-i/flashalizer/actions/artifacts/${{ env.artifact_id }}"
+     env:
+      GITHUB_TOKEN: ${{ secrets.PAT }}
