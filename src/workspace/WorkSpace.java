@@ -60,7 +60,7 @@ import com.sun.jna.platform.win32.WinDef.WPARAM;
 
 public class WorkSpace {
 	//private Preferences prefs=Preferences.userRoot().node(this.getClass().getName());
-	private Preferences prefs=Preferences.userNodeForPackage(this.getClass());
+	private Preferences prefs=Preferences.userRoot().node("flashalizer");
 	private class prop{
 		private Label label;
 		private String name;
@@ -416,7 +416,7 @@ public class WorkSpace {
 		//keep this order of declarations
 		//img = new ImageIcon(System.getProperty("user.dir")+"img/icon.jpg");
 		img = new ImageIcon(getClass().getResource("/img/icon.jpg"));
-		workpath=new prop("workpath",System.getProperty("user.home"));  //+"/Desktop"  this on linux is problematic
+		workpath=new prop("workpath",new File(System.getProperty("user.home"),"flashalizer").getPath());
 		menu menuBar=new menu();//Image,work path
 		frame = new JFrame();
 		boolean tryOpen=args.length>=1;

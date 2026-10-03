@@ -1,5 +1,11 @@
 
 import java.util.ArrayList;
+import java.io.IOException;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;
@@ -15,7 +21,52 @@ import workspace.function;
 import static workspace.element.NamedId;
 
 public class flashalizer {
+	private static void printHelp() {
+		System.out.println("Usage: flashalizer [folder]");
+		System.out.println("       flashalizer --project=folder");
+		System.out.println("       flashalizer --help");
+		System.out.println("       flashalizer --remove-config");
+		System.out.println("  --project=folder  Opens a named project");
+		System.out.println("  --help            Shows this help and exits");
+		System.out.println("  --remove-config   Removes ${HOME}/flashalizer if is empty");
+	}
+
+	private static void removeConfig() {
+		Path config=Paths.get(System.getProperty("user.home"),"flashalizer");
+		if(!Files.isDirectory(config,LinkOption.NOFOLLOW_LINKS)){
+			System.err.println("Not an existing config directory: "+config);
+			return;
+		}
+		try{
+			Files.delete(config);
+			System.out.println("Removed empty config directory: "+config);
+		}catch(DirectoryNotEmptyException e){
+			System.out.println("Config directory is not empty; not removed: "+config);
+		}catch(IOException e){
+			System.err.println("Could not remove config directory "+config+": "+e.getMessage());
+		}
+	}
+
 	public static void main(String[] args) {
+		if(args.length>0&&args[0].equals("--help")){
+			printHelp();
+			return;
+		}
+		if(args.length>0&&args[0].equals("--remove-config")){
+			removeConfig();
+			return;
+		}
+		String[] projectArgs=args;
+		if(args.length>0&&args[0].startsWith("--project=")){
+			String folder=args[0].substring("--project=".length());
+			if(folder.isEmpty()){
+				System.err.println("Missing folder for --project");
+				printHelp();
+				return;
+			}
+			projectArgs=new String[]{folder};
+		}
+		final String[] launchArgs=projectArgs;
 		Project.initializeNativeNumericLocale();
 		//create f_list and NamedId to elements
 		//run this later and got: duplicate class definition for name:... ; may be from .class. or some reflection or other thing, java assist using same reflection and cause the duplicate 
@@ -66,7 +117,7 @@ public class flashalizer {
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				wspace.main(args);
+				wspace.main(launchArgs);
 			}
 		});
 	}

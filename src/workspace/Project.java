@@ -39,7 +39,7 @@ import static actionswf.ActionSwf.repeating_bitmap_fill;
 public class Project{
 	private static final String SWF_IMG_PREFERENCE="useSwfImg";
 	private static final String NATIVE_NUMERIC_LOCALE_PREFERENCE="setNativeNumericLocale";
-	private static final Preferences preferences=Preferences.userNodeForPackage(WorkSpace.class);
+	private static final Preferences preferences=Preferences.userRoot().node("flashalizer");
 	public static void initializeNativeNumericLocale(){
 		if(preferences.getBoolean(NATIVE_NUMERIC_LOCALE_PREFERENCE,false))
 			CLocale.useCLocaleForNumeric();
@@ -70,11 +70,11 @@ public class Project{
 						return false;
 				}else if(no_open==false)open();
 			}else{
-				if(straight==true){
+				if(straight==true&&no_open==false){
 					JOptionPane.showMessageDialog(null,"There is no project at "+folder,null,JOptionPane.INFORMATION_MESSAGE);
 					return false;
 				}
-				Files.createDirectory(path);
+				Files.createDirectories(path);
 			}
 		}catch(Throwable e){
 			e.printStackTrace();
