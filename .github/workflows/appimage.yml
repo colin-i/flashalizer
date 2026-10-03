@@ -28,12 +28,14 @@ jobs:
       dpkg -s actionswf || [ "${{ inputs.frefresh }}" = true ] || {
        deps='ant default-jre libjna-java libjna-platform-java libjavassist-java squashfs-tools software-properties-common'
        if [ "$(id -u)" -eq 0 ]; then
-        apt-get update
-        apt-get install -y ${deps}
-        add-apt-repository -y ppa:colin-i/ppa
-        apt-get update
-        apt-get install -y actionswf
-       else # ! command -v ant
+         command -v ant || {
+          apt-get update
+          apt-get install -y ${deps}
+          add-apt-repository -y ppa:colin-i/ppa
+          apt-get update
+          apt-get install -y actionswf
+         }
+       else
         sudo apt-get update
         sudo apt-get install -y ${deps}
         sudo add-apt-repository -y ppa:colin-i/ppa
