@@ -11,16 +11,13 @@ jobs:
   steps:
    - name: Install build dependencies
      run: |
-      command -v Xvfb || {
-       deps='xvfb fuse3 libxtst6 libxi6 imagemagick'
-       if [ "$(id -u)" -eq 0 ]; then
-        apt-get update
-        apt-get install -y ${deps}
-       else
-        sudo apt-get update
-        sudo apt-get install -y ${deps}
-       fi
-      }
+      if [ "$(id -u)" -eq 0 ]; then
+       apt-get update
+       apt-get install -y imagemagick #fuse3
+      elif ! command -v Xvfb:
+       sudo apt-get update
+       sudo apt-get install -y xvfb libxtst6 libxi6 #fuse3 still not ok local, need --appimage-extract
+      fi
    - uses: actions/checkout@master
    - name: run and take screenshot
      run: |
