@@ -7,8 +7,8 @@ License:        GPLv3
 URL:            https://github.com/colin-i/%{name}
 Source0:        %{name}-%{version}.tar.gz
 
-BuildRequires:  
-Requires:       
+BuildRequires:  #
+Requires:       #
 
 %description
 GUI to make .swf files with actionswf.
@@ -33,5 +33,3 @@ GUI to make .swf files with actionswf.
 
 
 %changelog
-* Sun Oct 04 2026 bc
-- 
