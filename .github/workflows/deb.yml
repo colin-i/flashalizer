@@ -4,7 +4,7 @@ on:
 
 jobs:
  dbuild:
-  runs-on: ubuntu-latest #must be greater than 22.04, libssl3 is not at impish
+  runs-on: ubuntu-26.04
   steps:
    - uses: actions/checkout@master
      with:
