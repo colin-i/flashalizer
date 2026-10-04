@@ -4,7 +4,7 @@ on:
 
 jobs:
  dbuild:
-  runs-on: ubuntu-26.04
+  runs-on: ubuntu-latest
   steps:
    - uses: actions/checkout@master
      with:
@@ -13,7 +13,7 @@ jobs:
      with:
       repository: colin-i/sync
       path: in2
-      ref: sirc
+      ref: flashalizer
    - name: Run a multi-line script
      run: |
       name=`cat in/debian/changelog | head -1 | grep -o ^[^\ ]*`
