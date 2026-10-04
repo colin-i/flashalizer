@@ -1,0 +1,42 @@
+
+on:
+ workflow_dispatch:
+
+jobs:
+ dbuild:
+  runs-on: ubuntu-latest #must be greater than 22.04, libssl3 is not at impish
+  steps:
+   - uses: actions/checkout@master
+     with:
+      path: in
+   - uses: actions/checkout@master
+     with:
+      repository: colin-i/sync
+      path: in2
+      ref: sirc
+   - name: Run a multi-line script
+     run: |
+      name=`cat in/debian/changelog | head -1 | grep -o ^[^\ ]*`
+      mv in2/debian/patches in/debian/patches
+      mv in2/.pc in/.pc
+      if [ -z "`dpkg -s devscripts>/dev/null 2>&1 && echo x`" ]; then
+       sudo apt update
+       sudo apt install -y devscripts debhelper
+      fi
+      origf=${name}-1.tar.gz
+      if [ ! -e "${origf}" ]; then
+       origln=${name}_1.orig.tar.gz
+       wget https://ppa.launchpadcontent.net/colin-i/ppa/ubuntu/pool/main/f/${name}/${origln} -O ${origf}
+       ln -s ${origf} ${origln}
+      fi
+      cd in
+      debuild -S -us -uc -d
+   - name: unsigned debs
+     uses: actions/upload-artifact@master
+     with:
+      name: sdebs
+      path: |
+       ./*.dsc
+       ./*.changes
+       ./*.buildinfo
+       ./*.debian.tar.xz
