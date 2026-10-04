@@ -1,0 +1,12 @@
+flashalizer (1-5) resolute; urgency=medium
+
+  * fix
+
+ -- Costin Botescu <bc@ubuntu>  Sun, 04 Oct 2026 14:20:05 +0300
+
+flashalizer (1-4) resolute; urgency=low
+
+  * Initial release. Closes: #nnnn
+    <nnnn is the bug number of your ITP>
+
+ -- Costin Botescu <costin.botescu@gmail.com>  Sun, 04 Oct 2026 11:01:17 +0300

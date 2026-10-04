@@ -1,3 +1,7 @@
 set -e
+tito=x ~/test/debinit "$@"
+~/test/pub deb
+~/test/deb
+~/test/publp
 ./ai
 ~/test/jar

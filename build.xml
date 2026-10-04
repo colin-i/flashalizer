@@ -8,7 +8,7 @@
 
     <target name="clean">
 	<delete includeemptydirs="true">
-		<fileset dir="build">
+		<fileset dir="build" erroronmissingdir="false">
 			<!-- <exclude name=".gitignore"/> -->
 		</fileset>
 	</delete>

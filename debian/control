@@ -1,0 +1,17 @@
+Source: flashalizer
+Section: utils
+Priority: optional
+Maintainer: Costin Botescu <costin.botescu@gmail.com>
+Build-Depends:
+ debhelper-compat (= 13), ant, libjavassist-java, libjna-java, libjna-platform-java
+Standards-Version: 4.7.3
+Homepage: https://github.com/colin-i/flashalizer
+Rules-Requires-Root: no
+
+Package: flashalizer
+Section: utils
+Architecture: all
+Multi-Arch: foreign
+Depends:
+ ${misc:Depends}, default-jre, libjavassist-java, libjna-java, libjna-platform-java, actionswf
+Description: GUI to make .swf files
