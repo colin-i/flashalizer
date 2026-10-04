@@ -25,7 +25,7 @@ jobs:
       fi
       origf=${name}-1.tar.gz
       if [ ! -e "${origf}" ]; then
-       origln=${name}_1.orig.tar.gz
+       origln=${name}_1.orig.tar.xz
        wget https://ppa.launchpadcontent.net/colin-i/ppa/ubuntu/pool/main/f/${name}/${origln} -O ${origf}
        ln -s ${origf} ${origln}
       fi
