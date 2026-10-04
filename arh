@@ -1,5 +1,3 @@
 set -e
-~/test/ai/ai
-~/test/pub appimage
-~/test/ai/upapppic
-~/test/pub upapp
+./ai
+~/test/jar

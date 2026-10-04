@@ -12,6 +12,7 @@
 			<!-- <exclude name=".gitignore"/> -->
 		</fileset>
 	</delete>
+        <delete dir="dist"/>
     </target>
 
     <path id="main.classpath">
@@ -26,6 +27,13 @@
         <mkdir dir="build"/>
         <javac srcdir="src" destdir="build" classpathref="main.classpath" includeantruntime="false" debug="${build.debug}"/>
         <!-- <copy todir="build"> <fileset dir="." includes="img/**"/> </copy> -->
+    </target>
+
+    <target name="build" depends="compile">
+        <mkdir dir="dist"/>
+        <jar destfile="dist/flashalizer.jar" basedir="build" manifest="MANIFEST.MF">
+            <zipfileset dir="img" prefix="img"/>
+        </jar>
     </target>
 
     <target name="run">
@@ -62,6 +70,23 @@
             <jvmarg if:set="env.JDWP" value="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005"/>
 
             <!-- optional: libactionswf built with ASan -->
+            <env if:set="env.ACTIONSWF_ASAN" key="LD_PRELOAD" value="${env.ACTIONSWF_ASAN}"/>
+            <env if:set="env.ACTIONSWF_ASAN" key="ASAN_OPTIONS" value="detect_leaks=0:handle_segv=0:handle_sigbus=0:handle_sigfpe=0:allow_user_segv_handler=1"/>
+        </java>
+    </target>
+
+    <target name="run-dist" depends="build">
+        <path id="run.dist.classpath">
+            <pathelement location="dist/flashalizer.jar"/>
+            <path refid="main.classpath"/>
+        </path>
+        <java classname="flashalizer" fork="true" dir="${user.dir}">
+            <arg line="${env.APP_ARGS}" if:set="env.APP_ARGS"/>
+            <classpath refid="run.dist.classpath"/>
+            <jvmarg value="--add-opens=java.base/java.lang=ALL-UNNAMED"/>
+            <jvmarg line="${env.APP_EXTRA}" if:set="env.APP_EXTRA"/>
+            <jvmarg if:set="env.ACTIONSWF_LIB" value="-Djna.library.path=${env.ACTIONSWF_LIB}"/>
+            <jvmarg if:set="env.JDWP" value="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005"/>
             <env if:set="env.ACTIONSWF_ASAN" key="LD_PRELOAD" value="${env.ACTIONSWF_ASAN}"/>
             <env if:set="env.ACTIONSWF_ASAN" key="ASAN_OPTIONS" value="detect_leaks=0:handle_segv=0:handle_sigbus=0:handle_sigfpe=0:allow_user_segv_handler=1"/>
         </java>

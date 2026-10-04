@@ -1,0 +1,25 @@
+
+on:
+ workflow_dispatch:
+
+jobs:
+ ubuildgen:
+  runs-on: ubuntu-22.04 #latest is ok but it must be downloaded first
+  steps:
+   - name: Run a multi-line script
+     run: |
+      if [ -n "${{ env.init }}" ]; then
+       exit 1
+      fi
+      #get up_url
+      wget https://github.com/colin-i/test/releases/download/1.5/${{ env.proj }} -O 1.txt
+      echo "up_url=`cat 1.txt`" >> $GITHUB_ENV
+   - name: Upload Release Asset
+     uses: actions/upload-release-asset@v1
+     env:
+      GITHUB_TOKEN: ${{ secrets.PAT }}
+     with:
+      upload_url: ${{ env.up_url }}
+      asset_path: ./dist/${{ env.proj }}.jar
+      asset_name: ${{ env.proj }}.jar
+      asset_content_type: application/java-archive
