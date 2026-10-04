@@ -1,3 +1,9 @@
+flashalizer (1-6) resolute; urgency=medium
+
+  * deb fix
+
+ -- Costin Botescu <bc@ubuntu>  Sun, 04 Oct 2026 15:43:02 +0300
+
 flashalizer (1-5) resolute; urgency=medium
 
   * fix
