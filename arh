@@ -6,3 +6,4 @@ tito=x ~/test/debinit "$@"
 ./ai
 ~/test/jar
 ~/test/publp2
+~/test/pub2
