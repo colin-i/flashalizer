@@ -25,13 +25,10 @@ GUI to make .swf files with actionswf.
 
 %prep
 %autosetup
+# Use Fedora-specific manifest
+cp MANIFEST.f.MF MANIFEST.MF
 
 %build
-# Fedora puts JNA jars in subdirs; create symlinks so ant can find them
-mkdir -p %{_javadir}
-ln -sf /usr/share/java/jna/jna.jar %{_javadir}/jna.jar
-ln -sf /usr/share/java/jna/jna-platform.jar %{_javadir}/jna-platform.jar
-ln -sf /usr/share/java/javassist.jar %{_javadir}/javassist.jar
 ant build
 
 %install
@@ -77,5 +74,6 @@ EOF
 
 %changelog
 * Wed Oct 07 2026 costin <costin.botescu@gmail.com> 1.6-0
-- 
+- Automatic commit of package [flashalizer] release [1.6-0].
+  (costin.botescu@gmail.com)
 
