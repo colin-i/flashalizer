@@ -27,6 +27,11 @@ GUI to make .swf files with actionswf.
 %autosetup
 
 %build
+# Fedora puts JNA jars in subdirs; create symlinks so ant can find them
+mkdir -p %{_javadir}
+ln -sf /usr/share/java/jna/jna.jar %{_javadir}/jna.jar
+ln -sf /usr/share/java/jna/jna-platform.jar %{_javadir}/jna-platform.jar
+ln -sf /usr/share/java/javassist.jar %{_javadir}/javassist.jar
 ant build
 
 %install
