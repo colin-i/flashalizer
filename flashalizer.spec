@@ -3,12 +3,22 @@ Version:        1.6
 Release:        0
 Summary:        GUI to make .swf files
 
-License:        GPLv3
+License:        GPLv3+
 URL:            https://github.com/colin-i/%{name}
 Source0:        %{name}-%{version}.tar.gz
 
-#BuildRequires:  #
-#Requires:       #
+BuildRequires:  ant
+BuildRequires:  java-devel >= 1:1.8
+BuildRequires:  javapackages-tools
+BuildRequires:  jna
+BuildRequires:  javassist
+BuildRequires:  jna-platform
+
+Requires:       java >= 1:1.8
+Requires:       jna
+Requires:       javassist
+Requires:       jna-platform
+Requires:       actionswf
 
 %description
 GUI to make .swf files with actionswf.
@@ -16,58 +26,54 @@ GUI to make .swf files with actionswf.
 %prep
 %autosetup
 
-
 %build
-%configure
-%make_build
-
+ant build
 
 %install
-%make_install
+rm -rf %{buildroot}
+mkdir -p %{buildroot}%{_bindir}
+mkdir -p %{buildroot}%{_javadir}
 
+# Install jar
+install -m 644 dist/flashalizer.jar %{buildroot}%{_javadir}/%{name}.jar
+
+# Install wrapper script with JVM options (matching Debian package)
+cat > %{buildroot}%{_bindir}/%{name} << 'EOF'
+#!/bin/sh
+exec java --add-opens=java.base/java.lang=ALL-UNNAMED --enable-native-access=ALL-UNNAMED -jar /usr/share/java/%{name}.jar "$@"
+EOF
+chmod 755 %{buildroot}%{_bindir}/%{name}
+
+# Install icon
+mkdir -p %{buildroot}%{_datadir}/pixmaps
+install -m 644 img/icon.jpg %{buildroot}%{_datadir}/pixmaps/%{name}.jpg
+
+# Install desktop file
+mkdir -p %{buildroot}%{_datadir}/applications
+cat > %{buildroot}%{_datadir}/applications/%{name}.desktop << 'EOF'
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Flashalizer
+Comment=GUI to make .swf files
+Exec=/usr/bin/%{name}
+Icon=/usr/share/pixmaps/%{name}.jpg
+Terminal=false
+Categories=Utility;Development;
+EOF
 
 %files
-%license add-license-file-here
-%doc add-docs-here
-
-
+%license readme.md
+%doc readme.md
+%{_bindir}/%{name}
+%{_javadir}/%{name}.jar
+%{_datadir}/pixmaps/%{name}.jpg
+%{_datadir}/applications/%{name}.desktop
 
 %changelog
-* Sun Oct 04 2026 costin <costin.botescu@gmail.com> 1.6-0
-- Automatic commit of package [flashalizer] release [1.6-0].
-  (costin.botescu@gmail.com)
-- deb fix (costin.botescu@gmail.com)
-- "up" (costin.botescu@gmail.com)
-- "sync" (mail@flashixy.com)
-- deb (costin.botescu@gmail.com)
-- updating readme (costin.botescu@gmail.com)
-- "up" (costin.botescu@gmail.com)
-- upapp (costin.botescu@gmail.com)
+* Wed Oct 07 2026 costin <costin.botescu@gmail.com> 1.6-0
 - "up" (costin.botescu@gmail.com)
 - "up" (costin.botescu@gmail.com)
 - "up" (costin.botescu@gmail.com)
 - "up" (costin.botescu@gmail.com)
-- "up" (costin.botescu@gmail.com)
-- "up" (costin.botescu@gmail.com)
-- "up" (costin.botescu@gmail.com)
-- "up" (costin.botescu@gmail.com)
-- "up" (costin.botescu@gmail.com)
-- appimage actionswf (costin.botescu@gmail.com)
-- steps at appimage (costin.botescu@gmail.com)
-- start args (costin.botescu@gmail.com)
-- appimage steps (costin.botescu@gmail.com)
-- test.yml (costin.botescu@gmail.com)
-- unused imports (costin.botescu@gmail.com)
-- data at appimage (costin.botescu@gmail.com)
-- user.dir (costin.botescu@gmail.com)
-- fix to compile on latest jdk (costin.botescu@gmail.com)
-- clarity (costin.botescu@gmail.com)
-- swf_img pref . setlocale pref . (costin.botescu@gmail.com)
-- ported to linux (costin.botescu@gmail.com)
-- "up" (costin.botescu@gmail.com)
-- "sync" (costin.b.84@gmail.com)
-- multiple wine contexts (costin.botescu@gmail.com)
-- new actionswf (costin.botescu@gmail.com)
-- asflags (costin.botescu@gmail.com)
-- "sync" (costin.b.84@gmail.com)
 
