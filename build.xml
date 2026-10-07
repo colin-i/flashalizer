@@ -15,12 +15,13 @@
         <delete dir="dist"/>
     </target>
 
+    <property name="java.lib" value="/usr/share/java"/>
     <path id="main.classpath">
-	<fileset dir="/usr/share/java">
-		<include name="javassist.jar"/> <!-- 3.19.0.GA -->
-		<include name="jna.jar"/> <!-- 4.5.0 4.5.1 5.9.0 -->
-		<include name="jna-platform.jar"/> <!-- 4.5.0 4.5.1 5.9.0 -->
-	</fileset>
+      <fileset dir="${java.lib}">
+        <include name="javassist.jar"/>
+        <include name="jna.jar"/>
+        <include name="jna-platform.jar"/>
+      </fileset>
     </path>
 
     <target name="compile">
