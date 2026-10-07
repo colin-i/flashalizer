@@ -7,6 +7,8 @@ License:        GPLv3+
 URL:            https://github.com/colin-i/%{name}
 Source0:        %{name}-%{version}.tar.gz
 
+BuildArch:      noarch
+
 BuildRequires:  ant
 BuildRequires:  java-devel >= 1:1.8
 BuildRequires:  javapackages-tools
@@ -29,13 +31,12 @@ GUI to make .swf files with actionswf.
 cp MANIFEST.f.MF MANIFEST.MF
 
 %build
-# Create symlink for jna-platform (jna.jar already exists in /usr/share/java/)
-mkdir -p %{_javadir}
-ln -s /usr/share/java/jna/jna-platform.jar %{_javadir}/jna-platform.jar
-ant compile
-# Clean up
-rm %{_javadir}/jna-platform.jar
-ant build
+mkdir libs
+ln -s /usr/share/java/jna.jar libs/jna.jar
+#this jna-platform needs to be found somehow
+ln -s /usr/share/java/jna/jna-platform.jar libs/jna-platform.jar
+ln -s /usr/share/java/javassist.jar libs/javassist.jar
+ant -Djava.lib=$PWD/libs build
 
 %install
 rm -rf %{buildroot}
