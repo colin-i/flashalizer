@@ -29,13 +29,12 @@ GUI to make .swf files with actionswf.
 cp MANIFEST.f.MF MANIFEST.MF
 
 %build
-# Create symlinks for compile
+# Create symlink for jna-platform (jna.jar already exists in /usr/share/java/)
 mkdir -p %{_javadir}
-ln -s /usr/share/java/jna/jna.jar %{_javadir}/jna.jar
 ln -s /usr/share/java/jna/jna-platform.jar %{_javadir}/jna-platform.jar
 ant compile
 # Clean up
-rm %{_javadir}/jna.jar %{_javadir}/jna-platform.jar
+rm %{_javadir}/jna-platform.jar
 ant build
 
 %install
