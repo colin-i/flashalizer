@@ -12,12 +12,10 @@ BuildRequires:  java-devel >= 1:1.8
 BuildRequires:  javapackages-tools
 BuildRequires:  jna
 BuildRequires:  javassist
-BuildRequires:  jna-platform
 
 Requires:       java >= 1:1.8
 Requires:       jna
 Requires:       javassist
-Requires:       jna-platform
 Requires:       actionswf
 
 %description
@@ -72,8 +70,5 @@ EOF
 
 %changelog
 * Wed Oct 07 2026 costin <costin.botescu@gmail.com> 1.6-0
-- "up" (costin.botescu@gmail.com)
-- "up" (costin.botescu@gmail.com)
-- "up" (costin.botescu@gmail.com)
-- "up" (costin.botescu@gmail.com)
+- 
 
