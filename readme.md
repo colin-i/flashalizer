@@ -11,6 +11,12 @@ Install:
 sudo apt-get install flashalizer
 ```
 \
+On Fedora 43/44:
+```sh
+sudo dnf copr enable colin/project
+sudo dnf install flashalizer
+```
+\
 On linux distributions(x86_64), <i>.AppImage</i> file from [releases](https://github.com/colin-i/flashalizer/releases).\
 \
 \
