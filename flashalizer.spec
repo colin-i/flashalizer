@@ -29,6 +29,13 @@ GUI to make .swf files with actionswf.
 cp MANIFEST.f.MF MANIFEST.MF
 
 %build
+# Create symlinks for compile
+mkdir -p %{_javadir}
+ln -s /usr/share/java/jna/jna.jar %{_javadir}/jna.jar
+ln -s /usr/share/java/jna/jna-platform.jar %{_javadir}/jna-platform.jar
+ant compile
+# Clean up
+rm %{_javadir}/jna.jar %{_javadir}/jna-platform.jar
 ant build
 
 %install
@@ -74,6 +81,5 @@ EOF
 
 %changelog
 * Wed Oct 07 2026 costin <costin.botescu@gmail.com> 1.6-0
-- Automatic commit of package [flashalizer] release [1.6-0].
-  (costin.botescu@gmail.com)
+- 
 
