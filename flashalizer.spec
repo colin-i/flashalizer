@@ -11,10 +11,12 @@ BuildRequires:  ant
 BuildRequires:  java-devel >= 1:1.8
 BuildRequires:  javapackages-tools
 BuildRequires:  jna
+BuildRequires:  jna-contrib
 BuildRequires:  javassist
 
 Requires:       java >= 1:1.8
 Requires:       jna
+Requires:       jna-contrib
 Requires:       javassist
 Requires:       actionswf
 
