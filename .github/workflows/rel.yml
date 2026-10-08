@@ -1,0 +1,9 @@
+on:
+ workflow_dispatch:
+env:
+ GITHUB_TOKEN: ${{ secrets.PAT }}
+jobs:
+ rbuild:
+  runs-on: ubuntu-latest
+  steps:
+   - uses: colin-i/test/.github/actions/rel@main

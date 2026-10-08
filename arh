@@ -3,6 +3,8 @@ tito=x ~/test/debinit "$@"
 ~/test/pub deb
 ~/test/deb
 ~/test/publp
+~/test/rpm/copr
+~/test/rele
 ./ai
 ~/test/jar
 ~/test/publp2
