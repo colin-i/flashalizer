@@ -1,4 +1,5 @@
 set -e
+. ~/test/last
 tito=x ~/test/debinit "$@"
 ~/test/pub deb
 ~/test/deb
@@ -9,3 +10,4 @@ tito=x ~/test/debinit "$@"
 ~/test/jar
 ~/test/publp2
 ~/test/pub2
+~/test/arh2 ${last}
