@@ -11,6 +11,7 @@ tito=x ~/test/debinit "$@"
 ~/test/pkg/onb
 ~/test/pub pkg
 ~/test/pkg/aur
+~/test/rpm/suse
 ~/test/publp2
 ~/test/pub2
 ~/test/arh2 ${last}

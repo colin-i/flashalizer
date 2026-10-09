@@ -22,6 +22,22 @@ On Arch Linux, <i>.zst</i> file from [releases](https://github.com/colin-i/flash
 yay -Sy flashalizer
 ```
 \
+On openSUSE, run the following as __root__:\
+For openSUSE Tumbleweed(x86_64/i586 aarch64):
+```sh
+zypper addrepo https://download.opensuse.org/repositories/home:costin/openSUSE_Tumbleweed/home:costin.repo
+```
+For openSUSE Leap:
+```sh
+zypper addrepo https://download.opensuse.org/repositories/home:costin/openSUSE_Leap_16.0/home:costin.repo
+```
+Replace *16.0*(x86_64 aarch64) with *15.6*(x86_64/i586 aarch64) if needed.\
+And:
+```sh
+zypper refresh
+zypper install flashalizer
+```
+\
 On linux distributions(x86_64), <i>.AppImage</i> file from [releases](https://github.com/colin-i/flashalizer/releases).\
 \
 \
