@@ -17,6 +17,11 @@ sudo dnf copr enable colin/project
 sudo dnf install flashalizer
 ```
 \
+On Arch Linux, <i>.zst</i> file from [releases](https://github.com/colin-i/flashalizer/releases). Or:
+```sh
+yay -Sy flashalizer
+```
+\
 On linux distributions(x86_64), <i>.AppImage</i> file from [releases](https://github.com/colin-i/flashalizer/releases).\
 \
 \
