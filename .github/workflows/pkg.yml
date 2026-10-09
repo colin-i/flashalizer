@@ -10,4 +10,4 @@ jobs:
   steps:
    - uses: colin-i/test/.github/actions/pkg@main
      with:
-      aur: jna jna-platform javassist-bin actionswf  ocompiler ffdec-bin
+      aur: jna jna-platform javassist-bin  ocompiler ffdec-bin actionswf
