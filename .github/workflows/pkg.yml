@@ -1,0 +1,14 @@
+on:
+ workflow_dispatch:
+env:
+ #for composite
+ GITHUB_TOKEN: ${{ secrets.PAT }}
+jobs:
+ archbuild:
+  runs-on: ubuntu-latest
+  container: archlinux:latest
+  steps:
+   - uses: colin-i/test/.github/actions/pkg@main
+     with:
+      pac: ant
+      aur: jna jna-platform javassist-bin actionswf

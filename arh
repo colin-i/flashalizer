@@ -8,6 +8,9 @@ tito=x ~/test/debinit "$@"
 ~/test/rele
 ./ai
 ~/test/jar
+~/test/pkg/onb
+~/test/pub pkg
+~/test/pkg/aur
 ~/test/publp2
 ~/test/pub2
 ~/test/arh2 ${last}
