@@ -82,6 +82,8 @@ EOF
 * Fri Oct 09 2026 costin <costin.botescu@gmail.com> 1.6-1
 - Automatic commit of package [flashalizer] release [1.6-1].
   (costin.botescu@gmail.com)
+- Automatic commit of package [flashalizer] release [1.6-1].
+  (costin.botescu@gmail.com)
 - "up" (costin.botescu@gmail.com)
 - "up" (costin.botescu@gmail.com)
 - "up" (costin.botescu@gmail.com)
@@ -91,7 +93,6 @@ EOF
 - "up" (costin.botescu@gmail.com)
 - - 1 req (costin.botescu@gmail.com)
 
-* Fri Oct 09 2026 costin <costin.botescu@gmail.com> 1.6-1
 * Wed Oct 07 2026 costin <costin.botescu@gmail.com> 1.6-0
 - 
 
