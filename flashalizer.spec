@@ -1,6 +1,6 @@
 Name:           flashalizer
 Version:        1.6
-Release:        0
+Release:        1
 Summary:        GUI to make .swf files
 
 License:        GPLv3+
@@ -71,14 +71,24 @@ Categories=Utility;Development;
 EOF
 
 %files
-%license readme.md
-%doc readme.md
+%license LICENSE
+%doc INFO
 %{_bindir}/%{name}
 %{_javadir}/%{name}.jar
 %{_datadir}/pixmaps/%{name}.jpg
 %{_datadir}/applications/%{name}.desktop
 
 %changelog
+* Fri Oct 09 2026 costin <costin.botescu@gmail.com> 1.6-1
+- "up" (costin.botescu@gmail.com)
+- "up" (costin.botescu@gmail.com)
+- "up" (costin.botescu@gmail.com)
+- pkg yml (costin.botescu@gmail.com)
+- "up" (costin.botescu@gmail.com)
+- rel.yml (costin.botescu@gmail.com)
+- "up" (costin.botescu@gmail.com)
+- - 1 req (costin.botescu@gmail.com)
+
 * Wed Oct 07 2026 costin <costin.botescu@gmail.com> 1.6-0
 - 
 
