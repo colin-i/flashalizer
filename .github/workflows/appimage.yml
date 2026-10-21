@@ -8,6 +8,9 @@ on:
     description: "Force refresh even when ./src or ant already exist"
     type: boolean
     default: false
+   actionswf:
+    description: "URL of actionswf .deb (if empty, installs from the PPA)"
+    default: ""
 
 jobs:
  build:
@@ -24,6 +27,8 @@ jobs:
    - uses: actions/checkout@master
      if: steps.src.outputs.exists != 'true' || inputs.frefresh
    - name: Install build dependencies
+     env:
+      ACTIONSWF_URL: ${{ inputs.actionswf }}
      run: |
       dpkg -s actionswf || [ "${{ inputs.frefresh }}" = true ] || {
        deps='default-jre libjna-java libjna-platform-java libjavassist-java'
@@ -38,9 +43,14 @@ jobs:
        else
         sudo apt-get update
         sudo apt-get install -y ${deps}
-        sudo add-apt-repository -y ppa:colin-i/ppa
-        sudo apt-get update
-        sudo apt-get install -y actionswf
+        if [ -n "${ACTIONSWF_URL}" ]; then
+         wget -O /tmp/actionswf.deb "${ACTIONSWF_URL}"
+         sudo apt-get install -y /tmp/actionswf.deb
+        else
+         sudo add-apt-repository -y ppa:colin-i/ppa
+         sudo apt-get update
+         sudo apt-get install -y actionswf
+        fi
        fi
       }
    - name: Run a multi-line script
