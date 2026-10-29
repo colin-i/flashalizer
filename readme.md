@@ -11,7 +11,7 @@ Install:
 sudo apt-get install flashalizer
 ```
 \
-On Fedora 43/44:
+On Fedora 43/44/45:
 ```sh
 sudo dnf copr enable colin/project
 sudo dnf install flashalizer
